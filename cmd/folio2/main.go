@@ -9,17 +9,17 @@ import (
 	pbcmd "github.com/pocketbase/pocketbase/cmd"
 	"github.com/spf13/cobra"
 
-	"github.com/asano69/myapp/internal/cmd/serve"
+	"github.com/asano69/folio2/internal/cmd/serve"
 
-	"github.com/asano69/myapp/internal/config"
-    _ "github.com/asano69/myapp/migrations"
+	"github.com/asano69/folio2/internal/config"
+    _ "github.com/asano69/folio2/migrations"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
 func main() {
 	app := pocketbase.NewWithConfig(pocketbase.Config{HideStartBanner: true})
 
-	// Registers "myapp migrate up/down/create/collections/history-sync"
+	// Registers "folio2 migrate up/down/create/collections/history-sync"
 	// for manual or CI-driven schema management. Automigrate is off because
 	// the schema is defined purely in Go migration files (internal/migrations),
 	// not edited through the PocketBase dashboard.
@@ -28,8 +28,8 @@ func main() {
 	})
 
 	root := app.RootCmd
-	root.Use = "myapp"
-	root.Short = "myapp"
+	root.Use = "folio2"
+	root.Short = "folio2"
 	root.SilenceUsage = true
 	root.Version = "0.0.1"
 

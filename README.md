@@ -1,6 +1,6 @@
-# myapp
+# folio2
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asano69/myapp)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asano69/folio2)
 
 ## Introduction 
 
