@@ -4,19 +4,19 @@ APP := $(notdir $(CURDIR))
 PORTS := 3000 3001
 
 
-init:
-	fastmod --hidden myapp $(APP) --glob '!Makefile'
-	find . -depth \( -type f -o -type d \) -name '*myapp*' | while read -r f; do \
-		mv -- "$$f" "$$(dirname "$$f")/$$(basename "$$f" | sed 's/myapp/$(APP)/g')"; \
-	done
+.PHONY: all
+all: kill-ports frontend## (*) Build frontend assets and start the server
+	go run cmd/$(BINARY)/main.go superuser upsert admin@mail.internal password --dir=pb_data
+	go run cmd/$(BINARY)/main.go serve
 
-.PHONY: frontend-deps
-frontend-deps:
-	cd frontend && pnpm install
-
-.PHONY: build-frontend
-build-frontend: frontend-deps
+.PHONY: frontend
+frontend: frontend/node_modules
 	cd frontend && pnpm run build
+
+frontend/node_modules: frontend/package.json frontend/pnpm-lock.yaml
+	cd frontend && pnpm install --frozen-lockfile
+	touch $@
+
 
 .PHONY: build
 build: build-frontend
@@ -35,7 +35,7 @@ kill-ports:
 
 .PHONY: server
 server: kill-ports
-	#./myapp migrate up --dir=pb_data
+	#./folio2 migrate up --dir=pb_data
 	./$(BINARY) superuser upsert admin@mail.internal password --dir=pb_data
 	./$(BINARY) serve
 
@@ -66,5 +66,5 @@ format:
 # 本番では、後方互換性のために残しておいたほうが良いかも。
 migrate-collections:
 	ls -1 migrations/*.go | sort | head -n -1 | xargs rm -f
-	yes | go run ./cmd/myapp migrate collections
+	yes | go run ./cmd/folio2 migrate collections
 	ls -1 migrations/*.go | sort | head -n -1 | xargs rm -f
