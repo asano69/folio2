@@ -1001,11 +1001,11 @@ func init() {
 						"type": "text"
 					},
 					{
-						"help": "",
+						"help": "the page number as printed in the book",
 						"hidden": false,
 						"id": "json3570740395",
 						"maxSize": 0,
-						"name": "page_no",
+						"name": "page_number",
 						"presentable": false,
 						"required": false,
 						"system": false,
@@ -1291,7 +1291,7 @@ func init() {
 						"type": "text"
 					},
 					{
-						"cascadeDelete": false,
+						"cascadeDelete": true,
 						"collectionId": "pbc_601157786",
 						"help": "",
 						"hidden": false,
@@ -1305,7 +1305,7 @@ func init() {
 						"type": "relation"
 					},
 					{
-						"cascadeDelete": false,
+						"cascadeDelete": true,
 						"collectionId": "pbc_2170393721",
 						"help": "",
 						"hidden": false,
@@ -1398,7 +1398,7 @@ func init() {
 						"type": "text"
 					},
 					{
-						"cascadeDelete": false,
+						"cascadeDelete": true,
 						"collectionId": "pbc_2170393721",
 						"help": "",
 						"hidden": false,
@@ -1431,7 +1431,7 @@ func init() {
 						"id": "number491580807",
 						"max": null,
 						"min": null,
-						"name": "posiotion",
+						"name": "position",
 						"onlyInt": false,
 						"presentable": false,
 						"required": false,
@@ -1468,6 +1468,21 @@ func init() {
 							"COMPLETED",
 							"CANCELED"
 						]
+					},
+					{
+						"autogeneratePattern": "",
+						"help": "",
+						"hidden": false,
+						"id": "text18997305",
+						"max": 0,
+						"min": 0,
+						"name": "original_path",
+						"pattern": "",
+						"presentable": false,
+						"primaryKey": false,
+						"required": false,
+						"system": false,
+						"type": "text"
 					},
 					{
 						"hidden": false,
@@ -1940,7 +1955,7 @@ func init() {
 						"name": "image",
 						"presentable": false,
 						"protected": false,
-						"required": false,
+						"required": true,
 						"system": false,
 						"thumbs": null,
 						"type": "file"
