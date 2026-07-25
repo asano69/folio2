@@ -118,7 +118,7 @@ func importFolder(app core.App, path, label string, result *Result) (bool, error
 				return err
 			}
 
-			if err := createManifestPage(txApp, manifest, page, position, file); err != nil {
+			if err := createManifestPage(txApp, manifest, page, position, filepath.Join(label, filepath.Base(file))); err != nil {
 				return err
 			}
 		}
