@@ -7,6 +7,7 @@ import { createSignal, onCleanup, Show } from "solid-js";
 import "./style.css";
 import Home from "./routes/Home";
 import Settings from "./routes/Settings";
+import Stats from "./routes/Stats";
 import Login from "./routes/Login";
 
 import pb from "./lib/pb";
@@ -21,6 +22,16 @@ function AuthGate(props) {
   );
   onCleanup(unsubscribe);
 
+  // pb.authStore.isValid already accounts for token expiry, but nothing
+  // re-checks it while the tab stays open with no login/logout activity.
+  // Poll periodically so an expired token falls back to Login on its own,
+  // instead of waiting for a page reload or a failed API call.
+  const expiryCheck = setInterval(
+    () => setAuthed(pb.authStore.isValid),
+    30_000,
+  );
+  onCleanup(() => clearInterval(expiryCheck));
+
   return (
     <Show when={authed()} fallback={<Login />}>
       {props.children}
@@ -34,6 +45,7 @@ render(
       <Router>
         <Route path="/" component={Home} />
         <Route path="/settings" component={Settings} />
+        <Route path="/stats" component={Stats} />
       </Router>
     </AuthGate>
   ),
