@@ -8,7 +8,7 @@ folio2はローカルサーバのストレージに保存されたスキャン�
 
 <img src="frontend/public/favicon.svg" width="100" align="right" />
 
-- Library / Collection / Bookを単位としてスキャン資料を自由に整理できます。
+- Library / Collection / Manifestを単位としてスキャン資料を自由に整理できます。
 - 書籍やページには永続性のある静的なURLが与えられ、Wikiなどから自由に参照できます。
 - 各書籍には、BibTeXと互換性のある書誌情報の他、目次情報を保存できます。
 - 各画像ページには、タグ・メモ・マーカーなどの注釈情報を保存できます。
