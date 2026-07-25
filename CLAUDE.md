@@ -25,8 +25,14 @@ from flask import Flask
 
 ## Tech Stack
 
-- backend: Go + PocketBase **v0.39+**
-- frontend: solid.js + **tailwind v4**
+### backend
+- Go
+- PocketBase **v0.39+**
+
+### frontend
+- solid.js
+- Kobalte 0.13+ (UI)
+- **tailwind v4** (Style)
 
 
 ## Work in progress
