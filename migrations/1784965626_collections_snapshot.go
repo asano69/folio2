@@ -1989,6 +1989,162 @@ func init() {
 				"type": "base",
 				"updateRule": null,
 				"viewRule": null
+			},
+			{
+				"createRule": null,
+				"deleteRule": null,
+				"fields": [
+					{
+						"autogeneratePattern": "[a-z0-9]{15}",
+						"help": "",
+						"hidden": false,
+						"id": "text3208210256",
+						"max": 15,
+						"min": 15,
+						"name": "id",
+						"pattern": "^[a-z0-9]+$",
+						"presentable": false,
+						"primaryKey": true,
+						"required": true,
+						"system": true,
+						"type": "text"
+					},
+					{
+						"help": "Identifies the job type and allows future expansion with additional job categories",
+						"hidden": false,
+						"id": "select2363381545",
+						"maxSelect": 0,
+						"name": "type",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "select",
+						"values": [
+							"import_folders"
+						]
+					},
+					{
+						"help": "Represents the current job state; the frontend subscribes to this field to track state transitions",
+						"hidden": false,
+						"id": "select2063623452",
+						"maxSelect": 0,
+						"name": "status",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "select",
+						"values": [
+							"queued",
+							"running",
+							"completed",
+							"failed"
+						]
+					},
+					{
+						"help": "Total number of items to process, determined when the job starts",
+						"hidden": false,
+						"id": "number3257917790",
+						"max": null,
+						"min": null,
+						"name": "total",
+						"onlyInt": false,
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "number"
+					},
+					{
+						"help": "Number of items processed so far; incremented as work progresses",
+						"hidden": false,
+						"id": "number670768011",
+						"max": null,
+						"min": null,
+						"name": "processed",
+						"onlyInt": false,
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "number"
+					},
+					{
+						"autogeneratePattern": "",
+						"help": "Current progress message (e.g. \"importing: Book A\"); also used to store error details when the job fails",
+						"hidden": false,
+						"id": "text3065852031",
+						"max": 0,
+						"min": 0,
+						"name": "message",
+						"pattern": "",
+						"presentable": false,
+						"primaryKey": false,
+						"required": false,
+						"system": false,
+						"type": "text"
+					},
+					{
+						"help": "Summary of the completed job (e.g. {\"manifests_created\": 3, \"images_created\": 120, \"images_reused\": 5})",
+						"hidden": false,
+						"id": "json325763347",
+						"maxSize": 0,
+						"name": "result",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "json"
+					},
+					{
+						"help": "Timestamp when the job execution began",
+						"hidden": false,
+						"id": "date3029767898",
+						"max": "",
+						"min": "",
+						"name": "started",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "date"
+					},
+					{
+						"help": "Timestamp when the job execution completed",
+						"hidden": false,
+						"id": "date2790239036",
+						"max": "",
+						"min": "",
+						"name": "finished",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "date"
+					},
+					{
+						"hidden": false,
+						"id": "autodate2990389176",
+						"name": "created",
+						"onCreate": true,
+						"onUpdate": false,
+						"presentable": false,
+						"system": false,
+						"type": "autodate"
+					},
+					{
+						"hidden": false,
+						"id": "autodate3332085495",
+						"name": "updated",
+						"onCreate": true,
+						"onUpdate": true,
+						"presentable": false,
+						"system": false,
+						"type": "autodate"
+					}
+				],
+				"id": "pbc_2409499253",
+				"indexes": [],
+				"listRule": null,
+				"name": "jobs",
+				"system": false,
+				"type": "base",
+				"updateRule": null,
+				"viewRule": null
 			}
 		]`
 
