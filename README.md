@@ -88,7 +88,8 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - backend: Go+PocketBase v0.39+
 - frontend: solid.js + tailwind v4
 
+---
 
-
-
+## References
+- https://deepwiki.com/internetarchive/bookreader
 
