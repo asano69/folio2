@@ -1961,6 +1961,32 @@ func init() {
 						"type": "file"
 					},
 					{
+						"help": "",
+						"hidden": false,
+						"id": "number2350531887",
+						"max": null,
+						"min": null,
+						"name": "width",
+						"onlyInt": false,
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "number"
+					},
+					{
+						"help": "",
+						"hidden": false,
+						"id": "number4115522831",
+						"max": null,
+						"min": null,
+						"name": "height",
+						"onlyInt": false,
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "number"
+					},
+					{
 						"hidden": false,
 						"id": "autodate2990389176",
 						"name": "created",

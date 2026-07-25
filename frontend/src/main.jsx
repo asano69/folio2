@@ -6,6 +6,7 @@ import { createSignal, onCleanup, Show } from "solid-js";
 // stylesheet consumes via var().
 import "./style.css";
 import Home from "./routes/Home";
+import ManifestViewer from "./routes/ManifestViewer";
 import Settings from "./routes/Settings";
 import Stats from "./routes/Stats";
 import Login from "./routes/Login";
@@ -44,6 +45,7 @@ render(
     <AuthGate>
       <Router>
         <Route path="/" component={Home} />
+        <Route path="/manifests/:id" component={ManifestViewer} />
         <Route path="/settings" component={Settings} />
         <Route path="/stats" component={Stats} />
       </Router>

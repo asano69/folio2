@@ -7,11 +7,16 @@ package importer
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"image"
+	_ "image/jpeg" // registers the JPEG format with image.DecodeConfig
+	_ "image/png"  // registers the PNG format with image.DecodeConfig
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
 
 	"github.com/asano69/folio2/internal/errs"
 
@@ -170,6 +175,23 @@ func hashFile(path string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
+// decodeImageSize returns the pixel width and height of the image file at
+// path, used to populate images.width/height so viewers (e.g. PhotoSwipe)
+// can lay out pages without loading the full image first.
+func decodeImageSize(path string) (width, height int, err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, 0, errs.Newf("open image for size check: %v", err)
+	}
+	defer f.Close()
+
+	cfg, _, err := image.DecodeConfig(f)
+	if err != nil {
+		return 0, 0, errs.Newf("decode image config: %v", err)
+	}
+	return cfg.Width, cfg.Height, nil
+}
+
 // findOrCreateImage returns the images record for the file at path,
 // reusing an existing record with the same content hash instead of
 // storing the same bytes twice.
@@ -193,15 +215,23 @@ func findOrCreateImage(app core.App, path string) (record *core.Record, reused b
 		return nil, false, errs.Newf("read image file: %v", err)
 	}
 
-	image := core.NewRecord(collection)
-	image.Set("hash", hash)
-	image.Set("status", "imported")
-	image.Set("image", file)
+	width, height, err := decodeImageSize(path)
+	if err != nil {
+		return nil, false, err
+	}
 
-	if err := app.Save(image); err != nil {
+	// Named imageRecord (not "image") to avoid shadowing the image package.
+	imageRecord := core.NewRecord(collection)
+	imageRecord.Set("hash", hash)
+	imageRecord.Set("status", "imported")
+	imageRecord.Set("image", file)
+	imageRecord.Set("width", width)
+	imageRecord.Set("height", height)
+
+	if err := app.Save(imageRecord); err != nil {
 		return nil, false, errs.Newf("save image record: %v", err)
 	}
-	return image, false, nil
+	return imageRecord, false, nil
 }
 
 // createManifest creates a new manifest record with the given label.
