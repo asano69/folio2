@@ -72,7 +72,7 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 ### note
 - 本の中にはさんでおくような注釈メモ、読書ノートを書くためのもの。
 - あるnoteのスコープは、あるmanifestのなかに閉じている。（本質的に、ただのメモ。ここにナレッジベースを作るべきではない）
-- あるManifestに関連付けて、そのなかのimageに言及する。manifest_idは必須だがimage_idは任意。
+- あるManifestに関連付けて、そのなかのimageに言及する。manifest_idは必須だがpage_idは任意。
 
 ### tag
 - Pageにつける属性。複数選択可能。ページの集成（コンピテーション）を作成するのに役立つ。
