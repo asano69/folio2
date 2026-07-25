@@ -13,6 +13,10 @@ folio2はローカルサーバのストレージに保存されたスキャン�
 - 各書籍には、BibTeXと互換性のある書誌情報の他、目次情報を保存できます。
 - 各画像ページには、タグ・メモ・マーカーなどの注釈情報を保存できます。
 
+## Purpose
+
+Many existing open-source book viewers focus primarily on basic functions such as browsing and organizing books, but they often lack sufficient integration of annotation features—such as notes, highlights, and tagging—that are essential for research and inquiry activities. In addition, insufficient attention is often given to URI design for uniquely and persistently referencing individual pages, creating a risk that links to specific locations may become invalid in the future. As a result, challenges remain in ensuring the reproducibility, referenceability, and reliability required of an information infrastructure for research and inquiry activities. folio was developed with the aim of solving these problems. By integrating annotation features with a persistent referencing mechanism, it aims to realize a research support platform that enables users to continuously accumulate, share, and reuse knowledge.
+
 ## Design
 
 ### CBZ形式を使用しない
