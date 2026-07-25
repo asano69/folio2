@@ -1,5 +1,10 @@
 // Package serve implements the "serve" command, which runs a single HTTP server
 // that hosts the index page and all drill sessions defined in the config file.
+//
+// The package is split across three files:
+//   - serve.go:   route registration and server startup (this file)
+//   - handler.go: HTTP handlers
+//   - jobs.go:    background job orchestration
 package serve
 
 import (
@@ -9,12 +14,10 @@ import (
 
 	"github.com/asano69/folio2/internal/assets"
 	"github.com/asano69/folio2/internal/config"
-	"github.com/asano69/folio2/internal/importer"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
 
 	"github.com/sirupsen/logrus"
 )
@@ -72,72 +75,4 @@ func Run(app *pocketbase.PocketBase, cfg *config.Config) error {
 		HttpAddr:        addr,
 		ShowStartBanner: false,
 	})
-}
-
-// importFoldersHandler starts a background import-folders job and returns
-// its record id immediately, without waiting for the import to finish.
-func importFoldersHandler(app *pocketbase.PocketBase, cfg *config.Config) func(re *core.RequestEvent) error {
-	return func(re *core.RequestEvent) error {
-		if existing, err := app.FindFirstRecordByFilter("jobs", "status = 'queued' || status = 'running'"); err == nil && existing != nil {
-			return apis.NewBadRequestError("an import job is already running", nil)
-		}
-
-		collection, err := app.FindCollectionByNameOrId("jobs")
-		if err != nil {
-			return fmt.Errorf("find jobs collection: %w", err)
-		}
-
-		job := core.NewRecord(collection)
-		job.Set("type", "import_folders")
-		job.Set("status", "queued")
-		job.Set("started", types.NowDateTime())
-
-		if err := app.Save(job); err != nil {
-			return fmt.Errorf("save job record: %w", err)
-		}
-
-		jobID := job.Id
-		go runImportJob(app, cfg, jobID)
-
-		return re.JSON(http.StatusAccepted, map[string]string{"id": jobID})
-	}
-}
-
-// runImportJob runs the import in the background and writes its progress
-// and outcome onto the jobs record, so anyone subscribed to that record
-// over PocketBase realtime sees updates as they happen.
-func runImportJob(app *pocketbase.PocketBase, cfg *config.Config, jobID string) {
-	job, err := app.FindRecordById("jobs", jobID)
-	if err != nil {
-		logrus.WithError(err).Error("import job: reload record")
-		return
-	}
-
-	job.Set("status", "running")
-	if err := app.Save(job); err != nil {
-		logrus.WithError(err).Error("import job: save running status")
-		return
-	}
-
-	result, err := importer.Run(app, cfg.Data.ImportDir, func(p importer.Progress) {
-		job.Set("total", p.Total)
-		job.Set("processed", p.Processed)
-		job.Set("message", p.Message)
-		if err := app.Save(job); err != nil {
-			logrus.WithError(err).Error("import job: save progress")
-		}
-	})
-
-	job.Set("finished", types.NowDateTime())
-	if err != nil {
-		job.Set("status", "failed")
-		job.Set("message", err.Error())
-	} else {
-		job.Set("status", "completed")
-		job.Set("result", result)
-	}
-
-	if err := app.Save(job); err != nil {
-		logrus.WithError(err).Error("import job: save final status")
-	}
 }
