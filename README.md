@@ -34,10 +34,13 @@ folio2はローカルサーバのストレージに保存されたスキャン�
 
 
 ## Entity
-### Notes
+### note
 - 本の中にはさんでおくような注釈メモ、読書ノートを書くためのもの。
 - あるManifestに関連付けて、そのなかのimageに言及する。manifest_idは必須だがimage_idは任意。
-
+### tag
+- Pageにつける属性。複数選択可能。ページの集成（コンピテーション）を作成するのに役立つ。
+- 質的データ分析手法(Qualitative Data Analysis)におけるコードに相当。資料の中から、意味のある単位を切り出し、短いラベル（コード）を付けて分類・整理する。
+- あるManifestの情報に、そのManifestに含まれているtagの一覧を表示するようにする。
 
 ## Tech Stack
 - backend: Go+PocketBase v0.39+
