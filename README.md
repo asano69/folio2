@@ -90,7 +90,8 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - PocketBase v0.39+
 
 ### Frontend
-- Solid.js + tailwind v4
+- Solid.js
+- Style: tailwind v4
 - Note: https://github.com/slab/quill
 - Viewer: https://github.com/dimsemenov/photoswipe
 
