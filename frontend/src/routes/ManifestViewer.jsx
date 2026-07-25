@@ -1,6 +1,6 @@
 // frontend/src/routes/ManifestViewer.jsx
 import { createResource, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import NavBar from "../components/NavBar";
 import PageGallery from "../components/PageGallery";
 import pb from "../lib/pb";
@@ -19,13 +19,20 @@ async function fetchImages(manifestId) {
 
 export default function ManifestViewer() {
   const params = useParams();
+  // `p` (1-indexed) tracks which page PhotoSwipe currently shows, so each
+  // page gets its own shareable URI (e.g. .../manifests/abc?p=2).
+  const [searchParams, setSearchParams] = useSearchParams();
   const [images] = createResource(() => params.id, fetchImages);
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 bg-[var(--color-bg)] px-6 py-12 text-[var(--color-text)]">
       <NavBar />
       <Show when={images()} fallback={<p>Loading…</p>}>
-        <PageGallery images={images()} />
+        <PageGallery
+          images={images()}
+          page={searchParams.p}
+          onPageChange={(p) => setSearchParams({ p }, { replace: true })}
+        />
       </Show>
     </div>
   );
