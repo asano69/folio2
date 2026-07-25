@@ -1982,7 +1982,9 @@ func init() {
 					}
 				],
 				"id": "pbc_3607937828",
-				"indexes": [],
+				"indexes": [
+					"CREATE UNIQUE INDEX ` + "`" + `idx_cz54qn197p` + "`" + ` ON ` + "`" + `images` + "`" + ` (` + "`" + `hash` + "`" + `)"
+				],
 				"listRule": null,
 				"name": "images",
 				"system": false,
