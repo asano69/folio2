@@ -33,8 +33,13 @@ folio2はローカルサーバのストレージに保存されたスキャン�
 - 永続的に保存したいノートをここに保存してナレッジベースとして使う。（folioはナレッジベースではない）
 
 
+## Entity
+### Notes
+- 本の中にはさんでおくような注釈メモ、読書ノートを書くためのもの。
+- あるManifestに関連付けて、そのなかのimageに言及する。manifest_idは必須だがimage_idは任意。
 
-### Tech Stack
+
+## Tech Stack
 - backend: Go+PocketBase v0.39+
 - frontend: solid.js + tailwind v4
 
