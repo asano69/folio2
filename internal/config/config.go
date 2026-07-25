@@ -18,6 +18,9 @@ type ServerConfig struct {
 // DataConfig holds data storage settings.
 type DataConfig struct {
 	Root string
+	// ImportDir is the folder scanned by the importer for book folders
+	// to register as manifests (see internal/importer).
+	ImportDir string
 }
 type Config struct {
 	Server ServerConfig
@@ -32,6 +35,7 @@ type Config struct {
 //	SERVER_HOST         default "0.0.0.0"
 //	SERVER_PORT         default 3000
 //	DATA_ROOT           default "."
+//	FOLIO_IMPORT_DIR    default ""
 
 func Load() (*Config, error) {
 	cfg := &Config{
@@ -40,7 +44,8 @@ func Load() (*Config, error) {
 			Port: 3000,
 		},
 		Data: DataConfig{
-			Root: envString("DATA_ROOT", "."),
+			Root:      envString("DATA_ROOT", "."),
+			ImportDir: envString("FOLIO_IMPORT_DIR", ""),
 		},
 	}
 

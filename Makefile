@@ -1,3 +1,6 @@
+include folio2.env
+export
+
 BINARY := $(notdir $(CURDIR))
 APP := $(notdir $(CURDIR))
 # Ports used by the dev servers (frontend, backend, and PocketBase-style API)
@@ -19,7 +22,7 @@ frontend/node_modules: frontend/package.json frontend/pnpm-lock.yaml
 
 
 .PHONY: build
-build: build-frontend
+build: frontend
 	go build -o $(BINARY) ./cmd/$(BINARY)
 
 .PHONY: kill-ports

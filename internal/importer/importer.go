@@ -1,0 +1,263 @@
+// Package importer scans a folder of book folders (see docs/d01_book-import.md)
+// and registers their images into the database as manifests, pages, and
+// images. Each book folder becomes one manifest, and each folder's images
+// become one page (and one manifest_page linking it into the manifest) apiece.
+package importer
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+
+	"github.com/asano69/folio2/internal/errs"
+
+	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/filesystem"
+)
+
+// imageExtensions lists the file extensions treated as book pages.
+// Everything else (metadata files, hidden files like .DS_Store, ...) is ignored.
+var imageExtensions = map[string]bool{
+	".jpg":  true,
+	".jpeg": true,
+	".png":  true,
+	".webp": true,
+}
+
+// Progress reports incremental status while Run processes each folder.
+type Progress struct {
+	Total     int
+	Processed int
+	Message   string
+}
+
+// Result summarizes what Run created across all folders.
+type Result struct {
+	ManifestsCreated int `json:"manifests_created"`
+	ImagesCreated    int `json:"images_created"`
+	ImagesReused     int `json:"images_reused"`
+}
+
+// Run scans dir for book folders and imports each one as a manifest.
+// onProgress is called after every folder is processed (or skipped), so
+// callers can persist progress (e.g. to a jobs record) as it happens.
+//
+// Folders with no recognised image files are skipped without creating a
+// manifest. Running Run again on the same dir always creates new
+// manifests; it does not detect or skip folders imported previously.
+func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, errs.Newf("read import dir: %v", err)
+	}
+
+	var folders []string
+	for _, e := range entries {
+		if e.IsDir() {
+			folders = append(folders, e.Name())
+		}
+	}
+	sort.Strings(folders)
+
+	result := &Result{}
+	total := len(folders)
+
+	for i, name := range folders {
+		if onProgress != nil {
+			onProgress(Progress{Total: total, Processed: i, Message: "importing: " + name})
+		}
+
+		if _, err := importFolder(app, filepath.Join(dir, name), name, result); err != nil {
+			return nil, errs.Newf("import folder %q: %v", name, err)
+		}
+	}
+
+	if onProgress != nil {
+		onProgress(Progress{Total: total, Processed: total, Message: "done"})
+	}
+
+	return result, nil
+}
+
+// importFolder registers a single book folder as one manifest, inside a
+// single transaction so a partially-imported book is never left behind.
+// It returns false (with no error) if the folder contains no recognised
+// image files, in which case nothing is created.
+func importFolder(app core.App, path, label string, result *Result) (bool, error) {
+	files, err := listImageFiles(path)
+	if err != nil {
+		return false, err
+	}
+	if len(files) == 0 {
+		return false, nil
+	}
+
+	err = app.RunInTransaction(func(txApp core.App) error {
+		manifest, err := createManifest(txApp, label)
+		if err != nil {
+			return err
+		}
+
+		for position, file := range files {
+			image, reused, err := findOrCreateImage(txApp, file)
+			if err != nil {
+				return err
+			}
+			if reused {
+				result.ImagesReused++
+			} else {
+				result.ImagesCreated++
+			}
+
+			page, err := createPage(txApp, image)
+			if err != nil {
+				return err
+			}
+
+			if err := createManifestPage(txApp, manifest, page, position, file); err != nil {
+				return err
+			}
+		}
+
+		result.ManifestsCreated++
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// listImageFiles returns the image files directly inside dir, sorted by
+// filename using a plain string sort (no natural-order handling).
+// Subfolders are not descended into.
+func listImageFiles(dir string) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, errs.Newf("read book folder: %v", err)
+	}
+
+	var files []string
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if !imageExtensions[strings.ToLower(filepath.Ext(e.Name()))] {
+			continue
+		}
+		files = append(files, filepath.Join(dir, e.Name()))
+	}
+	sort.Strings(files)
+	return files, nil
+}
+
+// hashFile returns the hex-encoded SHA-256 digest of the file at path.
+func hashFile(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", errs.Newf("open file: %v", err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", errs.Newf("hash file: %v", err)
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+// findOrCreateImage returns the images record for the file at path,
+// reusing an existing record with the same content hash instead of
+// storing the same bytes twice.
+func findOrCreateImage(app core.App, path string) (record *core.Record, reused bool, err error) {
+	hash, err := hashFile(path)
+	if err != nil {
+		return nil, false, err
+	}
+
+	if existing, findErr := app.FindFirstRecordByFilter("images", "hash = {:hash}", map[string]any{"hash": hash}); findErr == nil && existing != nil {
+		return existing, true, nil
+	}
+
+	collection, err := app.FindCollectionByNameOrId("images")
+	if err != nil {
+		return nil, false, errs.Newf("find images collection: %v", err)
+	}
+
+	file, err := filesystem.NewFileFromPath(path)
+	if err != nil {
+		return nil, false, errs.Newf("read image file: %v", err)
+	}
+
+	image := core.NewRecord(collection)
+	image.Set("hash", hash)
+	image.Set("status", "imported")
+	image.Set("image", file)
+
+	if err := app.Save(image); err != nil {
+		return nil, false, errs.Newf("save image record: %v", err)
+	}
+	return image, false, nil
+}
+
+// createManifest creates a new manifest record with the given label.
+// Folio2 always creates a new manifest on import, even if a manifest with
+// the same label already exists; images are still deduplicated by hash,
+// so re-importing the same folder does not waste storage.
+func createManifest(app core.App, label string) (*core.Record, error) {
+	collection, err := app.FindCollectionByNameOrId("manifests")
+	if err != nil {
+		return nil, errs.Newf("find manifests collection: %v", err)
+	}
+
+	manifest := core.NewRecord(collection)
+	manifest.Set("label", label)
+
+	if err := app.Save(manifest); err != nil {
+		return nil, errs.Newf("save manifest record: %v", err)
+	}
+	return manifest, nil
+}
+
+// createPage creates a new pages record pointing at the given image.
+// page_number is left unset; it is filled in later by the user or by a
+// future folio.json metadata file.
+func createPage(app core.App, image *core.Record) (*core.Record, error) {
+	collection, err := app.FindCollectionByNameOrId("pages")
+	if err != nil {
+		return nil, errs.Newf("find pages collection: %v", err)
+	}
+
+	page := core.NewRecord(collection)
+	page.Set("image", image.Id)
+
+	if err := app.Save(page); err != nil {
+		return nil, errs.Newf("save page record: %v", err)
+	}
+	return page, nil
+}
+
+// createManifestPage links page into manifest at position, with the
+// original file path preserved for troubleshooting.
+func createManifestPage(app core.App, manifest, page *core.Record, position int, originalPath string) error {
+	collection, err := app.FindCollectionByNameOrId("manifest_pages")
+	if err != nil {
+		return errs.Newf("find manifest_pages collection: %v", err)
+	}
+
+	manifestPage := core.NewRecord(collection)
+	manifestPage.Set("manifest", manifest.Id)
+	manifestPage.Set("page", page.Id)
+	manifestPage.Set("position", position)
+	manifestPage.Set("status", "NOT_STARTED")
+	manifestPage.Set("original_path", originalPath)
+
+	if err := app.Save(manifestPage); err != nil {
+		return errs.Newf("save manifest_page record: %v", err)
+	}
+	return nil
+}
