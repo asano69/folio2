@@ -85,8 +85,14 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - カバー画像を設定できる。
 
 ## Tech Stack
-- backend: Go+PocketBase v0.39+
-- frontend: solid.js + tailwind v4
+### Backend
+- Go
+- PocketBase v0.39+
+
+### Frontend
+- Solid.js + tailwind v4
+- Note: https://github.com/slab/quill
+- Viewer: https://github.com/dimsemenov/photoswipe
 
 ---
 
