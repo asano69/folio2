@@ -36,6 +36,18 @@ Many existing open-source book viewers focus primarily on basic functions such a
 
 - 永続的に保存したいノートをここに保存してナレッジベースとして使う。（folioはナレッジベースではない）
 
+## 要件
+### 物理本との比較によるユーザー体験要件
+
+- **安心感の継承**: 本棚の本は失われないという安心感を損ねない
+- **アクセス性の向上**:
+  - ブラウジング: 本をパラパラめくる体験をシミュレート
+  - 目次: 情報構造の全体像を素早く把握
+  - タグ・マーク: ページへのクイックアクセス
+  - 書き込み: 記憶の想起トリガー
+- **永続的リソースアクセス**: すべてのページにURIを割り当て
+- **抽出可能性**: 内容を他のツールを関連付け可能に
+
 
 ## Entity
 The schema was developed with reference to [IIIF Presentation API 3.0](https://iiif.io/api/presentation/3.0/).
