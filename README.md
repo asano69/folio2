@@ -34,6 +34,8 @@ folio2はローカルサーバのストレージに保存されたスキャン�
 
 
 ## Entity
+The schema is based on [the Presentation API 3.0](https://iiif.io/api/presentation/3.0/) of the International Image Interoperability Framework (IIIF).
+
 ### manifest
 - 画像資料をグループ化する単位。本に相当する。
 - 含まれている画像資料のリストと、それらのメタデータを宣言する
