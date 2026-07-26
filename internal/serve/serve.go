@@ -9,8 +9,6 @@ package serve
 
 import (
 	"fmt"
-	"io/fs"
-	"net/http"
 
 	"github.com/asano69/folio2/internal/assets"
 	"github.com/asano69/folio2/internal/config"
@@ -25,47 +23,25 @@ import (
 // Run opens the database and collection once, registers all drill routes, then
 // starts listening. The database and collection are shared across all sessions.
 func Run(app *pocketbase.PocketBase, cfg *config.Config) error {
-
-	// assetsFS exposes just the "assets/" subdirectory that Vite's default
-	// (unprefixed) base writes hashed JS/CSS bundles into, so they're served
-	// at the conventional /assets/... URL instead of /static/assets/....
-	assetsFS, err := fs.Sub(assets.FS, "assets")
-	if err != nil {
-		return fmt.Errorf("sub assets fs: %w", err)
-	}
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
 	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
-		// GET /api/sessions reloads the collection from disk on every request
-		// so decks/cards added or removed since startup are reflected.
-		e.Router.GET("/assets/{path...}", apis.Static(assetsFS, false))
-		// Solid Router decides which screen to render client-side, so both
-		// /drill and / serve the same static shell. This shell is left
-		// unauthenticated on purpose: it's an empty HTML/JS bundle with no
-		// data in it. Every route that actually returns collection data is
-		// guarded above with RequireSuperuserAuth, so an unauthenticated
-		// visitor only ever sees the login screen the SPA renders client-side.
-		serveShell := func(re *core.RequestEvent) error {
-			re.Response.Header().Set("Content-Type", "text/html; charset=utf-8")
-			http.ServeFileFS(re.Response, re.Request, assets.FS, "index.html")
-			return nil
-		}
-
-		e.Router.GET("/", serveShell)
+		// Serves the whole Vite build output (index.html, hashed JS/CSS
+		// under assets/, and public/ files like favicon.svg copied to the
+		// root) from a single route. indexFallback=true makes any unmatched
+		// path (e.g. /manifests/abc, /settings) fall back to index.html, so
+		// Solid Router can handle it client-side even on a hard refresh.
+		// This shell is left unauthenticated on purpose: it's an empty
+		// HTML/JS bundle with no data in it. Every route that actually
+		// returns collection data is guarded below with
+		// RequireSuperuserAuth, so an unauthenticated visitor only ever
+		// sees the login screen the SPA renders client-side.
+		e.Router.GET("/{path...}", apis.Static(assets.FS, true))
 
 		// Starts a background job that imports book folders from
 		// cfg.Data.ImportDir (see internal/importer). Refuses to start a
 		// second job while one is already queued or running.
 		e.Router.POST("/api/admin/jobs/import-folders", importFoldersHandler(app, cfg)).Bind(apis.RequireSuperuserAuth())
-
-		// Vite's public/ directory (favicon.svg etc.) is copied to the root
-		// of the build output, so it's served directly rather than under
-		// /assets/.
-		e.Router.GET("/favicon.svg", func(re *core.RequestEvent) error {
-			re.Response.Header().Set("Content-Type", "image/svg+xml")
-			http.ServeFileFS(re.Response, re.Request, assets.FS, "favicon.svg")
-			return nil
-		})
 
 		return e.Next()
 	})
