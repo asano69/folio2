@@ -49,7 +49,7 @@ export default function Admin() {
         href="/_/"
         target="_blank"
         rel="noopener noreferrer"
-        class="rounded-md border px-5 py-3 text-lg font-semibold"
+        class="btn-link"
       >
         PocketBase↗
       </a>
