@@ -245,7 +245,7 @@ func hashFile(path string) (string, error) {
 	if err != nil {
 		return "", errs.Newf("open file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
@@ -262,7 +262,7 @@ func decodeImageSize(path string) (width, height int, err error) {
 	if err != nil {
 		return 0, 0, errs.Newf("open image for size check: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	cfg, _, err := image.DecodeConfig(f)
 	if err != nil {
