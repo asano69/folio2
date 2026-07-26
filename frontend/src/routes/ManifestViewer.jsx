@@ -6,15 +6,20 @@ import PageGallery from "../components/PageGallery";
 import pb from "../lib/pb";
 
 // Loads a manifest's pages, ordered by position, expanded down to their
-// image record (width/height/file), so PageGallery can render thumbnails
-// and hand a ready-to-use dataSource to PhotoSwipe.
+// image record (width/height/file) and their note (if any), so PageGallery
+// can render thumbnails, hand a ready-to-use dataSource to PhotoSwipe, and
+// open the note editor for the currently viewed page.
 async function fetchImages(manifestId) {
   const records = await pb.collection("manifest_pages").getFullList({
     filter: pb.filter("manifest = {:id}", { id: manifestId }),
     sort: "position",
-    expand: "page.image",
+    expand: "page.image,note",
   });
-  return records.map((r) => r.expand.page.expand.image);
+  return records.map((r) => ({
+    manifestPageId: r.id,
+    image: r.expand.page.expand.image,
+    note: r.expand.note ?? null,
+  }));
 }
 
 export default function ManifestViewer() {
