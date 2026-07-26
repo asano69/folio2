@@ -1453,6 +1453,20 @@ func init() {
 						"type": "relation"
 					},
 					{
+						"cascadeDelete": false,
+						"collectionId": "pbc_3395098727",
+						"help": "",
+						"hidden": false,
+						"id": "relation18589324",
+						"maxSelect": 0,
+						"minSelect": 0,
+						"name": "notes",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "relation"
+					},
+					{
 						"help": "",
 						"hidden": false,
 						"id": "select2063623452",
@@ -1639,34 +1653,6 @@ func init() {
 						"type": "text"
 					},
 					{
-						"cascadeDelete": true,
-						"collectionId": "pbc_2170393721",
-						"help": "",
-						"hidden": false,
-						"id": "relation2801428544",
-						"maxSelect": 0,
-						"minSelect": 0,
-						"name": "manifest",
-						"presentable": false,
-						"required": true,
-						"system": false,
-						"type": "relation"
-					},
-					{
-						"cascadeDelete": false,
-						"collectionId": "pbc_3945946014",
-						"help": "",
-						"hidden": false,
-						"id": "relation336246304",
-						"maxSelect": 10,
-						"minSelect": 0,
-						"name": "page",
-						"presentable": false,
-						"required": false,
-						"system": false,
-						"type": "relation"
-					},
-					{
 						"autogeneratePattern": "",
 						"help": "",
 						"hidden": false,
@@ -1695,19 +1681,6 @@ func init() {
 						"required": false,
 						"system": false,
 						"type": "text"
-					},
-					{
-						"help": "",
-						"hidden": false,
-						"id": "number1177347317",
-						"max": null,
-						"min": null,
-						"name": "position",
-						"onlyInt": false,
-						"presentable": false,
-						"required": false,
-						"system": false,
-						"type": "number"
 					},
 					{
 						"hidden": false,
