@@ -879,21 +879,6 @@ func init() {
 						"type": "text"
 					},
 					{
-						"help": "",
-						"hidden": false,
-						"id": "file2366146245",
-						"maxSelect": 0,
-						"maxSize": 0,
-						"mimeTypes": null,
-						"name": "cover",
-						"presentable": false,
-						"protected": false,
-						"required": false,
-						"system": false,
-						"thumbs": null,
-						"type": "file"
-					},
-					{
 						"hidden": false,
 						"id": "autodate2990389176",
 						"name": "created",
