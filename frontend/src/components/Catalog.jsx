@@ -1,7 +1,7 @@
 import { For, Show, createResource } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
-import { BookOpen } from "lucide-solid";
+import BookOpen from "lucide-solid/icons/book-open";
 import pb from "../lib/pb";
 import Loading from "./Loading";
 
