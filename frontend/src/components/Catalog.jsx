@@ -7,7 +7,7 @@ import pb from "../lib/pb";
 // currently the only entry point into a manifest's viewer.
 //
 // manifests has no cover field of its own, so the thumbnail shown here is
-// borrowed from each manifest's first page (manifest_pages.position === 1).
+// borrowed from each manifest's first page (manifest_pages.position === 0).
 // Manifests without a first page simply fall back to the placeholder icon.
 async function fetchManifests() {
   const manifests = await pb.collection("manifests").getFullList({ sort: "-created" });
@@ -17,7 +17,7 @@ async function fetchManifests() {
       pb
         .collection("manifest_pages")
         .getFirstListItem(
-          pb.filter("manifest = {:id} && position = 1", { id: manifest.id }),
+          pb.filter("manifest = {:id} && position = 0", { id: manifest.id }),
           { expand: "page.image" },
         )
         .catch(() => null),

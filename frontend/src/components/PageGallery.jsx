@@ -99,15 +99,16 @@ export default function PageGallery(props) {
 
   return (
     <>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="flex flex-wrap gap-2">
         <For each={props.images}>
           {(item, i) => (
             <Image
-              class="cursor-pointer rounded border"
+              class="h-[150px] w-[200px] cursor-pointer overflow-hidden rounded border"
               onClick={() => openViewer(i())}
             >
               <Image.Img
-                src={pb.files.getURL(item.image, item.image.image, { thumb: "300x0" })}
+                class="h-full w-full object-cover"
+                src={pb.files.getURL(item.image, item.image.image, { thumb: "200x150" })}
                 alt=""
               />
               <Image.Fallback>🖼️</Image.Fallback>

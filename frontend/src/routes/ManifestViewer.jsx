@@ -15,12 +15,16 @@ async function fetchImages(manifestId) {
     sort: "position",
     expand: "page.image,note",
   });
-  return records.map((r) => ({
-    manifestPageId: r.id,
-    image: r.expand.page.expand.image,
-    note: r.expand.note ?? null,
-    position: r.position,
-  }));
+  return records
+    // position 0 is the cover page, already shown in the Catalog, so it
+    // is excluded here to avoid showing it twice.
+    .filter((r) => r.position !== 0)
+    .map((r) => ({
+      manifestPageId: r.id,
+      image: r.expand.page.expand.image,
+      note: r.expand.note ?? null,
+      position: r.position,
+    }));
 }
 
 export default function ManifestViewer() {
