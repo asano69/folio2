@@ -58,7 +58,7 @@ export default function NoteEditor(props) {
 
   return (
     <Portal>
-      <div class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-6">
+      <div class="fixed inset-0 z-[100001] flex items-center justify-center bg-black/50 p-6">
         <div class="flex w-full max-w-xl flex-col gap-4 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-6 shadow-[0_1px_3px_0_var(--color-shadow)]">
           {/* Quill's snow theme assumes a light background, so this
               container stays light regardless of the app's dark mode. */}
