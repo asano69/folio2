@@ -88,6 +88,12 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - libraryは、collectionのリストをもつ
 - カバー画像を設定できる。
 
+## 扱える形式
+インポート可能な形式：
+- フォルダ＋画像
+- CBZファイル、ZIPファイル
+
+
 ## Tech Stack
 
 ### Frontend
