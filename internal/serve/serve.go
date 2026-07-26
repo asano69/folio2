@@ -10,14 +10,14 @@ package serve
 import (
 	"fmt"
 
+	"log/slog"
+
 	"github.com/asano69/folio2/internal/assets"
 	"github.com/asano69/folio2/internal/config"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Run opens the database and collection once, registers all drill routes, then
@@ -46,7 +46,7 @@ func Run(app *pocketbase.PocketBase, cfg *config.Config) error {
 		return e.Next()
 	})
 
-	logrus.WithField("addr", addr).Info("listening")
+	slog.Info("listening", "addr", addr)
 	return apis.Serve(app, apis.ServeConfig{
 		HttpAddr:        addr,
 		ShowStartBanner: false,

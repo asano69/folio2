@@ -1,13 +1,13 @@
 package serve
 
 import (
+	"log/slog"
+
 	"github.com/asano69/folio2/internal/config"
 	"github.com/asano69/folio2/internal/importer"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/tools/types"
-
-	"github.com/sirupsen/logrus"
 )
 
 // runImportJob runs the import in the background and writes its progress
@@ -16,13 +16,13 @@ import (
 func runImportJob(app *pocketbase.PocketBase, cfg *config.Config, jobID string) {
 	job, err := app.FindRecordById("jobs", jobID)
 	if err != nil {
-		logrus.WithError(err).Error("import job: reload record")
+		slog.Error("import job: reload record", "error", err)
 		return
 	}
 
 	job.Set("status", "running")
 	if err := app.Save(job); err != nil {
-		logrus.WithError(err).Error("import job: save running status")
+		slog.Error("import job: save running status", "error", err)
 		return
 	}
 
@@ -31,7 +31,7 @@ func runImportJob(app *pocketbase.PocketBase, cfg *config.Config, jobID string) 
 		job.Set("processed", p.Processed)
 		job.Set("message", p.Message)
 		if err := app.Save(job); err != nil {
-			logrus.WithError(err).Error("import job: save progress")
+			slog.Error("import job: save progress", "error", err)
 		}
 	})
 
@@ -45,6 +45,6 @@ func runImportJob(app *pocketbase.PocketBase, cfg *config.Config, jobID string) 
 	}
 
 	if err := app.Save(job); err != nil {
-		logrus.WithError(err).Error("import job: save final status")
+		slog.Error("import job: save final status", "error", err)
 	}
 }
