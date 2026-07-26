@@ -95,7 +95,7 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - Style: Tailwind v4
 - Icon: Lucide
 - NoteEditor: Slab/Quill v2
-- ImageViewer: PhotoSwipe v5.4+
+- ImageViewer: [PhotoSwipe](https://github.com/dimsemenov/photoswipe) v5.4+
 
 ### Backend
 - Go
