@@ -24,6 +24,7 @@ async function fetchImages(manifestId) {
       .map((r) => ({
         manifestPageId: r.id,
         image: r.expand.page.expand.image,
+        description: r.expand.page.description,
         note: r.expand.note ?? null,
         position: r.position,
       }))

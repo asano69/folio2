@@ -26,11 +26,18 @@ export default function PageGallery(props) {
   const openViewer = async (index) => {
     const { default: PhotoSwipe } = await import("photoswipe");
     await import("photoswipe/style.css");
+    const { default: PhotoSwipeDynamicCaption } = await import(
+      "photoswipe-dynamic-caption-plugin"
+    );
+    await import(
+      "photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css"
+    );
 
     const dataSource = props.images.map((item) => ({
       src: pb.files.getURL(item.image, item.image.image),
       width: item.image.width,
       height: item.image.height,
+      description: item.description,
     }));
 
     // trapFocus disabled: PhotoSwipe otherwise forces focus back into its
@@ -38,6 +45,24 @@ export default function PageGallery(props) {
     // portalled NoteEditor), which silently swallows every keystroke
     // typed into the note editor.
     pswp = new PhotoSwipe({ dataSource, index, trapFocus: false });
+
+    // photoswipe-dynamic-caption-plugin expects a PhotoSwipeLightbox
+    // instance, whose real PhotoSwipe instance lives at `lightbox.pswp`.
+    // We use PhotoSwipe's core class directly instead of the Lightbox
+    // wrapper, so a minimal stand-in object is passed instead: forwarding
+    // `on()` straight to `pswp` (do NOT set `pswp.pswp = pswp` -- PhotoSwipe's
+    // own `on()` delegates to `this.pswp` when present, which turns that
+    // into infinite self-recursion).
+    const captionHost = { on: (name, fn) => pswp.on(name, fn), pswp };
+
+    // Must be constructed before pswp.init(), since the plugin registers
+    // itself on the "init" event just like the note button below does on
+    // "uiRegister".
+    // Shows pages.description (if any) as a below/aside caption.
+    new PhotoSwipeDynamicCaption(captionHost, {
+      type: "auto",
+      captionContent: (slide) => slide.data.description || "",
+    });
 
     // Adds a note button just left of the built-in zoom button (order: 10)
     // that opens the note editor for whichever page is currently shown.

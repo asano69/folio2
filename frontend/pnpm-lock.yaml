@@ -20,6 +20,9 @@ importers:
       photoswipe:
         specifier: ^5.4.4
         version: 5.4.4
+      photoswipe-dynamic-caption-plugin:
+        specifier: ^1.2.7
+        version: 1.2.7
       pocketbase:
         specifier: ^0.27.0
         version: 0.27.0
@@ -1608,6 +1611,9 @@ packages:
   pathval@2.0.1:
     resolution: {integrity: sha512-//nshmD55c46FuFw26xV/xFAaB5HF9Xdap7HJBBnrKdAd6/GxDBaNA1870O79+9ueg61cZLSVc+OaFlfmObYVQ==}
     engines: {node: '>= 14.16'}
+
+  photoswipe-dynamic-caption-plugin@1.2.7:
+    resolution: {integrity: sha512-5XXdXLf2381nwe7KqQvcyStiUBi9TitYXppUQTrzPwYAi4lZsmWNnNKMclM7I4QGlX6fXo42v3bgb6rlK9pY1Q==}
 
   photoswipe@5.4.4:
     resolution: {integrity: sha512-WNFHoKrkZNnvFFhbHL93WDkW3ifwVOXSW3w1UuZZelSmgXpIGiZSNlZJq37rR8YejqME2rHs9EhH9ZvlvFH2NA==}
@@ -3438,6 +3444,8 @@ snapshots:
   pathe@2.0.3: {}
 
   pathval@2.0.1: {}
+
+  photoswipe-dynamic-caption-plugin@1.2.7: {}
 
   photoswipe@5.4.4: {}
 
