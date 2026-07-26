@@ -1,4 +1,4 @@
-include folio2.env
+include folio.env
 export
 
 BINARY := $(notdir $(CURDIR))
@@ -38,7 +38,7 @@ kill-ports:
 
 .PHONY: server
 server: kill-ports
-	#./folio2 migrate up --dir=pb_data
+	#./folio migrate up --dir=pb_data
 	./$(BINARY) superuser upsert admin@mail.internal password --dir=pb_data
 	./$(BINARY) serve
 
@@ -69,5 +69,5 @@ format:
 # 本番では、後方互換性のために残しておいたほうが良いかも。
 migrate-collections:
 	ls -1 migrations/*.go | sort | head -n -1 | xargs rm -f
-	yes | go run ./cmd/folio2 migrate collections
+	yes | go run ./cmd/folio migrate collections
 	ls -1 migrations/*.go | sort | head -n -1 | xargs rm -f

@@ -19,7 +19,7 @@ import (
 
 	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
 
-	"github.com/asano69/folio2/internal/errs"
+	"github.com/asano69/folio/internal/errs"
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"

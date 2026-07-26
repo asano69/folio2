@@ -32,13 +32,13 @@ COPY internal/ ./internal/
 COPY migrations/ ./migrations/
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o folio2 ./cmd/folio2
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o folio ./cmd/folio
 
 # ==========================================
 # Stage 2: Runtime
 # ==========================================
 FROM alpine:3.23
-WORKDIR /folio2
+WORKDIR /folio
 
 RUN apk add --no-cache \
     ca-certificates \
@@ -49,13 +49,13 @@ RUN apk add --no-cache \
     curl \
     sqlite
  
-RUN addgroup -g 1000 folio2 && \
-    adduser -D -u 1000 -G folio2 folio2
+RUN addgroup -g 1000 folio && \
+    adduser -D -u 1000 -G folio folio
 
-COPY --from=go-builder /build/folio2 /usr/local/bin/folio2
+COPY --from=go-builder /build/folio /usr/local/bin/folio
 
-RUN mkdir -p /certs /folio2/data
-RUN chown -R folio2:folio2 /folio2
+RUN mkdir -p /certs /folio/data
+RUN chown -R folio:folio /folio
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -63,5 +63,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 EXPOSE 3000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["folio2", "serve", "--dir=data"]
+CMD ["folio", "serve", "--dir=data"]
 

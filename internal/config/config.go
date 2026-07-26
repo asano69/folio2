@@ -1,4 +1,4 @@
-// Package config loads the configuration for folio2 serve from
+// Package config loads the configuration for folio serve from
 // environment variables.
 package config
 

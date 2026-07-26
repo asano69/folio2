@@ -6,7 +6,7 @@ set -euo pipefail
 # settings
 ########################################
 
-VERSION_FILE="cmd/folio2/main.go"
+VERSION_FILE="cmd/folio/main.go"
 REMOTE="origin"
 BRANCH="main"
 COMMIT_PREFIX="release:"

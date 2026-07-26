@@ -1,9 +1,9 @@
-# folio2
+# folio
 
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asano69/folio2)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asano69/folio)
 
-folio2はローカルサーバのストレージに保存されたスキャン資料を有効活用することを目的として設計されたシステムです。 
+folioはローカルサーバのストレージに保存されたスキャン資料を有効活用することを目的として設計されたシステムです。 
 
 
 <img src="frontend/public/favicon.svg" width="100" align="right" />

@@ -1,4 +1,4 @@
-module github.com/asano69/folio2
+module github.com/asano69/folio
 
 go 1.25.9
 

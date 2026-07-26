@@ -1,4 +1,4 @@
-// Package errs provides the standard error type for folio2.
+// Package errs provides the standard error type for folio.
 package errs
 
 import "fmt"

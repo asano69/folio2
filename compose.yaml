@@ -1,14 +1,14 @@
 services:
-  folio2:
-    image: ghcr.io/asano69/folio2:latest
-    container_name: folio2
+  folio:
+    image: ghcr.io/asano69/folio:latest
+    container_name: folio
     restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
-      - folio2.env
+      - folio.env
     volumes:
-      - ./data:/folio2/data
+      - ./data:/folio/data
         #- /etc/ssl/certs/root_ca.crt:/certs/root_ca.crt:ro # optional
     environment:
       - TZ=Etc/UTC
@@ -19,7 +19,7 @@ services:
     #  - traefik_net
     #labels:
     #  - traefik.enable=true
-    #  - traefik.http.routers.folio2.rule=Host(`folio2.app.internal`)
+    #  - traefik.http.routers.folio.rule=Host(`folio.app.internal`)
 #volumes:
 #  data:
 

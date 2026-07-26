@@ -6,11 +6,11 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/spf13/cobra"
 
-	"github.com/asano69/folio2/internal/config"
-	"github.com/asano69/folio2/internal/serve"
+	"github.com/asano69/folio/internal/config"
+	"github.com/asano69/folio/internal/serve"
 )
 
-// serveCmd defines the "folio2 serve" cobra command. RunE stays a thin
+// serveCmd defines the "folio serve" cobra command. RunE stays a thin
 // wrapper: load config, then delegate to internal/serve for the actual
 // server implementation.
 func serveCmd(app *pocketbase.PocketBase) *cobra.Command {

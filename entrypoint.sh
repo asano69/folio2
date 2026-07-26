@@ -11,7 +11,7 @@ fi
 ADMIN_EMAIL="${INITIAL_ADMIN_EMAIL:-admin@mail.internal}"
 ADMIN_PASSWORD="${INITIAL_ADMIN_PASSWORD:-password}"
 
-# /folio2/data
-su-exec folio2:folio2 folio2 superuser create "$ADMIN_EMAIL" "$ADMIN_PASSWORD" --dir=data || true
+# /folio/data
+su-exec folio:folio folio superuser create "$ADMIN_EMAIL" "$ADMIN_PASSWORD" --dir=data || true
 
-exec su-exec folio2:folio2 "$@"
+exec su-exec folio:folio "$@"
