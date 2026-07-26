@@ -1,5 +1,6 @@
 import { createSignal, onMount } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Dialog } from "@kobalte/core/dialog";
+import { Button } from "@kobalte/core/button";
 import pb from "../lib/pb";
 
 // Overlay panel for editing the note attached to a single manifest_pages
@@ -57,28 +58,24 @@ export default function NoteEditor(props) {
   };
 
   return (
-    <Portal>
-      <div class="fixed inset-0 z-[100001] flex items-center justify-center bg-black/50 p-6">
-        <div class="flex w-full max-w-xl flex-col gap-4 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-6 shadow-[0_1px_3px_0_var(--color-shadow)]">
-          {/* Quill's snow theme assumes a light background, so this
-              container stays light regardless of the app's dark mode. */}
-          <div ref={editorRef} class="min-h-[200px] bg-white text-black" />
-          {error() && <p class="text-sm text-[#dc3545]">{error()}</p>}
-          <div class="flex justify-end gap-2">
-            <button type="button" class="btn" onClick={props.onClose}>
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn"
-              onClick={handleSave}
-              disabled={saving()}
-            >
-              {saving() ? "Saving…" : "Save"}
-            </button>
-          </div>
+    <Dialog defaultOpen onOpenChange={(open) => !open && props.onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay class="fixed inset-0 z-[100001] bg-black/50" />
+        <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
+          <Dialog.Content class="flex w-full max-w-xl flex-col gap-4 p-6">
+            {/* Quill's snow theme assumes a light background, so this
+                container stays light regardless of the rest of the app. */}
+            <div ref={editorRef} class="min-h-[200px] bg-white text-black" />
+            {error() && <p class="text-sm">{error()}</p>}
+            <div class="flex justify-end gap-2">
+              <Button onClick={props.onClose}>Close</Button>
+              <Button onClick={handleSave} disabled={saving()}>
+                {saving() ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </Dialog.Content>
         </div>
-      </div>
-    </Portal>
+      </Dialog.Portal>
+    </Dialog>
   );
 }

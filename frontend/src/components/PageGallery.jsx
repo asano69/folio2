@@ -48,7 +48,10 @@ export default function PageGallery(props) {
         html: "📝",
         onClick: () => {
           const item = props.images[pswp.currIndex];
-          setNotePanel({ manifestPageId: item.manifestPageId, note: item.note });
+          setNotePanel({
+            manifestPageId: item.manifestPageId,
+            note: item.note,
+          });
         },
       });
     });
@@ -80,7 +83,9 @@ export default function PageGallery(props) {
   const handleNoteSaved = (note) => {
     const panel = notePanel();
     if (!panel) return;
-    const item = props.images.find((i) => i.manifestPageId === panel.manifestPageId);
+    const item = props.images.find(
+      (i) => i.manifestPageId === panel.manifestPageId,
+    );
     if (item) item.note = note;
     setNotePanel(null);
   };
@@ -91,9 +96,11 @@ export default function PageGallery(props) {
         <For each={props.images}>
           {(item, i) => (
             <img
-              src={pb.files.getURL(item.image, item.image.image, { thumb: "300x0" })}
+              src={pb.files.getURL(item.image, item.image.image, {
+                thumb: "300x0",
+              })}
               alt=""
-              class="cursor-pointer rounded border border-[var(--color-border-soft)]"
+              class="cursor-pointer rounded border"
               onClick={() => openViewer(i())}
             />
           )}

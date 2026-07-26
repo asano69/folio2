@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { Button } from "@kobalte/core/button";
 import pb from "../lib/pb";
 
 // Login screen shown by AuthGate when no valid superuser session exists.
@@ -27,12 +28,12 @@ export default function Login() {
   };
 
   return (
-    <div class="flex min-h-screen w-full items-center justify-center bg-[var(--color-bg)] px-6 text-[var(--color-text)]">
+    <div class="flex min-h-screen w-full items-center justify-center px-6">
       <form
         onSubmit={handleSubmit}
-        class="flex w-full max-w-sm flex-col gap-4 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-8 shadow-[0_1px_3px_0_var(--color-shadow)]"
+        class="flex w-full max-w-sm flex-col gap-4 rounded-md border p-8"
       >
-        <h1 class="text-center font-serif text-3xl">folio2</h1>
+        <h1 class="text-center text-3xl">folio2</h1>
         <input
           type="email"
           placeholder="Email"
@@ -40,7 +41,7 @@ export default function Login() {
           onInput={(e) => setEmail(e.target.value)}
           required
           autofocus
-          class="rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)]"
+          class="rounded-md border px-3 py-2"
         />
         <input
           type="password"
@@ -48,12 +49,12 @@ export default function Login() {
           value={password()}
           onInput={(e) => setPassword(e.target.value)}
           required
-          class="rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)]"
+          class="rounded-md border px-3 py-2"
         />
-        {error() && <p class="text-sm text-[#dc3545]">{error()}</p>}
-        <button type="submit" class="btn" disabled={pending()}>
+        {error() && <p class="text-sm">{error()}</p>}
+        <Button type="submit" disabled={pending()}>
           {pending() ? "Logging in…" : "Log in"}
-        </button>
+        </Button>
       </form>
     </div>
   );

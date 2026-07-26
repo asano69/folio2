@@ -30,7 +30,7 @@ export default function ManifestViewer() {
   const [images] = createResource(() => params.id, fetchImages);
 
   return (
-    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 bg-[var(--color-bg)] px-6 py-12 text-[var(--color-text)]">
+    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
       <NavBar />
       <Show when={images()} fallback={<p>Loading…</p>}>
         <PageGallery
