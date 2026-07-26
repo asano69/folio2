@@ -12,8 +12,8 @@ import (
 
 	"log/slog"
 
-	"github.com/asano69/folio2/internal/assets"
 	"github.com/asano69/folio2/internal/config"
+	"github.com/asano69/folio2/internal/static"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -36,7 +36,7 @@ func Run(app *pocketbase.PocketBase, cfg *config.Config) error {
 		// returns collection data is guarded below with
 		// RequireSuperuserAuth, so an unauthenticated visitor only ever
 		// sees the login screen the SPA renders client-side.
-		e.Router.GET("/{path...}", apis.Static(assets.FS, true))
+		e.Router.GET("/{path...}", apis.Static(static.FS, true))
 
 		// Starts a background job that imports book folders from
 		// cfg.Data.ImportDir (see internal/importer). Refuses to start a
