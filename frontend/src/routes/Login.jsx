@@ -3,6 +3,7 @@ import { Button } from "@kobalte/core/button";
 import { TextField } from "@kobalte/core/text-field";
 import pb from "../lib/pb";
 import { showError } from "../lib/toast";
+import Logo from "../components/Logo";
 
 // Login screen shown by AuthGate when no valid superuser session exists.
 // This app is single-user, so the PocketBase superuser account also
@@ -33,7 +34,9 @@ export default function Login() {
         onSubmit={handleSubmit}
         class="flex w-full max-w-sm flex-col gap-4 rounded-md border p-8"
       >
-        <h1 class="text-center text-3xl">folio2</h1>
+        <div class="flex justify-center">
+          <Logo />
+        </div>
         <TextField
           value={email()}
           onChange={setEmail}

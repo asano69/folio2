@@ -3,6 +3,7 @@ import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import { BookOpen } from "lucide-solid";
 import pb from "../lib/pb";
+import Loading from "./Loading";
 
 // Fixed thumbnail size so every cover lines up in a neat grid regardless
 // of each source image's own aspect ratio.
@@ -40,7 +41,7 @@ export default function Catalog() {
   const [manifests] = createResource(fetchManifests);
 
   return (
-    <Show when={manifests()} fallback={<p>Loading…</p>}>
+    <Show when={manifests()} fallback={<Loading />}>
       <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
         <For each={manifests()}>
           {(manifest) => (
