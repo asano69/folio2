@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../internal/assets/dist",
+    outDir: "../internal/static/dist",
     emptyOutDir: true,
   },
 });
