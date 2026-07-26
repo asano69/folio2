@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -43,6 +44,9 @@ type Progress struct {
 // Result summarizes what Run created across all folders.
 type Result struct {
 	ManifestsCreated int `json:"manifests_created"`
+	// ManifestsSkipped counts folders whose image sequence exactly
+	// matched an existing manifest, so no new manifest was created.
+	ManifestsSkipped int `json:"manifests_skipped"`
 	ImagesCreated    int `json:"images_created"`
 	ImagesReused     int `json:"images_reused"`
 }
@@ -91,13 +95,35 @@ func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
 // importFolder registers a single book folder as one manifest, inside a
 // single transaction so a partially-imported book is never left behind.
 // It returns false (with no error) if the folder contains no recognised
-// image files, in which case nothing is created.
+// image files, or if an existing manifest already has the exact same
+// ordered sequence of images, in which case nothing is created.
 func importFolder(app core.App, path, label string, result *Result) (bool, error) {
 	files, err := listImageFiles(path)
 	if err != nil {
 		return false, err
 	}
 	if len(files) == 0 {
+		return false, nil
+	}
+
+	// Hash every file up front. This lets duplicate detection run before
+	// any records are created, and lets findOrCreateImage below reuse the
+	// hash instead of reading each file a second time.
+	hashes := make([]string, len(files))
+	for i, file := range files {
+		hash, err := hashFile(file)
+		if err != nil {
+			return false, err
+		}
+		hashes[i] = hash
+	}
+
+	duplicate, err := findDuplicateManifest(app, hashes)
+	if err != nil {
+		return false, err
+	}
+	if duplicate != nil {
+		result.ManifestsSkipped++
 		return false, nil
 	}
 
@@ -110,7 +136,7 @@ func importFolder(app core.App, path, label string, result *Result) (bool, error
 		// position is 1-based (matches the page number shown to users),
 		// so the first image in a folder gets position=1, not 0.
 		for index, file := range files {
-			image, reused, err := findOrCreateImage(txApp, file)
+			image, reused, err := findOrCreateImage(txApp, file, hashes[index])
 			if err != nil {
 				return err
 			}
@@ -137,6 +163,57 @@ func importFolder(app core.App, path, label string, result *Result) (bool, error
 		return false, err
 	}
 	return true, nil
+}
+
+// findDuplicateManifest returns an existing manifest whose pages carry the
+// exact same ordered sequence of image hashes as hashes, or nil if no such
+// manifest exists. This lets re-importing an unchanged folder reuse the
+// existing manifest instead of creating a duplicate.
+func findDuplicateManifest(app core.App, hashes []string) (*core.Record, error) {
+	manifests, err := app.FindRecordsByFilter("manifests", "", "-created", 0, 0)
+	if err != nil {
+		return nil, errs.Newf("list manifests: %v", err)
+	}
+
+	for _, manifest := range manifests {
+		existing, err := manifestImageHashes(app, manifest.Id)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Equal(existing, hashes) {
+			return manifest, nil
+		}
+	}
+	return nil, nil
+}
+
+// manifestImageHashes returns the ordered list of image hashes for a
+// manifest's pages, following manifest_pages -> pages -> images.
+func manifestImageHashes(app core.App, manifestID string) ([]string, error) {
+	manifestPages, err := app.FindRecordsByFilter(
+		"manifest_pages",
+		"manifest = {:id}",
+		"position",
+		0, 0,
+		map[string]any{"id": manifestID},
+	)
+	if err != nil {
+		return nil, errs.Newf("list manifest pages: %v", err)
+	}
+
+	hashes := make([]string, 0, len(manifestPages))
+	for _, mp := range manifestPages {
+		page, err := app.FindRecordById("pages", mp.GetString("page"))
+		if err != nil {
+			return nil, errs.Newf("find page: %v", err)
+		}
+		image, err := app.FindRecordById("images", page.GetString("image"))
+		if err != nil {
+			return nil, errs.Newf("find image: %v", err)
+		}
+		hashes = append(hashes, image.GetString("hash"))
+	}
+	return hashes, nil
 }
 
 // listImageFiles returns the image files directly inside dir, sorted by
@@ -196,13 +273,9 @@ func decodeImageSize(path string) (width, height int, err error) {
 
 // findOrCreateImage returns the images record for the file at path,
 // reusing an existing record with the same content hash instead of
-// storing the same bytes twice.
-func findOrCreateImage(app core.App, path string) (record *core.Record, reused bool, err error) {
-	hash, err := hashFile(path)
-	if err != nil {
-		return nil, false, err
-	}
-
+// storing the same bytes twice. hash is the file's already-computed
+// SHA-256 digest (see importFolder), so the file is never read twice.
+func findOrCreateImage(app core.App, path, hash string) (record *core.Record, reused bool, err error) {
 	if existing, findErr := app.FindFirstRecordByFilter("images", "hash = {:hash}", map[string]any{"hash": hash}); findErr == nil && existing != nil {
 		return existing, true, nil
 	}
