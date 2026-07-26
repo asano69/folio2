@@ -42,7 +42,7 @@ func Load() (*Config, error) {
 			Port: 3000,
 		},
 		Data: DataConfig{
-			ImportDir: envString("FOLIO_IMPORT_DIR", ""),
+			ImportDir: envString("FOLIO_IMPORT_DIR", "./import"),
 		},
 	}
 
