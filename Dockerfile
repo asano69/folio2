@@ -54,7 +54,7 @@ RUN addgroup -g 1000 folio && \
 
 COPY --from=go-builder /build/folio /usr/local/bin/folio
 
-RUN mkdir -p /certs /folio/data
+RUN mkdir -p /certs /folio/data /folio/import
 RUN chown -R folio:folio /folio
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
