@@ -9,12 +9,13 @@ import NoteEditor from "./NoteEditor";
 // array instead of using the DOM-scanning Lightbox helper, since Solid
 // renders declaratively rather than leaving static <a> tags to scan.
 export default function PageGallery(props) {
-  // props.images: [{ manifestPageId, image, note }], already sorted by
-  // manifest_pages.position. `note` is the linked notes record or null.
-  // props.page: 1-indexed page number from the `p` search param, used to
-  // deep-link directly into a page when the component mounts.
-  // props.onPageChange(p): called with the current 1-indexed page while
-  // browsing, and with undefined when the lightbox is closed.
+  // props.images: [{ manifestPageId, image, note, position }], already
+  // sorted by manifest_pages.position. `note` is the linked notes record or
+  // null.
+  // props.position: manifest_pages.position from the `i` search param, used
+  // to deep-link directly into a page when the component mounts.
+  // props.onPositionChange(position): called with the current page's
+  // position while browsing, and with undefined when the lightbox is closed.
 
   // Holds { manifestPageId, note } while the note editor overlay is open,
   // null otherwise. The overlay is portalled out of PhotoSwipe's DOM (see
@@ -57,24 +58,26 @@ export default function PageGallery(props) {
       });
     });
 
-    // Keep the `p` search param in sync with whichever page is on screen,
+    // Keep the `i` search param in sync with whichever page is on screen,
     // so the URL always points at a specific page while browsing.
     pswp.on("change", () => {
-      props.onPageChange?.(String(pswp.currIndex + 1));
+      props.onPositionChange?.(String(props.images[pswp.currIndex].position));
     });
     pswp.on("close", () => {
-      props.onPageChange?.(undefined);
+      props.onPositionChange?.(undefined);
     });
 
     pswp.init();
   };
 
-  // Deep-link support: if the URL already has ?p=N when this gallery
-  // mounts, jump straight into PhotoSwipe at that page.
+  // Deep-link support: if the URL already has ?i=N when this gallery
+  // mounts, jump straight into PhotoSwipe at the page whose
+  // manifest_pages.position matches N.
   onMount(() => {
-    const page = Number(props.page);
-    if (Number.isInteger(page) && page >= 1 && page <= props.images.length) {
-      openViewer(page - 1);
+    const position = Number(props.position);
+    if (Number.isInteger(position)) {
+      const index = props.images.findIndex((img) => img.position === position);
+      if (index !== -1) openViewer(index);
     }
   });
 

@@ -9,8 +9,8 @@ PORTS := 3000 3001
 
 .PHONY: all
 all: kill-ports frontend## (*) Build frontend assets and start the server
-	go run cmd/$(BINARY)/main.go superuser upsert admin@mail.internal password --dir=pb_data
-	go run cmd/$(BINARY)/main.go serve
+	go run ./cmd/$(BINARY) superuser upsert admin@mail.internal password --dir=pb_data
+	go run ./cmd/$(BINARY) serve
 
 .PHONY: frontend
 frontend: frontend/node_modules

@@ -19,13 +19,14 @@ async function fetchImages(manifestId) {
     manifestPageId: r.id,
     image: r.expand.page.expand.image,
     note: r.expand.note ?? null,
+    position: r.position,
   }));
 }
 
 export default function ManifestViewer() {
   const params = useParams();
-  // `p` (1-indexed) tracks which page PhotoSwipe currently shows, so each
-  // page gets its own shareable URI (e.g. .../manifests/abc?p=2).
+  // `i` tracks the manifest_pages.position of the page PhotoSwipe currently
+  // shows, so each page gets its own shareable URI (e.g. .../manifests/abc?i=2).
   const [searchParams, setSearchParams] = useSearchParams();
   const [images] = createResource(() => params.id, fetchImages);
 
@@ -35,8 +36,8 @@ export default function ManifestViewer() {
       <Show when={images()} fallback={<p>Loading…</p>}>
         <PageGallery
           images={images()}
-          page={searchParams.p}
-          onPageChange={(p) => setSearchParams({ p }, { replace: true })}
+          position={searchParams.i}
+          onPositionChange={(i) => setSearchParams({ i }, { replace: true })}
         />
       </Show>
     </div>
