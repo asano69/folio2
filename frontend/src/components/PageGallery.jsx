@@ -1,5 +1,6 @@
 // frontend/src/components/PageGallery.jsx
 import { For, onMount, createSignal, Show } from "solid-js";
+import { Image } from "@kobalte/core/image";
 import pb from "../lib/pb";
 import NoteEditor from "./NoteEditor";
 
@@ -95,14 +96,16 @@ export default function PageGallery(props) {
       <div class="grid grid-cols-4 gap-2">
         <For each={props.images}>
           {(item, i) => (
-            <img
-              src={pb.files.getURL(item.image, item.image.image, {
-                thumb: "300x0",
-              })}
-              alt=""
+            <Image
               class="cursor-pointer rounded border"
               onClick={() => openViewer(i())}
-            />
+            >
+              <Image.Img
+                src={pb.files.getURL(item.image, item.image.image, { thumb: "300x0" })}
+                alt=""
+              />
+              <Image.Fallback>🖼️</Image.Fallback>
+            </Image>
           )}
         </For>
       </div>

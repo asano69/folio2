@@ -2,6 +2,7 @@ import { createSignal, onMount } from "solid-js";
 import { Dialog } from "@kobalte/core/dialog";
 import { Button } from "@kobalte/core/button";
 import pb from "../lib/pb";
+import { showError } from "../lib/toast";
 
 // Overlay panel for editing the note attached to a single manifest_pages
 // record. Mounted via Portal so it lives outside PhotoSwipe's DOM and can
@@ -21,7 +22,6 @@ export default function NoteEditor(props) {
   let editorRef;
   let quill;
   const [saving, setSaving] = createSignal(false);
-  const [error, setError] = createSignal("");
 
   // Quill is loaded on demand (like PhotoSwipe in PageGallery) so it isn't
   // part of the main bundle for people who never open a note.
@@ -35,7 +35,6 @@ export default function NoteEditor(props) {
   });
 
   const handleSave = async () => {
-    setError("");
     setSaving(true);
     try {
       // Quill Delta is stored as-is in notes.content (json field).
@@ -51,7 +50,7 @@ export default function NoteEditor(props) {
       }
       props.onSaved(note);
     } catch (err) {
-      setError(err?.message || "Failed to save note.");
+      showError(err?.message || "Failed to save note.");
     } finally {
       setSaving(false);
     }
@@ -66,7 +65,6 @@ export default function NoteEditor(props) {
             {/* Quill's snow theme assumes a light background, so this
                 container stays light regardless of the rest of the app. */}
             <div ref={editorRef} class="min-h-[200px] bg-white text-black" />
-            {error() && <p class="text-sm">{error()}</p>}
             <div class="flex justify-end gap-2">
               <Button onClick={props.onClose}>Close</Button>
               <Button onClick={handleSave} disabled={saving()}>

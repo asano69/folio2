@@ -1,16 +1,16 @@
 import { createSignal, Show } from "solid-js";
 import { Button } from "@kobalte/core/button";
+import { Progress } from "@kobalte/core/progress";
 import pb from "../../lib/pb";
+import { showError } from "../../lib/toast";
 
 // Admin section of the Settings page: a link to the PocketBase admin
 // dashboard, plus a button that kicks off the background import-folders
 // job and follows its progress via PocketBase realtime.
 export default function Admin() {
   const [job, setJob] = createSignal(null);
-  const [error, setError] = createSignal("");
 
   const startImport = async () => {
-    setError("");
     try {
       const { id } = await pb.send("/api/admin/jobs/import-folders", {
         method: "POST",
@@ -30,7 +30,7 @@ export default function Admin() {
         }
       });
     } catch (err) {
-      setError(err?.message || "Failed to start import.");
+      showError(err?.message || "Failed to start import.");
     }
   };
 
@@ -48,12 +48,24 @@ export default function Admin() {
       <Button onClick={startImport}>Import Folders</Button>
 
       <Show when={job()}>
-        <p class="text-sm">
-          {job().status}: {job().processed}/{job().total} {job().message}
-        </p>
-      </Show>
-      <Show when={error()}>
-        <p class="text-sm">{error()}</p>
+        <Progress
+          value={job().processed}
+          minValue={0}
+          maxValue={job().total || 1}
+          indeterminate={!job().total}
+          class="flex w-full max-w-sm flex-col gap-1"
+        >
+          <div class="flex justify-between text-sm">
+            <Progress.Label>{job().status}</Progress.Label>
+            <Progress.ValueLabel>
+              {job().processed}/{job().total}
+            </Progress.ValueLabel>
+          </div>
+          <Progress.Track class="h-2 w-full rounded-full border">
+            <Progress.Fill class="h-full rounded-full" />
+          </Progress.Track>
+          <p class="text-sm">{job().message}</p>
+        </Progress>
       </Show>
     </div>
   );

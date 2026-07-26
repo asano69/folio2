@@ -12,6 +12,7 @@ import Stats from "./routes/Stats";
 import Login from "./routes/Login";
 
 import pb from "./lib/pb";
+import { ToastRegion } from "./lib/toast";
 
 // AuthGate blocks the whole app behind Login until a valid superuser
 // session exists, tracking pb.authStore so it reacts immediately to
@@ -42,14 +43,17 @@ function AuthGate(props) {
 
 render(
   () => (
-    <AuthGate>
-      <Router>
-        <Route path="/" component={Home} />
-        <Route path="/manifests/:id" component={ManifestViewer} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/stats" component={Stats} />
-      </Router>
-    </AuthGate>
+    <>
+      <AuthGate>
+        <Router>
+          <Route path="/" component={Home} />
+          <Route path="/manifests/:id" component={ManifestViewer} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/stats" component={Stats} />
+        </Router>
+      </AuthGate>
+      <ToastRegion />
+    </>
   ),
   document.getElementById("app"),
 );
