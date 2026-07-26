@@ -37,11 +37,7 @@ export default function Login() {
         <div class="flex justify-center">
           <Logo />
         </div>
-        <TextField
-          value={email()}
-          onChange={setEmail}
-          required
-        >
+        <TextField value={email()} onChange={setEmail} required>
           <TextField.Input
             type="email"
             placeholder="Email"
@@ -49,11 +45,7 @@ export default function Login() {
             class="w-full rounded-md border px-3 py-2"
           />
         </TextField>
-        <TextField
-          value={password()}
-          onChange={setPassword}
-          required
-        >
+        <TextField value={password()} onChange={setPassword} required>
           <TextField.Input
             type="password"
             placeholder="Password"

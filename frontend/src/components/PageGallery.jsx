@@ -108,7 +108,9 @@ export default function PageGallery(props) {
             >
               <Image.Img
                 class="h-full w-full object-cover"
-                src={pb.files.getURL(item.image, item.image.image, { thumb: "200x150" })}
+                src={pb.files.getURL(item.image, item.image.image, {
+                  thumb: "200x150",
+                })}
                 alt=""
               />
               <Image.Fallback>🖼️</Image.Fallback>

@@ -31,7 +31,10 @@ export default function CollectionList() {
             >
               <Image
                 class="overflow-hidden rounded border"
-                style={{ width: `${THUMB_WIDTH}px`, height: `${THUMB_HEIGHT}px` }}
+                style={{
+                  width: `${THUMB_WIDTH}px`,
+                  height: `${THUMB_HEIGHT}px`,
+                }}
               >
                 <Image.Img
                   class="h-full w-full object-cover"

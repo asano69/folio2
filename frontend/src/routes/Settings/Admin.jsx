@@ -45,12 +45,7 @@ export default function Admin() {
 
   return (
     <div class="flex flex-col items-center justify-center gap-4 py-6">
-      <a
-        href="/_/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-link"
-      >
+      <a href="/_/" target="_blank" rel="noopener noreferrer" class="btn-link">
         PocketBase↗
       </a>
 

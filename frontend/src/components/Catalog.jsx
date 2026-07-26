@@ -10,7 +10,9 @@ import ManifestGrid from "./ManifestGrid";
 // borrowed from each manifest's first page (manifest_pages.position === 0).
 // Manifests without a first page simply fall back to the placeholder icon.
 async function fetchManifests() {
-  const manifests = await pb.collection("manifests").getFullList({ sort: "-created" });
+  const manifests = await pb
+    .collection("manifests")
+    .getFullList({ sort: "-created" });
 
   const covers = await Promise.all(
     manifests.map((manifest) =>

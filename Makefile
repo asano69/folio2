@@ -68,6 +68,7 @@ test:
 
 lint:
 	golangci-lint run
+	cd frontend && pnpm run lint
 
 format:
 	cd frontend && pnpm exec prettier --write "src/**/*.{js,jsx,css}"

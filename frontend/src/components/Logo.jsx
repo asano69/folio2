@@ -18,15 +18,14 @@ export default function Logo(props) {
     </>
   );
 
-return props.linkable ? (
-  <A
-    href="/"
-    class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
-  >
-    {content}
-  </A>
-) : (
+  return props.linkable ? (
+    <A
+      href="/"
+      class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
+    >
+      {content}
+    </A>
+  ) : (
     <div class="flex items-center gap-2">{content}</div>
-);
+  );
 }
-

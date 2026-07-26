@@ -32,9 +32,13 @@ export default function ManifestGrid(props) {
                 class="h-full w-full object-cover"
                 src={
                   manifest.coverImage
-                    ? pb.files.getURL(manifest.coverImage, manifest.coverImage.image, {
-                        thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
-                      })
+                    ? pb.files.getURL(
+                        manifest.coverImage,
+                        manifest.coverImage.image,
+                        {
+                          thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
+                        },
+                      )
                     : undefined
                 }
                 alt=""

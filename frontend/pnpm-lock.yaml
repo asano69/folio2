@@ -30,6 +30,9 @@ importers:
         specifier: ^1.9.12
         version: 1.9.13
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.39.4
+        version: 9.39.4
       '@tailwindcss/vite':
         specifier: ^4.3.2
         version: 4.3.2(vite@8.1.4(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
