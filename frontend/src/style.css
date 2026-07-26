@@ -1,11 +1,41 @@
 @import "tailwindcss";
 
-/* Color tokens and component classes were removed as part of the
- * Kobalte migration. Styling is being reintroduced incrementally,
- * component by component, as each one is ported to Kobalte. */
+/* Semantic color tokens live in @theme so Tailwind generates matching
+ * utilities. Default values here are the light theme; the dark-mode
+ * override below reassigns the same variable names, so components can
+ * keep referencing var(--color-*) once instead of pairing every utility
+ * with a dark: variant. */
+@theme {
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-field: #ffffff;
+  --color-border-soft: #999999;
+  --color-hover-bg: #f0f0f0;
+  --color-hover-border: #777777;
+  --color-active-bg: #e4e4e4;
+  --color-active-border: #666666;
+  --color-shadow: #cccccc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a1a1a;
+    --color-text: #e0e0e0;
+    --color-field: #333333;
+    --color-border-soft: #555555;
+    --color-hover-bg: #3a3a3a;
+    --color-hover-border: #666666;
+    --color-active-bg: #444444;
+    --color-active-border: #777777;
+    --color-shadow: #111111;
+  }
+}
+
 @layer base {
   body {
     @apply h-screen w-screen;
+    background: var(--color-bg);
+    color: var(--color-text);
   }
 
   strong {
@@ -16,12 +46,18 @@
 /* Kobalte's Button renders as a native <button> by default, so the tag
  * selector covers it without needing a wrapper class. `.btn-link` lets
  * plain <A> navigation links (e.g. NavBar) opt into the same look while
- * staying real anchors (keyboard/middle-click/new-tab all still work). */
+ * staying real anchors (keyboard/middle-click/new-tab all still work).
+ * Colors go through the tokens above instead of hardcoded hex, so the
+ * hover/active states stay legible in dark mode instead of "glowing". */
 @layer components {
   button,
   .btn-link {
-    @apply inline-flex items-center justify-center rounded-md border border-[#999999] bg-transparent px-4 py-1.5 cursor-pointer;
-    @apply hover:bg-[#f0f0f0];
+    @apply inline-flex items-center justify-center rounded-md px-4 py-1.5 cursor-pointer font-semibold;
+    @apply border border-[var(--color-border-soft)] bg-[var(--color-field)] text-[var(--color-text)];
+    @apply shadow-[0_1px_3px_0_var(--color-shadow)];
+    @apply transition-colors transition-shadow duration-150;
+    @apply hover:bg-[var(--color-hover-bg)] hover:border-[var(--color-hover-border)];
+    @apply active:bg-[var(--color-active-bg)] active:border-[var(--color-active-border)] active:shadow-none;
     @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b82f6];
     @apply data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed;
   }
