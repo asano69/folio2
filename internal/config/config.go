@@ -3,10 +3,9 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/asano69/folio2/internal/errs"
 )
 
 // ServerConfig holds HTTP server settings.
@@ -17,11 +16,11 @@ type ServerConfig struct {
 
 // DataConfig holds data storage settings.
 type DataConfig struct {
-	Root string
 	// ImportDir is the folder scanned by the importer for book folders
 	// to register as manifests (see internal/importer).
 	ImportDir string
 }
+
 type Config struct {
 	Server ServerConfig
 	Data   DataConfig
@@ -32,24 +31,22 @@ type Config struct {
 //
 // Recognised variables:
 //
-//	SERVER_HOST         default "0.0.0.0"
-//	SERVER_PORT         default 3000
-//	DATA_ROOT           default "."
+//	FOLIO_SERVER_HOST         default "0.0.0.0"
+//	FOLIO_SERVER_PORT         default 3000
 //	FOLIO_IMPORT_DIR    default ""
 
 func Load() (*Config, error) {
 	cfg := &Config{
 		Server: ServerConfig{
-			Host: envString("SERVER_HOST", "0.0.0.0"),
+			Host: envString("FOLIO_SERVER_HOST", "0.0.0.0"),
 			Port: 3000,
 		},
 		Data: DataConfig{
-			Root:      envString("DATA_ROOT", "."),
 			ImportDir: envString("FOLIO_IMPORT_DIR", ""),
 		},
 	}
 
-	port, err := envInt("SERVER_PORT", cfg.Server.Port)
+	port, err := envInt("FOLIO_SERVER_PORT", cfg.Server.Port)
 	if err != nil {
 		return nil, err
 	}
@@ -76,21 +73,7 @@ func envInt(key string, fallback int) (int, error) {
 	}
 	n, err := strconv.Atoi(v)
 	if err != nil {
-		return 0, errs.Newf("invalid %s: %v", key, err)
+		return 0, fmt.Errorf("invalid %s: %w", key, err)
 	}
 	return n, nil
-}
-
-// envFloat returns the float64 value of the environment variable key, or
-// fallback if it is unset.
-func envFloat(key string, fallback float64) (float64, error) {
-	v, ok := os.LookupEnv(key)
-	if !ok || v == "" {
-		return fallback, nil
-	}
-	f, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		return 0, errs.Newf("invalid %s: %v", key, err)
-	}
-	return f, nil
 }
