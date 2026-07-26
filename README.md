@@ -72,7 +72,7 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 ### note
 - 本の中にはさんでおくような注釈メモ、読書ノートを書くためのもの。
 - あるnoteのスコープは、あるmanifestのなかに閉じている。（本質的に、ただのメモ。ここにナレッジベースを作るべきではない）
-- あるManifestに関連付けて、そのなかのimageに言及する。manifest_idは必須だがpage_idは任意。
+
 
 ### tag
 - Pageにつける属性。複数選択可能。ページの集成（コンピテーション）を作成するのに役立つ。
@@ -85,15 +85,17 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - カバー画像を設定できる。
 
 ## Tech Stack
-### Backend
-- Go
-- PocketBase v0.39+
 
 ### Frontend
 - UI: Solid.js v1.9 + Kobalte v0.13
 - Style: Tailwind v4
+- Icon: Lucide
 - NoteEditor: Slab/Quill v2
 - ImageViewer: PhotoSwipe v5.4+
+
+### Backend
+- Go
+- PocketBase v0.39+
 
 ---
 
