@@ -1460,7 +1460,7 @@ func init() {
 						"id": "relation18589324",
 						"maxSelect": 0,
 						"minSelect": 0,
-						"name": "notes",
+						"name": "note",
 						"presentable": false,
 						"required": false,
 						"system": false,
