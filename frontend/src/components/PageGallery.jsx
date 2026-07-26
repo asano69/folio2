@@ -31,7 +31,11 @@ export default function PageGallery(props) {
       height: item.image.height,
     }));
 
-    pswp = new PhotoSwipe({ dataSource, index });
+    // trapFocus disabled: PhotoSwipe otherwise forces focus back into its
+    // own container whenever focus moves elsewhere (e.g. into the
+    // portalled NoteEditor), which silently swallows every keystroke
+    // typed into the note editor.
+    pswp = new PhotoSwipe({ dataSource, index, trapFocus: false });
 
     // Adds a note button just left of the built-in zoom button (order: 10)
     // that opens the note editor for whichever page is currently shown.
