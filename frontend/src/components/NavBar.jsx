@@ -10,7 +10,7 @@ export default function NavBar(props) {
     <div class="mb-10 flex w-full flex-wrap items-center justify-between gap-y-3">
       <Logo linkable />
       <nav class="flex flex-wrap items-center gap-3">
-        <A href="/collection" class="btn-link">Collection</A>
+        <A href="/collections" class="btn-link">Collections</A>
         <A href="/stats" class="btn-link">Stats</A>
         <A href="/settings" class="btn-link">Settings</A>
         <Button onClick={handleLogout}>Log out</Button>
