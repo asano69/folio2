@@ -16,8 +16,8 @@ export default function NavBar(props) {
         <h1>folio2</h1>
       </A>
       <nav class="flex flex-wrap items-center gap-3">
-        <A href="/stats">Stats</A>
-        <A href="/settings">Settings</A>
+        <A href="/stats" class="btn-link">Stats</A>
+        <A href="/settings" class="btn-link">Settings</A>
         <Button onClick={handleLogout}>Log out</Button>
       </nav>
     </div>
