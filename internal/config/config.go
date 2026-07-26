@@ -36,22 +36,20 @@ type Config struct {
 //	FOLIO_IMPORT_DIR    default ""
 
 func Load() (*Config, error) {
+	port, err := envInt("FOLIO_SERVER_PORT", 3000)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		Server: ServerConfig{
 			Host: envString("FOLIO_SERVER_HOST", "0.0.0.0"),
-			Port: 3000,
+			Port: port,
 		},
 		Data: DataConfig{
 			ImportDir: envString("FOLIO_IMPORT_DIR", "./import"),
 		},
 	}
-
-	port, err := envInt("FOLIO_SERVER_PORT", cfg.Server.Port)
-	if err != nil {
-		return nil, err
-	}
-	cfg.Server.Port = port
-
 	return cfg, nil
 }
 
