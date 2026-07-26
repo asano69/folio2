@@ -25,7 +25,7 @@ COPY go.mod go.sum* ./
 RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 # Copy frontend build artifacts just before the Go compilation step
-COPY --from=node-builder /build/internal/assets/dist ./internal/assets/dist
+COPY --from=node-builder /build/internal/static/dist ./internal/static/dist
 # Copy Go source files last, as they change most frequently
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
