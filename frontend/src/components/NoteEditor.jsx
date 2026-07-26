@@ -61,10 +61,20 @@ export default function NoteEditor(props) {
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-[100001] bg-black/50" />
         <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
-          <Dialog.Content class="flex w-full max-w-xl flex-col gap-4 p-6">
-            {/* Quill's snow theme assumes a light background, so this
-                container stays light regardless of the rest of the app. */}
-            <div ref={editorRef} class="min-h-[200px] bg-white text-black" />
+          <Dialog.Content class="flex w-full max-w-xl flex-col gap-4 rounded-md border border-[#999999] bg-white p-6 text-black shadow-lg dark:bg-neutral-900 dark:text-white">
+            {/* Quill's snow theme is overridden here to follow light/dark
+                mode instead of staying forced-light, and the editor area
+                is height-capped with overflow so it scrolls instead of
+                growing the dialog without bound. */}
+            <div
+              ref={editorRef}
+              class="min-h-[200px] rounded border bg-white text-black
+                     dark:bg-neutral-800 dark:text-white
+                     [&_.ql-editor]:max-h-[50vh] [&_.ql-editor]:overflow-y-auto
+                     [&_.ql-toolbar]:dark:border-neutral-700 [&_.ql-toolbar]:dark:bg-neutral-900
+                     [&_.ql-stroke]:dark:stroke-white [&_.ql-fill]:dark:fill-white
+                     [&_.ql-picker-label]:dark:text-white [&_.ql-picker-options]:dark:bg-neutral-800"
+            />
             <div class="flex justify-end gap-2">
               <Button onClick={props.onClose}>Close</Button>
               <Button onClick={handleSave} disabled={saving()}>
