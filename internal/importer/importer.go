@@ -107,7 +107,9 @@ func importFolder(app core.App, path, label string, result *Result) (bool, error
 			return err
 		}
 
-		for position, file := range files {
+		// position is 1-based (matches the page number shown to users),
+		// so the first image in a folder gets position=1, not 0.
+		for index, file := range files {
 			image, reused, err := findOrCreateImage(txApp, file)
 			if err != nil {
 				return err
@@ -123,7 +125,7 @@ func importFolder(app core.App, path, label string, result *Result) (bool, error
 				return err
 			}
 
-			if err := createManifestPage(txApp, manifest, page, position, filepath.Join(label, filepath.Base(file))); err != nil {
+			if err := createManifestPage(txApp, manifest, page, index+1, filepath.Join(label, filepath.Base(file))); err != nil {
 				return err
 			}
 		}
