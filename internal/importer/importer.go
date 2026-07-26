@@ -92,6 +92,85 @@ func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
 	return result, nil
 }
 
+// ImportPaths imports the given paths directly, without scanning a
+// configured import directory and without moving anything afterward
+// (unlike Run, which is built around FOLIO_IMPORT_DIR). Each path is
+// resolved independently:
+//
+//   - a plain file is skipped, since folio only imports book folders
+//   - a directory containing image files directly is treated as a single
+//     book folder
+//   - a directory containing no image files directly, but with
+//     subdirectories, is treated as a container: each subdirectory is
+//     expanded as its own book folder (one level deep, same as Run does
+//     for FOLIO_IMPORT_DIR)
+//
+// onProgress is called the same way as in Run.
+func ImportPaths(app core.App, paths []string, onProgress func(Progress)) (*Result, error) {
+	folders, err := expandBookFolders(paths)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Result{}
+	total := len(folders)
+
+	for i, dir := range folders {
+		label := filepath.Base(dir)
+		if onProgress != nil {
+			onProgress(Progress{Total: total, Processed: i, Message: "importing: " + label})
+		}
+
+		if _, err := importFolder(app, dir, label, result); err != nil {
+			return nil, errs.Newf("import folder %q: %v", dir, err)
+		}
+	}
+
+	if onProgress != nil {
+		onProgress(Progress{Total: total, Processed: total, Message: "done"})
+	}
+
+	return result, nil
+}
+
+// expandBookFolders resolves each of the given paths into the list of
+// book folders to import (see ImportPaths for the resolution rules).
+func expandBookFolders(paths []string) ([]string, error) {
+	var folders []string
+
+	for _, p := range paths {
+		info, err := os.Stat(p)
+		if err != nil {
+			return nil, errs.Newf("stat %q: %v", p, err)
+		}
+		if !info.IsDir() {
+			continue
+		}
+
+		files, err := listImageFiles(p)
+		if err != nil {
+			return nil, err
+		}
+		if len(files) > 0 {
+			folders = append(folders, p)
+			continue
+		}
+
+		entries, err := os.ReadDir(p)
+		if err != nil {
+			return nil, errs.Newf("read dir %q: %v", p, err)
+		}
+		for _, e := range entries {
+			if e.IsDir() {
+				folders = append(folders, filepath.Join(p, e.Name()))
+			}
+		}
+	}
+
+	sort.Strings(folders)
+	return folders, nil
+}
+
 // importFolder registers a single book folder as one manifest, inside a
 // single transaction so a partially-imported book is never left behind.
 // It returns false (with no error) if the folder contains no recognised
