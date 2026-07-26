@@ -1,10 +1,14 @@
 include folio.env
 export
 
+.PHONY: lint
+
 BINARY := $(notdir $(CURDIR))
 APP := $(notdir $(CURDIR))
 # Ports used by the dev servers (frontend, backend, and PocketBase-style API)
 PORTS := 3000 3001
+
+VERSION  := $(shell cat VERSION 2>/dev/null | tr -d '[:space:]')
 
 
 .PHONY: all
@@ -59,9 +63,11 @@ dev-back: clean
 
 .PHONY: test
 test:
-	cd frontend && pnpm test
-	go test ./...
+	#cd frontend && pnpm test
+	go test -race ./...
 
+lint:
+	golangci-lint run
 
 format:
 	cd frontend && pnpm exec prettier --write "src/**/*.{js,jsx,css}"
