@@ -63,9 +63,14 @@ export default function PageGallery(props) {
 
     // Keep the `i` search param in sync with whichever page is on screen,
     // so the URL always points at a specific page while browsing.
+    // These run inside PhotoSwipe's own event callbacks, not a Solid
+    // tracked scope, so eslint-plugin-solid's reactivity check doesn't
+    // apply here (same as a plain DOM event handler).
+    // eslint-disable-next-line solid/reactivity
     pswp.on("change", () => {
       props.onPositionChange?.(String(props.images[pswp.currIndex].position));
     });
+    // eslint-disable-next-line solid/reactivity
     pswp.on("close", () => {
       props.onPositionChange?.(undefined);
     });

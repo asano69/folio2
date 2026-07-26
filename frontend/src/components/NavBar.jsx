@@ -3,7 +3,7 @@ import { Button } from "@kobalte/core/button";
 import pb from "../lib/pb";
 import Logo from "./Logo";
 
-export default function NavBar(props) {
+export default function NavBar() {
   const handleLogout = () => pb.authStore.clear();
 
   return (

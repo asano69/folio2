@@ -1,4 +1,5 @@
 import { A } from "@solidjs/router";
+import { Show } from "solid-js";
 import { Image } from "@kobalte/core/image";
 // Bundled copy of public/favicon.svg. Importing from src/ lets Vite inline
 // it with the JS bundle instead of fetching it separately at runtime,
@@ -18,14 +19,17 @@ export default function Logo(props) {
     </>
   );
 
-  return props.linkable ? (
-    <A
-      href="/"
-      class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
+  return (
+    <Show
+      when={props.linkable}
+      fallback={<div class="flex items-center gap-2">{content}</div>}
     >
-      {content}
-    </A>
-  ) : (
-    <div class="flex items-center gap-2">{content}</div>
+      <A
+        href="/"
+        class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
+      >
+        {content}
+      </A>
+    </Show>
   );
 }
