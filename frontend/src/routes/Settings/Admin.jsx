@@ -10,6 +10,20 @@ import { showError } from "../../lib/toast";
 export default function Admin() {
   const [job, setJob] = createSignal(null);
 
+  // Applies a jobs record (from realtime or a plain fetch) to local state,
+  // and stops listening once the job has reached a terminal status.
+  const applyJob = (record) => {
+    setJob({
+      status: record.status,
+      message: record.message,
+      processed: record.processed,
+      total: record.total,
+    });
+    if (record.status === "completed" || record.status === "failed") {
+      pb.collection("jobs").unsubscribe(record.id);
+    }
+  };
+
   const startImport = async () => {
     try {
       const { id } = await pb.send("/api/admin/jobs/import-folders", {
@@ -17,18 +31,13 @@ export default function Admin() {
       });
       setJob({ status: "queued", message: "", processed: 0, total: 0 });
 
-      pb.collection("jobs").subscribe(id, (e) => {
-        const record = e.record;
-        setJob({
-          status: record.status,
-          message: record.message,
-          processed: record.processed,
-          total: record.total,
-        });
-        if (record.status === "completed" || record.status === "failed") {
-          pb.collection("jobs").unsubscribe(id);
-        }
-      });
+      // Subscribe first, then fetch the current record once the
+      // subscription is active. The import can finish (even fully
+      // complete) between job creation and this point, so without this
+      // catch-up fetch a fast job's progress/completion would never
+      // reach the UI and the progress bar would be stuck on "queued".
+      await pb.collection("jobs").subscribe(id, (e) => applyJob(e.record));
+      applyJob(await pb.collection("jobs").getOne(id));
     } catch (err) {
       showError(err?.message || "Failed to start import.");
     }
