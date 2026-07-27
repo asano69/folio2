@@ -50,12 +50,18 @@ export default function SideBar(props) {
         <Show
           when={sidebarOpen()}
           fallback={
-            <div class="flex justify-center p-2">
+            // sticky + top-0 keeps the toggle button pinned to the
+            // viewport while the page scrolls with the gallery content
+            // beneath it, instead of scrolling away along with it.
+            <div class="sticky top-0 z-10 flex justify-center bg-[var(--color-bg)] p-2">
               <ToggleButton onClick={() => setSidebarOpen(true)} />
             </div>
           }
         >
-          <div class="flex h-full w-80 flex-col gap-4 p-6">
+          {/* sticky + h-screen (instead of h-full) pins this panel to the
+              viewport the same way, so it no longer scrolls off along
+              with the page. */}
+          <div class="sticky top-0 flex h-screen w-80 flex-col gap-4 bg-[var(--color-bg)] p-6">
             <div class="flex shrink-0 items-center justify-between">
               <h2 class="text-2xl">{props.title}</h2>
               <ToggleButton onClick={() => setSidebarOpen(false)} />
@@ -68,9 +74,12 @@ export default function SideBar(props) {
         </Show>
       }
     >
+      {/* sticky + top-0 pins the sidebar to the viewport while the page
+          (AppShell's min-h-screen wrapper) scrolls with the gallery
+          content, instead of scrolling away along with it. */}
       <aside
         classList={{
-          "flex h-screen shrink-0 flex-col overflow-hidden border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] transition-[width] duration-300 ease-in-out": true,
+          "sticky top-0 flex h-screen shrink-0 flex-col overflow-hidden border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] transition-[width] duration-300 ease-in-out": true,
           "w-80": sidebarOpen(),
           "w-12": !sidebarOpen(),
         }}
