@@ -2371,6 +2371,21 @@ func init() {
 						"type": "json"
 					},
 					{
+						"autogeneratePattern": "",
+						"help": "",
+						"hidden": false,
+						"id": "text3514781862",
+						"max": 0,
+						"min": 0,
+						"name": "uuid",
+						"pattern": "",
+						"presentable": false,
+						"primaryKey": false,
+						"required": false,
+						"system": false,
+						"type": "text"
+					},
+					{
 						"help": "",
 						"hidden": false,
 						"id": "date884808015",
