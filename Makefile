@@ -81,3 +81,6 @@ migrate-collections:
 
 increment:
 	bash scripts/increment.sh
+deploy:
+	bash scripts/deploy.sh
+
