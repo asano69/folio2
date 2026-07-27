@@ -33,13 +33,9 @@ export default function SidebarViewSelect() {
     >
       <Select.Trigger
         aria-label="Sidebar view"
-        class="text-xl"
+        class="w-32 justify-between font-medium border-none bg-transparent px-0 py-0 shadow-none text-xl hover:border-transparent hover:bg-transparent active:border-transparent active:bg-transparent active:shadow-none"
       >
         <Select.Value>{(state) => state.selectedOption()?.label}</Select.Value>
-        <Select.Icon>
-          <ChevronDown size={10} />
-
-        </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
         <Select.Content class="z-30 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] p-1 shadow-md">

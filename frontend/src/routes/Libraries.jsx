@@ -18,7 +18,10 @@ export default function Libraries() {
         <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
           <For each={libraries()}>
             {(library) => (
-              <div class="flex flex-col gap-2" style={{ width: `${THUMB_WIDTH}px` }}>
+              <div
+                class="flex flex-col gap-2"
+                style={{ width: `${THUMB_WIDTH}px` }}
+              >
                 <Image
                   class="overflow-hidden rounded border"
                   style={{

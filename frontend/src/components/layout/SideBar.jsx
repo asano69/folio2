@@ -92,9 +92,7 @@ export default function SideBar(props) {
             once open. */}
         <div class="flex items-center gap-2 p-2">
           <Show when={sidebarOpen()}>
-      
-        <h2 class="truncate px-4 pt-2">{props.title}</h2>
-            
+            <h2 class="truncate px-4 m-3">{props.title}</h2>
           </Show>
           <ToggleButton
             onClick={() => setSidebarOpen(!sidebarOpen())}
@@ -102,7 +100,6 @@ export default function SideBar(props) {
           />
         </div>
         <Show when={sidebarOpen()}>
-      
           <div class="flex w-80 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
             {props.children}
           </div>
