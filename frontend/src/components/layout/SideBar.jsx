@@ -90,9 +90,9 @@ export default function SideBar(props) {
             slides along with the growing/shrinking width instead of staying
             fixed on the left. The title label moves to its own row below,
             once open. */}
-        <div class="flex items-center gap-2 p-2">
+        <div class="flex h-12 items-center gap-2 p-2">
           <Show when={sidebarOpen()}>
-            <h2 class="truncate px-4 m-3">{props.title}</h2>
+            <h2 class="truncate px-4">{props.title}</h2>
           </Show>
           <ToggleButton
             onClick={() => setSidebarOpen(!sidebarOpen())}
