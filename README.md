@@ -36,7 +36,7 @@ Many existing open-source book viewers focus primarily on basic functions such a
 
 - 永続的に保存したいノートをここに保存してナレッジベースとして使う。（folioはナレッジベースではない）
 
-## 要件
+## Requirements
 
 ### モバイル重視
 - モバイル端末からでも効率的に画像資料にアクセスできるようにしなければならない。
@@ -52,6 +52,22 @@ Many existing open-source book viewers focus primarily on basic functions such a
 - **永続的リソースアクセス**: すべてのページにURIを割り当て
 - **抽出可能性**: 内容を他のツールを関連付け可能に
 
+### コアビューア機能
+- **ページ表示**: スキャン画像を各ページにURIを付与して配信
+- **閲覧**: ホイールズーム、ドラッグパン、キーボードナビゲーション
+
+### ナビゲーション
+- **セクション/目次**: 資料にセクションを登録し、セクション間の移動
+- **ページジャンプ**: ページ番号指定での直接アクセス
+
+### ページ注釈
+- **マークダウンノート**: 要約・コメント・メモをMarkdown形式で作成
+- **手描き注釈**: SVGペンで図解・強調などの描画
+- **ステータスタグ**: ページごとの「既読/途中/未読」などのステータス管理
+
+### その他
+- **書籍ノート**: 書籍レベルのメモ（全体的な感想など）
+- **進捗率表示**: 書籍全体のどの位置を読んでいるかを可視化
 
 ## Entity
 The schema was developed with reference to [IIIF Presentation API 3.0](https://iiif.io/api/presentation/3.0/).
