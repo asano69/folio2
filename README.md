@@ -96,7 +96,7 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 
 ## Configuration
 
-All configuration is via environment variables. Defaults match `folio.env`.
+All configuration is via environment variables.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
