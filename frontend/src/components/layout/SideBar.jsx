@@ -1,4 +1,3 @@
-import { A } from "@solidjs/router";
 import { Show } from "solid-js";
 import PanelLeft from "lucide-solid/icons/panel-left";
 import { isDesktop } from "../../lib/viewport";
@@ -93,12 +92,9 @@ export default function SideBar(props) {
             once open. */}
         <div class="flex items-center gap-2 p-2">
           <Show when={sidebarOpen()}>
-            <A
-              href="/"
-              class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
-            >
-              <div class="logo text-xl font-serif  mx-2">folio</div>
-            </A>
+            <div class="mx-3">
+              <Logo linkable size="sm" />
+            </div>
           </Show>
           <ToggleButton
             onClick={() => setSidebarOpen(!sidebarOpen())}

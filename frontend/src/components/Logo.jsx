@@ -6,16 +6,24 @@ import { Image } from "@kobalte/core/image";
 // which otherwise causes the logo to visibly pop in after Home renders.
 import logoUrl from "../assets/logo.svg";
 
-// Shared icon + app name, used by NavBar (post-login, links back to Home)
-// and Login (pre-login, where there's nowhere to navigate to yet, so it
-// renders as plain text/icon instead of a link).
+// Shared icon + app name, used by NavBar (post-login, links back to Home),
+// Login (pre-login, where there's nowhere to navigate to yet, so it
+// renders as plain text/icon instead of a link), and SideBar's expanded
+// header (smaller, via size="sm").
+const SIZES = {
+  lg: { icon: "h-12 w-12", text: "text-4xl" },
+  sm: { icon: "h-6 w-6", text: "text-xl" },
+};
+
 export default function Logo(props) {
+  const size = () => SIZES[props.size ?? "lg"];
+
   const content = (
     <>
-      <Image class="h-12 w-12">
+      <Image class={size().icon}>
         <Image.Img src={logoUrl} alt="" />
       </Image>
-      <div class="logo text-4xl font-serif">folio</div>
+      <div class={`logo font-serif ${size().text}`}>folio</div>
     </>
   );
 
