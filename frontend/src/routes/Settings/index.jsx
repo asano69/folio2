@@ -1,4 +1,3 @@
-import NavBar from "../../components/NavBar";
 import Admin from "./Admin";
 
 // Settings page: each section (e.g. Admin) lives in its own file and is
@@ -7,7 +6,6 @@ import Admin from "./Admin";
 export default function Settings() {
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-12 px-6 py-12">
-      <NavBar />
       <h1 class="text-4xl">Settings</h1>
 
       <Admin />

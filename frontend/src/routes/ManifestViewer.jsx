@@ -1,7 +1,6 @@
 // frontend/src/routes/ManifestViewer.jsx
 import { createResource, Show } from "solid-js";
 import { useParams, useSearchParams } from "@solidjs/router";
-import NavBar from "../components/NavBar";
 import PageGallery from "../components/PageGallery";
 import Loading from "../components/Loading";
 import pb from "../lib/pb";
@@ -40,7 +39,6 @@ export default function ManifestViewer() {
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
-      <NavBar />
       <Show when={images()} fallback={<Loading />}>
         <PageGallery
           images={images()}

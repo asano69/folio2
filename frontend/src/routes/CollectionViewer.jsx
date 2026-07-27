@@ -1,6 +1,5 @@
 import { createResource, Show } from "solid-js";
 import { useParams } from "@solidjs/router";
-import NavBar from "../components/NavBar";
 import ManifestGrid from "../components/ManifestGrid";
 import Loading from "../components/Loading";
 import pb from "../lib/pb";
@@ -47,7 +46,6 @@ export default function CollectionViewer() {
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
-      <NavBar />
       <Show when={data()} fallback={<Loading />}>
         <h1 class="text-4xl">{data().label}</h1>
         <ManifestGrid manifests={data().manifests} />
