@@ -3,7 +3,7 @@ import { Button } from "@kobalte/core/button";
 import pb from "../lib/pb";
 import Logo from "./Logo";
 import { isDesktop } from "../lib/viewport";
-import { setCollectionsSidebarOpen } from "../lib/uiState";
+import { setCollectionsSidebarOpen } from "./layout/uiState";
 
 export default function NavBar() {
   const handleLogout = () => pb.authStore.clear();

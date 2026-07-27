@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 import NavBar from "../NavBar";
 import { isDesktop } from "../../lib/viewport";
-import { collectionsSidebarOpen, setCollectionsSidebarOpen } from "../../lib/uiState";
+import { collectionsSidebarOpen, setCollectionsSidebarOpen } from "./uiState";
 import CollectionList from "../CollectionList";
 
 // Wraps every route so NavBar renders once regardless of page (it's
