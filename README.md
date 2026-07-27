@@ -125,7 +125,7 @@ All configuration is via environment variables.
 ## Tech Stack
 
 ### Frontend
-- UI: Solid.js v1.9 + Kobalte v0.13
+- UI: Solid.js v1.9 + [Kobalte](https://kobalte.dev/docs/core/overview/) v0.13 
 - Style: Tailwind v4
 - Icon: Lucide
 - NoteEditor: Slab/Quill v2
