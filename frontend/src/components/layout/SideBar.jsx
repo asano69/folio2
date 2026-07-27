@@ -12,7 +12,7 @@ function ToggleButton(props) {
       type="button"
       onClick={props.onClick}
       aria-label="Toggle sidebar"
-      class="cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+      class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
     >
       <PanelLeft size={20} />
     </button>

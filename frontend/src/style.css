@@ -47,10 +47,13 @@
  * selector covers it without needing a wrapper class. `.btn-link` lets
  * plain <A> navigation links (e.g. NavBar) opt into the same look while
  * staying real anchors (keyboard/middle-click/new-tab all still work).
- * Colors go through the tokens above instead of hardcoded hex, so the
- * hover/active states stay legible in dark mode instead of "glowing". */
+ * `:not(.icon-btn)` opts out plain icon-only buttons (e.g. SideBar's
+ * toggle), which draw their own SVG icon and don't want the bordered
+ * button chrome at all. Colors go through the tokens above instead of
+ * hardcoded hex, so the hover/active states stay legible in dark mode
+ * instead of "glowing". */
 @layer components {
-  button,
+  button:not(.icon-btn),
   .btn-link {
     @apply inline-flex items-center justify-center rounded-md px-4 py-1.5 cursor-pointer font-semibold;
     @apply border border-[var(--color-border-soft)] bg-[var(--color-field)] text-[var(--color-text)];
