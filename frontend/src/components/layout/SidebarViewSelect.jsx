@@ -38,7 +38,7 @@ export default function SidebarViewSelect() {
         <Select.Value>{(state) => state.selectedOption()?.label}</Select.Value>
       </Select.Trigger>
       <Select.Portal>
-        <Select.Content class="z-30 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] p-1 shadow-md">
+        <Select.Content class="z-60 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] p-1 shadow-md">
           <Select.Listbox />
         </Select.Content>
       </Select.Portal>

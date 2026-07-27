@@ -49,30 +49,46 @@ export default function SideBar(props) {
     <Show
       when={isDesktop()}
       fallback={
-        <Show when={sidebarOpen()}>
+        <>
           {/* Backdrop: dims the page behind the overlay and closes the
               sidebar when tapped. Fixed, so it never affects the page's
-              own layout. */}
+              own layout. Always mounted (opacity-toggled instead of
+              Show-gated) so it fades in/out instead of popping instantly. */}
           <div
-            class="fixed inset-0 z-40 bg-black/50"
+            class="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ease-in-out"
+            classList={{
+              "opacity-100": sidebarOpen(),
+              "pointer-events-none opacity-0": !sidebarOpen(),
+            }}
             onClick={() => setSidebarOpen(false)}
           />
           {/* Fixed overlay panel, stacked above the page via z-index
               instead of pushing it aside like the desktop <aside> does.
-              When collapsed (sidebarOpen() === false), this whole <Show>
-              renders nothing -- no toggle-button rail on mobile, since
-              the sidebar is opened via NavBar's Sidebar button instead. */}
-          <div class="fixed top-0 left-0 z-50 flex h-screen w-80 flex-col gap-4 bg-[var(--color-bg)] p-6">
+              Always mounted and slid off-screen via translate-x instead of
+              being Show-gated, so opening/closing animates smoothly the
+              same way the desktop rail's width does, instead of popping
+              in/out instantly. */}
+          <div
+            class="fixed top-0 left-0 z-50 flex h-screen w-80 flex-col gap-4 bg-[var(--color-bg)] p-6 transition-transform duration-300 ease-in-out"
+            classList={{
+              "translate-x-0": sidebarOpen(),
+              "-translate-x-full": !sidebarOpen(),
+            }}
+          >
             <div class="flex shrink-0 items-center justify-between">
               <h2 class="text-2xl">{props.title}</h2>
               <ToggleButton onClick={() => setSidebarOpen(false)} />
             </div>
             {/* Scrolls independently of the header above, so the toggle
                 button stays fixed in place instead of scrolling out of
-                view along with the list. */}
-            <div class="min-h-0 flex-1 overflow-y-auto">{props.children}</div>
+                view along with the list. Content itself stays Show-gated
+                so it isn't fetched/rendered until the panel is actually
+                opened, even though the panel wrapper is always mounted. */}
+            <div class="min-h-0 flex-1 overflow-y-auto">
+              <Show when={sidebarOpen()}>{props.children}</Show>
+            </div>
           </div>
-        </Show>
+        </>
       }
     >
       {/* sticky + top-0 pins the sidebar to the viewport while the page
