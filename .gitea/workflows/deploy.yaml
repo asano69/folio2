@@ -2,14 +2,7 @@ name: Deploy
 on:
   push:
     paths:
-      - '**/*.go'
-      - '**/*.jsx'
-      - '**/*.svg'
-      - '**/*.html'
-      - '**/*.css'
-      - '**/*.js'      
-      - 'Dockerfile'
-      - 'entrypoint.sh'
+      - 'VERSION'
     paths-ignore:
       - '**/README.md'
 
