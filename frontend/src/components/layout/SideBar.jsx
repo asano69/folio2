@@ -28,7 +28,8 @@ function ToggleButton(props) {
 //   - open (sidebarOpen() === true): the full panel. On desktop it's an
 //     ordinary flex child, pushing the rest of the layout aside; on
 //     mobile there's no room to push content around, so it becomes a
-//     fixed overlay on top of the page instead, with a dimmed backdrop.
+//     fixed overlay on top of the page instead, with a dimmed backdrop,
+//     rather than shrinking/pushing the page underneath it.
 //   - collapsed (sidebarOpen() === false): a narrow rail with just a
 //     toggle button on desktop, so the sidebar is always reachable.
 //     On mobile, collapsed renders nothing at all -- mobile has no
@@ -48,21 +49,20 @@ export default function SideBar(props) {
     <Show
       when={isDesktop()}
       fallback={
-        <Show
-          when={sidebarOpen()}
-          fallback={
-            // sticky + top-0 keeps the toggle button pinned to the
-            // viewport while the page scrolls with the gallery content
-            // beneath it, instead of scrolling away along with it.
-            <div class="sticky top-0 z-10 flex justify-center bg-[var(--color-bg)] p-2">
-              <ToggleButton onClick={() => setSidebarOpen(true)} />
-            </div>
-          }
-        >
-          {/* sticky + h-screen (instead of h-full) pins this panel to the
-              viewport the same way, so it no longer scrolls off along
-              with the page. */}
-          <div class="sticky top-0 flex h-screen w-80 flex-col gap-4 bg-[var(--color-bg)] p-6">
+        <Show when={sidebarOpen()}>
+          {/* Backdrop: dims the page behind the overlay and closes the
+              sidebar when tapped. Fixed, so it never affects the page's
+              own layout. */}
+          <div
+            class="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setSidebarOpen(false)}
+          />
+          {/* Fixed overlay panel, stacked above the page via z-index
+              instead of pushing it aside like the desktop <aside> does.
+              When collapsed (sidebarOpen() === false), this whole <Show>
+              renders nothing -- no toggle-button rail on mobile, since
+              the sidebar is opened via NavBar's Sidebar button instead. */}
+          <div class="fixed top-0 left-0 z-50 flex h-screen w-80 flex-col gap-4 bg-[var(--color-bg)] p-6">
             <div class="flex shrink-0 items-center justify-between">
               <h2 class="text-2xl">{props.title}</h2>
               <ToggleButton onClick={() => setSidebarOpen(false)} />
