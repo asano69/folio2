@@ -6,19 +6,18 @@ import "./style.css";
 import AppRouter from "./lib/router";
 import AuthGate from "./lib/auth";
 import { ToastRegion } from "./lib/toast";
-import AppShell from "./components/layout/AppShell";
 
+// AppShell (desktop overlay panels like the Collections sidebar) is
+// mounted via AppRouter's <Router root={AppShell}>, not here -- it needs
+// to live inside the router context (see router.jsx).
 render(
   () => (
     <>
       <AuthGate>
-        <AppShell>
-          <AppRouter />
-        </AppShell>
+        <AppRouter />
       </AuthGate>
       <ToastRegion />
     </>
   ),
   document.getElementById("app"),
 );
-
