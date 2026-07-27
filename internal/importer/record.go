@@ -17,13 +17,23 @@ import (
 	"slices"
 
 	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
+	"time"
 
 	"github.com/asano69/folio/internal/errs"
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
+
+// resolveLabel picks the manifest label to use: folio.json's "title"
+// takes priority when present, otherwise the source's own label
+// (folder/archive name) is used.
+func resolveLabel(sourceLabel string, meta *folioMeta) string {
+	if meta != nil && meta.Title != "" {
+		return meta.Title
+	}
+	return sourceLabel
+}
 
 // importSource registers src as one manifest, inside a single transaction
 // so a partially-imported book is never left behind. It returns false
@@ -46,12 +56,7 @@ func importSource(app core.App, src source, result *Result) (bool, error) {
 		return false, err
 	}
 
-	// folio.json's "title" takes priority over the source's own label
-	// (folder/archive name) when present.
-	label := src.Label()
-	if meta != nil && meta.Title != "" {
-		label = meta.Title
-	}
+	label := resolveLabel(src.Label(), meta)
 
 	// Read and hash every page up front. This lets duplicate detection
 	// run before any records are created, and lets findOrCreateImage
@@ -261,41 +266,100 @@ func createManifest(app core.App, label string) (*core.Record, error) {
 	return manifest, nil
 }
 
+// bookMetadataFields holds the book_metadata field values derived from
+// legacy folio.json, before they're written onto a record. Kept separate
+// from createBookMetadata so the mapping itself can be unit tested
+// without a running PocketBase app.
+type bookMetadataFields struct {
+	ManifestID         string
+	UUID               string
+	Title              string
+	Abstract           string
+	Language           string
+	Author             []PersonName
+	Translator         []PersonName
+	Edition            string
+	Volume             string
+	Series             string
+	SeriesNumber       string
+	Publisher          string
+	Year               string
+	Note               string
+	Keywords           []string
+	ISBN               string
+	Links              []string
+	OriginalCreated    string
+	HasOriginalCreated bool
+}
+
+// toBookMetadataFields maps legacy folio.json fields onto the current
+// book_metadata schema (see docs/cbz-follio-json.md for the mapping):
+// "id" -> uuid, "origtitle" -> title (the source's own "title" instead
+// becomes manifest.label, see resolveLabel), "created_at" ->
+// original_created. "version" and "updated_at" are intentionally
+// discarded. created_at is expected in RFC3339 (see
+// docs/cbz-follio-json.md); an unparsable value is left unset rather than
+// failing the import.
+func toBookMetadataFields(manifestID string, meta *folioMeta) bookMetadataFields {
+	fields := bookMetadataFields{
+		ManifestID:   manifestID,
+		UUID:         meta.ID,
+		Title:        meta.OrigTitle,
+		Abstract:     meta.Abstract,
+		Language:     meta.Language,
+		Author:       meta.Author,
+		Translator:   meta.Translator,
+		Edition:      meta.Edition,
+		Volume:       meta.Volume,
+		Series:       meta.Series,
+		SeriesNumber: meta.SeriesNumber,
+		Publisher:    meta.Publisher,
+		Year:         meta.Year,
+		Note:         meta.Note,
+		Keywords:     meta.Keywords,
+		ISBN:         meta.ISBN,
+		Links:        meta.Links,
+	}
+
+	if _, err := time.Parse(time.RFC3339, meta.CreatedAt); err == nil {
+		fields.OriginalCreated = meta.CreatedAt
+		fields.HasOriginalCreated = true
+	}
+
+	return fields
+}
+
 // createBookMetadata creates a book_metadata record from legacy folio.json
-// data and links it to manifest. "version" and "updated_at" from the
-// legacy format are intentionally discarded (see docs/cbz-follio-json.md);
-// "id" becomes uuid, "origtitle" becomes title (the source's own "title"
-// is used for manifest.label instead, see importSource), and "created_at"
-// becomes original_created.
+// data and links it to manifest.
 func createBookMetadata(app core.App, manifest *core.Record, meta *folioMeta) error {
 	collection, err := app.FindCollectionByNameOrId("book_metadata")
 	if err != nil {
 		return errs.Newf("find book_metadata collection: %v", err)
 	}
 
-	record := core.NewRecord(collection)
-	record.Set("manifest", manifest.Id)
-	record.Set("uuid", meta.ID)
-	record.Set("title", meta.OrigTitle)
-	record.Set("abstract", meta.Abstract)
-	record.Set("language", meta.Language)
-	record.Set("author", meta.Author)
-	record.Set("translator", meta.Translator)
-	record.Set("edition", meta.Edition)
-	record.Set("volume", meta.Volume)
-	record.Set("series", meta.Series)
-	record.Set("series_number", meta.SeriesNumber)
-	record.Set("publisher", meta.Publisher)
-	record.Set("year", meta.Year)
-	record.Set("note", meta.Note)
-	record.Set("keywords", meta.Keywords)
-	record.Set("isbn", meta.ISBN)
-	record.Set("links", meta.Links)
+	fields := toBookMetadataFields(manifest.Id, meta)
 
-	if meta.CreatedAt != "" {
-		if dt, err := types.ParseDateTime(meta.CreatedAt); err == nil {
-			record.Set("original_created", dt)
-		}
+	record := core.NewRecord(collection)
+	record.Set("manifest", fields.ManifestID)
+	record.Set("uuid", fields.UUID)
+	record.Set("title", fields.Title)
+	record.Set("abstract", fields.Abstract)
+	record.Set("language", fields.Language)
+	record.Set("author", fields.Author)
+	record.Set("translator", fields.Translator)
+	record.Set("edition", fields.Edition)
+	record.Set("volume", fields.Volume)
+	record.Set("series", fields.Series)
+	record.Set("series_number", fields.SeriesNumber)
+	record.Set("publisher", fields.Publisher)
+	record.Set("year", fields.Year)
+	record.Set("note", fields.Note)
+	record.Set("keywords", fields.Keywords)
+	record.Set("isbn", fields.ISBN)
+	record.Set("links", fields.Links)
+	// PocketBase's date field accepts an RFC3339 string directly.
+	if fields.HasOriginalCreated {
+		record.Set("original_created", fields.OriginalCreated)
 	}
 
 	if err := app.Save(record); err != nil {
