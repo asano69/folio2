@@ -1,7 +1,9 @@
+import { A } from "@solidjs/router";
 import { Show } from "solid-js";
 import PanelLeft from "lucide-solid/icons/panel-left";
 import { isDesktop } from "../../lib/viewport";
 import { sidebarOpen, setSidebarOpen } from "./uiState";
+import Logo from "../Logo";
 
 // Icon-only toggle button shared by the desktop rail and the panel
 // header. Plain <button> (not Kobalte's Button) so it can get its own
@@ -12,7 +14,7 @@ function ToggleButton(props) {
       type="button"
       onClick={props.onClick}
       aria-label="Toggle sidebar"
-      class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+      class={`icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)] ${props.class ?? ""}`}
     >
       <PanelLeft size={20} />
     </button>
@@ -84,17 +86,27 @@ export default function SideBar(props) {
           "w-12": !sidebarOpen(),
         }}
       >
-        {/* Fixed header row: the toggle button is always the first item
-            here, at the same p-2 offset, so it never moves when the
-            sidebar opens/closes. The title label is a separate element
-            that only appears next to it once open. */}
+        {/* Header row: the brand logo appears only once open, left-aligned;
+            the toggle button is pushed to the right edge via ml-auto, so it
+            slides along with the growing/shrinking width instead of staying
+            fixed on the left. The title label moves to its own row below,
+            once open. */}
         <div class="flex items-center gap-2 p-2">
-          <ToggleButton onClick={() => setSidebarOpen(!sidebarOpen())} />
           <Show when={sidebarOpen()}>
-            <h2 class="truncate text-2xl">{props.title}</h2>
+            <A
+              href="/"
+              class="group flex items-center gap-2 transition-opacity hover:opacity-60 hover:scale-[1.02]"
+            >
+              <div class="logo text-xl font-serif  mx-2">folio</div>
+            </A>
           </Show>
+          <ToggleButton
+            onClick={() => setSidebarOpen(!sidebarOpen())}
+            class="ml-auto"
+          />
         </div>
         <Show when={sidebarOpen()}>
+          <h2 class="truncate px-6 pt-2 text-2xl">{props.title}</h2>
           <div class="flex w-80 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
             {props.children}
           </div>
