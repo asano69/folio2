@@ -36,8 +36,12 @@ function ToggleButton(props) {
 //
 // On desktop the rail and the open panel are the same <aside>, whose
 // width is animated with a CSS transition, so toggling slides smoothly
-// instead of cutting instantly between the two states. Mobile keeps its
-// own fixed-overlay markup, since it isn't part of that width animation.
+// instead of cutting instantly between the two states. The toggle button
+// always lives in its own fixed top-left row (separate from the title
+// label and from props.children), so its position never shifts between
+// the collapsed and open states -- only the label/content next to it are
+// conditionally shown. Mobile keeps its own fixed-overlay markup, since
+// it isn't part of that width animation.
 export default function SideBar(props) {
   return (
     <Show
@@ -65,19 +69,18 @@ export default function SideBar(props) {
           "w-12": !sidebarOpen(),
         }}
       >
-        <Show
-          when={sidebarOpen()}
-          fallback={
-            <div class="flex justify-center p-2">
-              <ToggleButton onClick={() => setSidebarOpen(true)} />
-            </div>
-          }
-        >
-          <div class="flex h-screen w-80 flex-col gap-4 overflow-y-auto p-6">
-            <div class="flex items-center justify-between">
-              <h2 class="text-2xl">{props.title}</h2>
-              <ToggleButton onClick={() => setSidebarOpen(false)} />
-            </div>
+        {/* Fixed header row: the toggle button is always the first item
+            here, at the same p-2 offset, so it never moves when the
+            sidebar opens/closes. The title label is a separate element
+            that only appears next to it once open. */}
+        <div class="flex items-center gap-2 p-2">
+          <ToggleButton onClick={() => setSidebarOpen(!sidebarOpen())} />
+          <Show when={sidebarOpen()}>
+            <h2 class="truncate text-2xl">{props.title}</h2>
+          </Show>
+        </div>
+        <Show when={sidebarOpen()}>
+          <div class="flex w-80 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
             {props.children}
           </div>
         </Show>
