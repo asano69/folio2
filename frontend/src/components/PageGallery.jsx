@@ -27,12 +27,9 @@ export default function PageGallery(props) {
   const openViewer = async (index) => {
     const { default: PhotoSwipe } = await import("photoswipe");
     await import("photoswipe/style.css");
-    const { default: PhotoSwipeDynamicCaption } = await import(
-      "photoswipe-dynamic-caption-plugin"
-    );
-    await import(
-      "photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css"
-    );
+    const { default: PhotoSwipeDynamicCaption } =
+      await import("photoswipe-dynamic-caption-plugin");
+    await import("photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css");
 
     const dataSource = props.images.map((item) => ({
       src: pb.files.getURL(item.image, item.image.image),

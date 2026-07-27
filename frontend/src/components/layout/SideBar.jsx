@@ -47,18 +47,24 @@ export default function SideBar(props) {
     <Show
       when={isDesktop()}
       fallback={
-        <Show when={sidebarOpen()}>
-          <div
-            class="fixed inset-0 z-[100000] bg-black/30"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <aside class="fixed inset-y-0 left-0 z-[100001] flex h-screen w-80 flex-col gap-4 overflow-y-auto border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] p-6">
-            <div class="flex items-center justify-between">
+        <Show
+          when={sidebarOpen()}
+          fallback={
+            <div class="flex justify-center p-2">
+              <ToggleButton onClick={() => setSidebarOpen(true)} />
+            </div>
+          }
+        >
+          <div class="flex h-full w-80 flex-col gap-4 p-6">
+            <div class="flex shrink-0 items-center justify-between">
               <h2 class="text-2xl">{props.title}</h2>
               <ToggleButton onClick={() => setSidebarOpen(false)} />
             </div>
-            {props.children}
-          </aside>
+            {/* Scrolls independently of the header above, so the toggle
+                button stays fixed in place instead of scrolling out of
+                view along with the list. */}
+            <div class="min-h-0 flex-1 overflow-y-auto">{props.children}</div>
+          </div>
         </Show>
       }
     >
