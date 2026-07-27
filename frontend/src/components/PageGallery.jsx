@@ -1,6 +1,7 @@
 // frontend/src/components/PageGallery.jsx
 import { For, onMount, createSignal, Show } from "solid-js";
 import { Image } from "@kobalte/core/image";
+import ImageIcon from "lucide-solid/icons/image";
 import pb from "../lib/pb";
 import NoteEditor from "./NoteEditor";
 
@@ -143,7 +144,9 @@ export default function PageGallery(props) {
                 })}
                 alt=""
               />
-              <Image.Fallback>🖼️</Image.Fallback>
+              <Image.Fallback class="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
+                <ImageIcon size={36} strokeWidth={1.5} />
+              </Image.Fallback>
             </Image>
           )}
         </For>
