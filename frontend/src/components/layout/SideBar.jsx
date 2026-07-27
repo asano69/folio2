@@ -1,7 +1,23 @@
 import { Show } from "solid-js";
-import { Button } from "@kobalte/core/button";
+import PanelLeft from "lucide-solid/icons/panel-left";
 import { isDesktop } from "../../lib/viewport";
 import { sidebarOpen, setSidebarOpen } from "./uiState";
+
+// Icon-only toggle button shared by the desktop rail and the panel
+// header. Plain <button> (not Kobalte's Button) so it can get its own
+// compact hover style instead of the global bordered button look.
+function ToggleButton(props) {
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      aria-label="Toggle sidebar"
+      class="cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+    >
+      <PanelLeft size={20} />
+    </button>
+  );
+}
 
 // Generic sidebar panel. What it shows is entirely up to the caller via
 // `children` -- today that's CollectionSidebar, but it could just as
@@ -17,35 +33,54 @@ import { sidebarOpen, setSidebarOpen } from "./uiState";
 //     On mobile, collapsed renders nothing at all -- mobile has no
 //     persistent chrome, and opens the sidebar via NavBar's Sidebar
 //     button instead.
+//
+// On desktop the rail and the open panel are the same <aside>, whose
+// width is animated with a CSS transition, so toggling slides smoothly
+// instead of cutting instantly between the two states. Mobile keeps its
+// own fixed-overlay markup, since it isn't part of that width animation.
 export default function SideBar(props) {
   return (
     <Show
-      when={sidebarOpen()}
+      when={isDesktop()}
       fallback={
-        <Show when={isDesktop()}>
-          <div class="flex h-screen w-12 shrink-0 flex-col items-center border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] p-2">
-            <Button onClick={() => setSidebarOpen(true)}>›</Button>
-          </div>
+        <Show when={sidebarOpen()}>
+          <div
+            class="fixed inset-0 z-[100000] bg-black/30"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside class="fixed inset-y-0 left-0 z-[100001] flex h-screen w-80 flex-col gap-4 overflow-y-auto border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] p-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl">{props.title}</h2>
+              <ToggleButton onClick={() => setSidebarOpen(false)} />
+            </div>
+            {props.children}
+          </aside>
         </Show>
       }
     >
-      <Show when={!isDesktop()}>
-        <div
-          class="fixed inset-0 z-[100000] bg-black/30"
-          onClick={() => setSidebarOpen(false)}
-        />
-      </Show>
       <aside
         classList={{
-          "flex h-screen w-80 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] p-6": true,
-          "fixed inset-y-0 left-0 z-[100001]": !isDesktop(),
+          "flex h-screen shrink-0 flex-col overflow-hidden border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] transition-[width] duration-300 ease-in-out": true,
+          "w-80": sidebarOpen(),
+          "w-12": !sidebarOpen(),
         }}
       >
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl">{props.title}</h2>
-          <Button onClick={() => setSidebarOpen(false)}>‹</Button>
-        </div>
-        {props.children}
+        <Show
+          when={sidebarOpen()}
+          fallback={
+            <div class="flex justify-center p-2">
+              <ToggleButton onClick={() => setSidebarOpen(true)} />
+            </div>
+          }
+        >
+          <div class="flex h-screen w-80 flex-col gap-4 overflow-y-auto p-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl">{props.title}</h2>
+              <ToggleButton onClick={() => setSidebarOpen(false)} />
+            </div>
+            {props.children}
+          </div>
+        </Show>
       </aside>
     </Show>
   );
