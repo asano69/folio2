@@ -5,7 +5,7 @@ import Library from "lucide-solid/icons/library";
 import pb from "../../lib/pb";
 import { fetchCollections } from "../../lib/collections";
 import Loading from "../Loading";
-import { setCollectionsSidebarOpen } from "./uiState";
+import { setSidebarOpen } from "./uiState";
 
 // Desktop-only sidebar list of collections, shown as a left-side overlay
 // panel by AppShell (see uiState.js / AppShell.jsx). Kept as its own
@@ -27,7 +27,7 @@ export default function CollectionSidebar() {
             <li>
               <A
                 href={`/collections/${collection.id}`}
-                onClick={() => setCollectionsSidebarOpen(false)}
+                onClick={() => setSidebarOpen(false)}
                 class="flex items-center gap-3 rounded-md p-2 hover:bg-[var(--color-hover-bg)]"
               >
                 <Image class="h-12 w-12 shrink-0 overflow-hidden rounded border">

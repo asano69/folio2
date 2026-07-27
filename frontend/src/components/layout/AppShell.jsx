@@ -1,15 +1,13 @@
-import { Show } from "solid-js";
 import NavBar from "../NavBar";
-import { isDesktop } from "../../lib/viewport";
-import { collectionsSidebarOpen, setCollectionsSidebarOpen } from "./uiState";
+import SideBar from "./SideBar";
 import CollectionSidebar from "./CollectionSidebar";
 
 // Wraps every route so NavBar renders once regardless of page (it's
-// global chrome, not something that should vary per route), and so
-// desktop-only overlay panels can render on top of whichever page is
-// currently active, without each route needing to know about them. On
-// mobile the overlay below renders nothing extra: Collections there is
-// just the normal /collections route (see NavBar).
+// global chrome, not something that should vary per route), and so the
+// overlay sidebar panel can render on top of whichever page is currently
+// active, without each route needing to know about it. What the sidebar
+// shows is decided here; today that's CollectionSidebar, but the panel
+// itself (SideBar) doesn't know or care what's inside it.
 export default function AppShell(props) {
   return (
     <>
@@ -17,16 +15,9 @@ export default function AppShell(props) {
         <NavBar />
       </div>
       {props.children}
-      <Show when={isDesktop() && collectionsSidebarOpen()}>
-        <div
-          class="fixed inset-0 z-[100000] bg-black/30"
-          onClick={() => setCollectionsSidebarOpen(false)}
-        />
-        <aside class="fixed top-0 left-0 z-[100001] flex h-screen w-80 flex-col gap-4 overflow-y-auto border-r border-[var(--color-border-soft)] bg-[var(--color-bg)] p-6">
-          <h2 class="text-2xl">Collections</h2>
-          <CollectionSidebar />
-        </aside>
-      </Show>
+      <SideBar title="Collections">
+        <CollectionSidebar />
+      </SideBar>
     </>
   );
 }
