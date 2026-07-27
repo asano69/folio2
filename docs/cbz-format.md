@@ -1,22 +1,4 @@
-## Storage Strategy
-
-### Library Layout
-
-The library root is specified via the `FOLIO_LIBRARY_PATH` environment variable.
-Subdirectories are purely for the user's own organization and carry no meaning to the application.
-Scanning is recursive: all `.cbz` files found under the library root are registered.
-
-```
-library/
-├── manga/
-│   ├── book-a.cbz
-│   └── book-b.cbz
-├── technical/
-│   └── book-c.cbz
-└── book-d.cbz
-```
-
-### CBZ Format
+## CBZ Format
 
 CBZ is a ZIP archive. Page images and a `folio.json` file are stored at the root of the archive.
 Using `folio.json` rather than a generic name like `metadata.json` avoids conflicts with other
