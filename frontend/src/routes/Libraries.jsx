@@ -2,17 +2,12 @@ import { For, Show, createResource } from "solid-js";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../lib/pb";
+import { fetchLibraries } from "../lib/libraries";
 import Loading from "../components/Loading";
 
 // Fixed thumbnail size for every library card, matching Collections.jsx.
 const THUMB_WIDTH = 250;
 const THUMB_HEIGHT = 200;
-
-// Unlike collections (sorted by -created), libraries have an explicit
-// "position" field for manual ordering, so that's used here instead.
-async function fetchLibraries() {
-  return pb.collection("libraries").getFullList({ sort: "position" });
-}
 
 export default function Libraries() {
   const [libraries] = createResource(fetchLibraries);
