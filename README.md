@@ -94,6 +94,18 @@ The schema was developed with reference to [IIIF Presentation API 3.0](https://i
 - CBZファイル、ZIPファイル
 
 
+## Configuration
+
+All configuration is via environment variables. Defaults match `folio.env`.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FOLIO_SERVER_HOST` | `0.0.0.0` | Server bind address |
+| `FOLIO_SERVER_PORT` | `3000` | Server port |
+| `FOLIO_IMPORT_DIR` | `./import` | import dir |
+
+
+
 ## Tech Stack
 
 ### Frontend
