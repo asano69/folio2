@@ -34,6 +34,20 @@ func newFolderSource(path, label string) *folderSource {
 
 func (s *folderSource) Label() string { return s.label }
 
+// Meta reads folio.json from directly inside the book folder, if present.
+func (s *folderSource) Meta() (*folioMeta, error) {
+	f, err := os.Open(filepath.Join(s.path, metaFileName))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, errs.Newf("open %s: %v", metaFileName, err)
+	}
+	defer func() { _ = f.Close() }()
+
+	return decodeFolioMeta(f)
+}
+
 func (s *folderSource) Pages() ([]sourcePage, error) {
 	entries, err := os.ReadDir(s.path)
 	if err != nil {

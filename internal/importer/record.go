@@ -22,6 +22,7 @@ import (
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 // importSource registers src as one manifest, inside a single transaction
@@ -36,6 +37,20 @@ func importSource(app core.App, src source, result *Result) (bool, error) {
 	}
 	if len(pages) == 0 {
 		return false, nil
+	}
+
+	// meta is the legacy folio.json content, if any. A malformed file
+	// fails the whole item's import rather than being silently ignored.
+	meta, err := src.Meta()
+	if err != nil {
+		return false, err
+	}
+
+	// folio.json's "title" takes priority over the source's own label
+	// (folder/archive name) when present.
+	label := src.Label()
+	if meta != nil && meta.Title != "" {
+		label = meta.Title
 	}
 
 	// Read and hash every page up front. This lets duplicate detection
@@ -63,9 +78,15 @@ func importSource(app core.App, src source, result *Result) (bool, error) {
 	}
 
 	err = app.RunInTransaction(func(txApp core.App) error {
-		manifest, err := createManifest(txApp, src.Label())
+		manifest, err := createManifest(txApp, label)
 		if err != nil {
 			return err
+		}
+
+		if meta != nil {
+			if err := createBookMetadata(txApp, manifest, meta); err != nil {
+				return err
+			}
 		}
 
 		// position is 0-based, so the first page gets position=0.
@@ -238,6 +259,49 @@ func createManifest(app core.App, label string) (*core.Record, error) {
 		return nil, errs.Newf("save manifest record: %v", err)
 	}
 	return manifest, nil
+}
+
+// createBookMetadata creates a book_metadata record from legacy folio.json
+// data and links it to manifest. "version" and "updated_at" from the
+// legacy format are intentionally discarded (see docs/cbz-follio-json.md);
+// "id" becomes uuid, "origtitle" becomes title (the source's own "title"
+// is used for manifest.label instead, see importSource), and "created_at"
+// becomes original_created.
+func createBookMetadata(app core.App, manifest *core.Record, meta *folioMeta) error {
+	collection, err := app.FindCollectionByNameOrId("book_metadata")
+	if err != nil {
+		return errs.Newf("find book_metadata collection: %v", err)
+	}
+
+	record := core.NewRecord(collection)
+	record.Set("manifest", manifest.Id)
+	record.Set("uuid", meta.ID)
+	record.Set("title", meta.OrigTitle)
+	record.Set("abstract", meta.Abstract)
+	record.Set("language", meta.Language)
+	record.Set("author", meta.Author)
+	record.Set("translator", meta.Translator)
+	record.Set("edition", meta.Edition)
+	record.Set("volume", meta.Volume)
+	record.Set("series", meta.Series)
+	record.Set("series_number", meta.SeriesNumber)
+	record.Set("publisher", meta.Publisher)
+	record.Set("year", meta.Year)
+	record.Set("note", meta.Note)
+	record.Set("keywords", meta.Keywords)
+	record.Set("isbn", meta.ISBN)
+	record.Set("links", meta.Links)
+
+	if meta.CreatedAt != "" {
+		if dt, err := types.ParseDateTime(meta.CreatedAt); err == nil {
+			record.Set("original_created", dt)
+		}
+	}
+
+	if err := app.Save(record); err != nil {
+		return errs.Newf("save book_metadata record: %v", err)
+	}
+	return nil
 }
 
 // createPage creates a new pages record pointing at the given image.

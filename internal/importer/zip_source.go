@@ -27,6 +27,33 @@ func newZipSource(path, label string) *zipSource {
 
 func (s *zipSource) Label() string { return s.label }
 
+// Meta reads folio.json from the archive root, if present.
+func (s *zipSource) Meta() (*folioMeta, error) {
+	r, err := zip.OpenReader(s.path)
+	if err != nil {
+		return nil, errs.Newf("open archive: %v", err)
+	}
+	defer func() { _ = r.Close() }()
+
+	for _, f := range r.File {
+		if f.FileInfo().IsDir() || strings.ContainsRune(f.Name, '/') {
+			continue
+		}
+		if f.Name != metaFileName {
+			continue
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return nil, errs.Newf("open archive entry %q: %v", f.Name, err)
+		}
+		defer func() { _ = rc.Close() }()
+
+		return decodeFolioMeta(rc)
+	}
+	return nil, nil
+}
+
 // Pages opens the archive, reads every root-level image entry fully into
 // memory, then closes the archive before returning. This keeps
 // sourcePage.Open simple (a plain byte reader, no archive handle to keep

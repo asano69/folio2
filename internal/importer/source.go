@@ -14,6 +14,9 @@ type source interface {
 	// Pages returns the book's pages in order, already filtered to
 	// recognised image extensions and sorted by name.
 	Pages() ([]sourcePage, error)
+	// Meta returns the legacy folio.json metadata for this source, or nil
+	// if no such file is present.
+	Meta() (*folioMeta, error)
 }
 
 // sourcePage is one page within a source: a name (used for
