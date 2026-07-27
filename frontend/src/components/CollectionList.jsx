@@ -3,18 +3,12 @@ import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import Library from "lucide-solid/icons/library";
 import pb from "../lib/pb";
+import { fetchCollections } from "../lib/collections";
 import Loading from "./Loading";
 
 // Fixed thumbnail size for every collection card.
 const THUMB_WIDTH = 250;
 const THUMB_HEIGHT = 200;
-
-// Fetches all collections so Collections can link into /collections/:id.
-// Unlike manifests, collections have their own `cover` file field, so no
-// borrowing from a related record is needed here.
-async function fetchCollections() {
-  return pb.collection("collections").getFullList({ sort: "-created" });
-}
 
 export default function CollectionList() {
   const [collections] = createResource(fetchCollections);
