@@ -15,6 +15,9 @@ export default function NavBar() {
         <A href="/collections" class="btn-link">
           Collections
         </A>
+        <A href="/libraries" class="btn-link">
+          Libraries
+        </A>
         <A href="/stats" class="btn-link">
           Stats
         </A>

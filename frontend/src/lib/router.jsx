@@ -4,6 +4,7 @@ import Home from "../routes/Home";
 import ManifestViewer from "../routes/ManifestViewer";
 import Collections from "../routes/Collections";
 import CollectionViewer from "../routes/CollectionViewer";
+import Libraries from "../routes/Libraries";
 import Settings from "../routes/Settings";
 import Stats from "../routes/Stats";
 import AppShell from "../components/layout/AppShell";
@@ -23,6 +24,7 @@ export default function AppRouter() {
       <Route path="/manifests/:id" component={ManifestViewer} />
       <Route path="/collections" component={Collections} />
       <Route path="/collections/:id" component={CollectionViewer} />
+      <Route path="/libraries" component={Libraries} />
       <Route path="/settings" component={Settings} />
       <Route path="/stats" component={Stats} />
     </Router>
