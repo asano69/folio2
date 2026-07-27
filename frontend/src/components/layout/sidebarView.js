@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import pb from "./pb";
+import pb from "../../lib/pb";
 
 // Key used to store this preference as a single row in the (generic)
 // "settings" collection, alongside any other app-wide preference that

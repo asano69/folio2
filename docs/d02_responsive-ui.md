@@ -14,7 +14,10 @@
 
 ## 状態管理
 - デスクトップ限定のオーバーレイパネルの開閉状態は
-  `frontend/src/lib/uiState.js` にシグナルとして持つ。
+  `frontend/src/components/layout/uiState.js` にシグナルとして持つ。
+- サイドバーがどのリスト（Collections/Libraries）を表示するかは
+  `frontend/src/components/layout/sidebarView.js` にシグナルとして持ち、
+  `settings` コレクションに永続化される。
 - これらのシグナルは `AppShell`
   (`frontend/src/components/layout/AppShell.jsx`) が購読し、
   `isDesktop()` が真のときだけオーバーレイを描画する。

@@ -1,6 +1,6 @@
 import { Select } from "@kobalte/core/select";
 import ChevronDown from "lucide-solid/icons/chevron-down";
-import { sidebarView, setSidebarView } from "../../lib/sidebarView";
+import { sidebarView, setSidebarView } from "./sidebarView";
 
 // Options shown in the switcher, keyed by the values lib/sidebarView.js
 // stores and understands.

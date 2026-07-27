@@ -4,7 +4,7 @@ import SideBar from "./SideBar";
 import CollectionSidebar from "./CollectionSidebar";
 import LibrarySidebar from "./LibrarySidebar";
 import SidebarViewSelect from "./SidebarViewSelect";
-import { sidebarView, loadSidebarView } from "../../lib/sidebarView";
+import { sidebarView, loadSidebarView } from "./sidebarView";
 
 // Wraps every route so NavBar renders once regardless of page (it's
 // global chrome, not something that should vary per route). SideBar is
