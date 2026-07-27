@@ -60,7 +60,7 @@ func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
 
 	for i, name := range names {
 		if onProgress != nil {
-			onProgress(Progress{Total: total, Processed: i, Message: "importing: " + name})
+			onProgress(Progress{Total: total, Processed: i + 1, Message: "importing: " + name})
 		}
 
 		src, err := newSource(filepath.Join(dir, name), name)
@@ -106,7 +106,7 @@ func ImportPaths(app core.App, paths []string, onProgress func(Progress)) (*Resu
 	for i, path := range items {
 		label := filepath.Base(path)
 		if onProgress != nil {
-			onProgress(Progress{Total: total, Processed: i, Message: "importing: " + label})
+			onProgress(Progress{Total: total, Processed: i + 1, Message: "importing: " + label})
 		}
 
 		src, err := newSource(path, label)
