@@ -129,7 +129,8 @@ All configuration is via environment variables.
 - Style: Tailwind v4
 - Icon: Lucide
 - NoteEditor: Slab/Quill v2
-- ImageViewer: [PhotoSwipe](https://github.com/dimsemenov/photoswipe) v5.4+
+- ImageViewer: [PhotoSwipe](https://github.com/dimsemenov/photoswipe) v5.4+ [photoswipe-dynamic-caption-plugin](https://deepwiki.com/dimsemenov/photoswipe-dynamic-caption-plugin)
+- 
 
 ### Backend
 - Go
