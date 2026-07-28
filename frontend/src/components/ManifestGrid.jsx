@@ -2,7 +2,9 @@ import { For } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import BookOpen from "lucide-solid/icons/book-open";
+import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
+import { DRAG_TYPE_MANIFEST_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size so every cover lines up in a neat grid regardless
 // of each source image's own aspect ratio.
@@ -18,11 +20,24 @@ export default function ManifestGrid(props) {
   return (
     <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
       <For each={props.manifests}>
-        {(manifest) => (
+        {(manifest) => {
+          // Draggable onto a CollectionSidebar row (see lib/classification.js)
+          // to add this manifest to that collection. dnd-kit's default
+          // activation distance keeps a plain tap/click still working as
+          // navigation.
+          const draggable = useDraggable({
+            id: `manifest-${manifest.id}`,
+            data: { type: DRAG_TYPE_MANIFEST_ID, manifestId: manifest.id },
+          });
+          return (
           <A
+            ref={draggable.ref}
             href={`/manifests/${manifest.id}`}
             class="flex flex-col gap-2"
-            style={{ width: `${THUMB_WIDTH}px` }}
+            style={{
+              width: `${THUMB_WIDTH}px`,
+              opacity: draggable.isDragging() ? 0.5 : 1,
+            }}
           >
             <Image
               class="overflow-hidden rounded border"
@@ -49,7 +64,8 @@ export default function ManifestGrid(props) {
             </Image>
             <span class="truncate text-sm">{manifest.label}</span>
           </A>
-        )}
+          );
+        }}
       </For>
     </div>
   );

@@ -2,8 +2,10 @@ import { For, createResource } from "solid-js";
 import { A, useParams } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
+import { useDraggable } from "@dnd-kit/solid";
 import ViewerPage from "../components/ViewerPage";
 import pb from "../lib/pb";
+import { DRAG_TYPE_COLLECTION_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size for every collection card, matching Collections.jsx.
 const THUMB_WIDTH = 250;
@@ -36,11 +38,20 @@ export default function LibraryViewer() {
       <h1 class="text-4xl">{data().label}</h1>
       <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
         <For each={data().collections}>
-          {(collection) => (
+          {(collection) => {
+            const draggable = useDraggable({
+              id: `collection-${collection.id}`,
+              data: { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
+            });
+            return (
             <A
+              ref={draggable.ref}
               href={`/collections/${collection.id}`}
               class="flex flex-col gap-2"
-              style={{ width: `${THUMB_WIDTH}px` }}
+              style={{
+                width: `${THUMB_WIDTH}px`,
+                opacity: draggable.isDragging() ? 0.5 : 1,
+              }}
             >
               <Image
                 class="overflow-hidden rounded border"
@@ -66,7 +77,8 @@ export default function LibraryViewer() {
               </Image>
               <span class="truncate text-sm">{collection.label}</span>
             </A>
-          )}
+            );
+          }}
         </For>
       </div>
     </ViewerPage>

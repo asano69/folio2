@@ -5,6 +5,7 @@ import { fetchCollections } from "../../lib/collections";
 import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
 import { setSidebarOpen } from "./uiState";
+import { DROP_TARGET_COLLECTION } from "../../lib/dragTypes";
 
 const THUMB_SIZE = 48;
 
@@ -34,6 +35,12 @@ export default function CollectionSidebar() {
           : null
       }
       getLabel={(collection) => collection.label}
+      getDropId={(collection) => `collection-${collection.id}`}
+      getDropData={(collection) => ({
+        type: DROP_TARGET_COLLECTION,
+        collectionId: collection.id,
+        label: collection.label,
+      })}
       // Only close the mobile overlay on navigation. On desktop the
       // sidebar is a persistent rail, so it should stay open.
       itemProps={() => ({

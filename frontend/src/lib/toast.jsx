@@ -12,6 +12,18 @@ export function showError(message) {
   ));
 }
 
+// Same shell as showError, used for positive confirmations (e.g. a
+// drag-and-drop classification succeeding -- see lib/classification.js),
+// so callers don't need to invent their own ad hoc toast each time.
+export function showSuccess(message) {
+  toaster.show((props) => (
+    <Toast toastId={props.toastId} class="rounded-md border p-4">
+      <Toast.Description>{message}</Toast.Description>
+      <Toast.CloseButton>×</Toast.CloseButton>
+    </Toast>
+  ));
+}
+
 // Mounted once near the root of the app (see main.jsx); renders whatever
 // toasts are currently active via showError() above.
 export function ToastRegion() {

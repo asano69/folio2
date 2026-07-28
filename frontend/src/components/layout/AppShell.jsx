@@ -1,10 +1,12 @@
 import { onMount, Show } from "solid-js";
+import { DragDropProvider } from "@dnd-kit/solid";
 import NavBar from "../NavBar";
 import SideBar from "./SideBar";
 import CollectionSidebar from "./CollectionSidebar";
 import LibrarySidebar from "./LibrarySidebar";
 import SidebarViewSelect from "./SidebarViewSelect";
 import { sidebarView, loadSidebarView } from "./sidebarView";
+import { handleClassificationDrop } from "../../lib/classification";
 
 // Wraps every route so NavBar renders once regardless of page (it's
 // global chrome, not something that should vary per route). SideBar is
@@ -17,22 +19,29 @@ import { sidebarView, loadSidebarView } from "./sidebarView";
 export default function AppShell(props) {
   onMount(loadSidebarView);
 
+  // A single provider wraps both the sidebar (drop targets) and the
+  // routed content (drag sources), so classification drags work
+  // regardless of which sidebar view is active. See
+  // lib/classification.js for what happens on drop, and
+  // lib/dragTypes.js for the payload vocabulary.
   return (
-    <div class="flex min-h-screen w-full">
-      <SideBar title={<SidebarViewSelect />}>
-        <Show when={sidebarView() === "collections"}>
-          <CollectionSidebar />
-        </Show>
-        <Show when={sidebarView() === "libraries"}>
-          <LibrarySidebar />
-        </Show>
-      </SideBar>
-      <div class="min-w-0 flex-1">
-        <div class="mx-auto w-full max-w-4xl px-6 pt-12">
-          <NavBar />
+    <DragDropProvider onDragEnd={handleClassificationDrop}>
+      <div class="flex min-h-screen w-full">
+        <SideBar title={<SidebarViewSelect />}>
+          <Show when={sidebarView() === "collections"}>
+            <CollectionSidebar />
+          </Show>
+          <Show when={sidebarView() === "libraries"}>
+            <LibrarySidebar />
+          </Show>
+        </SideBar>
+        <div class="min-w-0 flex-1">
+          <div class="mx-auto w-full max-w-4xl px-6 pt-12">
+            <NavBar />
+          </div>
+          {props.children}
         </div>
-        {props.children}
       </div>
-    </div>
+    </DragDropProvider>
   );
 }

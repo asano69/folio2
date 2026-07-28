@@ -5,6 +5,7 @@ import { fetchLibraries } from "../../lib/libraries";
 import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
 import { setSidebarOpen } from "./uiState";
+import { DROP_TARGET_LIBRARY } from "../../lib/dragTypes";
 
 const THUMB_SIZE = 48;
 
@@ -35,6 +36,12 @@ export default function LibrarySidebar() {
           : null
       }
       getLabel={(library) => library.label}
+      getDropId={(library) => `library-${library.id}`}
+      getDropData={(library) => ({
+        type: DROP_TARGET_LIBRARY,
+        libraryId: library.id,
+        label: library.label,
+      })}
       // Only close the mobile overlay on navigation. On desktop the
       // sidebar is a persistent rail, so it should stay open.
       itemProps={() => ({

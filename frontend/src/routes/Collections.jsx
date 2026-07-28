@@ -2,10 +2,12 @@ import { For, Show, createResource } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
+import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
 import { fetchCollections } from "../lib/collections";
 import Loading from "../components/Loading";
 import CreateEntityButton from "../components/CreateEntityButton";
+import { DRAG_TYPE_COLLECTION_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size for every collection card.
 const THUMB_WIDTH = 250;
@@ -26,11 +28,22 @@ export default function Collections() {
       <Show when={collections()} fallback={<Loading />}>
         <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
           <For each={collections()}>
-            {(collection) => (
+            {(collection) => {
+              // Draggable onto a LibrarySidebar row to add this collection
+              // to that library (see lib/classification.js).
+              const draggable = useDraggable({
+                id: `collection-${collection.id}`,
+                data: { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
+              });
+              return (
               <A
+                ref={draggable.ref}
                 href={`/collections/${collection.id}`}
                 class="flex flex-col gap-2"
-                style={{ width: `${THUMB_WIDTH}px` }}
+                style={{
+                  width: `${THUMB_WIDTH}px`,
+                  opacity: draggable.isDragging() ? 0.5 : 1,
+                }}
               >
                 <Image
                   class="overflow-hidden rounded border"
@@ -56,7 +69,8 @@ export default function Collections() {
                 </Image>
                 <span class="truncate text-sm">{collection.label}</span>
               </A>
-            )}
+              );
+            }}
           </For>
         </div>
       </Show>

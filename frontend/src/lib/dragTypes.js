@@ -1,9 +1,11 @@
-// Custom drag-and-drop data types, shared between whatever eventually
-// becomes a drag source (e.g. a manifest or collection card) and a drop
-// target (e.g. a CollectionSidebar/LibrarySidebar row), so both sides
-// agree on the same format. Nothing sets or reads these yet -- this only
-// reserves the vocabulary so wiring up drag-and-drop later (dropping a
-// manifest onto a collection, or a collection onto a library) doesn't
-// require inventing a new format at the same time.
+// Drag-and-drop payload types shared between drag sources (ManifestGrid,
+// Collections/LibraryViewer cards) and drop targets (CollectionSidebar /
+// LibrarySidebar rows, via SidebarList), so both sides agree on the same
+// vocabulary. Used as the `type` field of each @dnd-kit/solid draggable's
+// and droppable's `data`, so lib/classification.js can dispatch on it
+// without depending on the id format.
 export const DRAG_TYPE_MANIFEST_ID = "application/x-folio-manifest-id";
 export const DRAG_TYPE_COLLECTION_ID = "application/x-folio-collection-id";
+
+export const DROP_TARGET_COLLECTION = "collection";
+export const DROP_TARGET_LIBRARY = "library";
