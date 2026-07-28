@@ -1,5 +1,8 @@
 import { Show } from "solid-js";
+import { A } from "@solidjs/router";
 import PanelLeft from "lucide-solid/icons/panel-left";
+import LibraryIcon from "lucide-solid/icons/library";
+import LandmarkIcon from "lucide-solid/icons/landmark";
 import { isDesktop } from "../../lib/viewport";
 import { sidebarOpen, setSidebarOpen } from "./uiState";
 import Logo from "../Logo";
@@ -17,6 +20,21 @@ function ToggleButton(props) {
     >
       <PanelLeft size={20} />
     </button>
+  );
+}
+
+// Icon-only link shared by the collapsed rail's quick links to
+// Collections and Libraries, styled the same way as ToggleButton so both
+// rows of icons line up.
+function NavIconLink(props) {
+  return (
+    <A
+      href={props.href}
+      aria-label={props.label}
+      class="icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+    >
+      <props.icon size={20} />
+    </A>
   );
 }
 
@@ -115,6 +133,15 @@ export default function SideBar(props) {
             class="ml-auto"
           />
         </div>
+        {/* Collapsed-only quick links to Collections/Libraries (moved
+            here from NavBar), so they stay reachable while the panel
+            itself is collapsed to a narrow rail. */}
+        <Show when={!sidebarOpen()}>
+          <div class="flex flex-col items-center gap-1">
+            <NavIconLink href="/collections" label="Collections" icon={LibraryIcon} />
+            <NavIconLink href="/libraries" label="Libraries" icon={LandmarkIcon} />
+          </div>
+        </Show>
         <Show when={sidebarOpen()}>
           <div class="flex w-80 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
             {props.children}
