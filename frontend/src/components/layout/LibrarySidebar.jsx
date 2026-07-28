@@ -2,6 +2,7 @@ import { createResource } from "solid-js";
 import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../../lib/pb";
 import { fetchLibraries } from "../../lib/libraries";
+import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
 import { setSidebarOpen } from "./uiState";
 
@@ -34,7 +35,13 @@ export default function LibrarySidebar() {
           : null
       }
       getLabel={(library) => library.label}
-      itemProps={() => ({ onClick: () => setSidebarOpen(false) })}
+      // Only close the mobile overlay on navigation. On desktop the
+      // sidebar is a persistent rail, so it should stay open.
+      itemProps={() => ({
+        onClick: () => {
+          if (!isDesktop()) setSidebarOpen(false);
+        },
+      })}
     />
   );
 }
