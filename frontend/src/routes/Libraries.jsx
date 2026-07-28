@@ -1,4 +1,5 @@
 import { For, Show, createResource } from "solid-js";
+import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../lib/pb";
@@ -18,7 +19,8 @@ export default function Libraries() {
         <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
           <For each={libraries()}>
             {(library) => (
-              <div
+              <A
+                href={`/libraries/${library.id}`}
                 class="flex flex-col gap-2"
                 style={{ width: `${THUMB_WIDTH}px` }}
               >
@@ -45,7 +47,7 @@ export default function Libraries() {
                   </Image.Fallback>
                 </Image>
                 <span class="truncate text-sm">{library.label}</span>
-              </div>
+              </A>
             )}
           </For>
         </div>
