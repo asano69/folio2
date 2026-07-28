@@ -4,6 +4,7 @@
 // drives this lives, and lib/dragTypes.js for the payload vocabulary.
 import pb from "./pb";
 import { showError, showSuccess } from "./toast";
+import { triggerManifestsRefresh } from "./manifestsRefresh";
 import {
   DRAG_TYPE_MANIFEST_ID,
   DRAG_TYPE_COLLECTION_ID,
@@ -76,7 +77,12 @@ export async function handleClassificationDrop(event) {
         source.manifestId,
         dest.collectionId,
       );
-      if (added) showSuccess(`Added to "${dest.label}".`);
+      if (added) {
+        showSuccess(`Added to "${dest.label}".`);
+        // The manifest is now classified, so Home's unclassified list
+        // needs to drop it.
+        triggerManifestsRefresh();
+      }
     } else if (
       source.type === DRAG_TYPE_COLLECTION_ID &&
       dest.type === DROP_TARGET_LIBRARY
