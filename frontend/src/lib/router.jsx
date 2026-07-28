@@ -6,7 +6,6 @@ import Collections from "../routes/Collections";
 import CollectionViewer from "../routes/CollectionViewer";
 import Libraries from "../routes/Libraries";
 import LibraryViewer from "../routes/LibraryViewer";
-import Settings from "../routes/Settings";
 import Stats from "../routes/Stats";
 import AppShell from "../components/layout/AppShell";
 
@@ -27,7 +26,6 @@ export default function AppRouter() {
       <Route path="/collections/:id" component={CollectionViewer} />
       <Route path="/libraries" component={Libraries} />
       <Route path="/libraries/:id" component={LibraryViewer} />
-      <Route path="/settings" component={Settings} />
       <Route path="/stats" component={Stats} />
     </Router>
   );
