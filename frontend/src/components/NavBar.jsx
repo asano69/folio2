@@ -38,9 +38,13 @@ export default function NavBar() {
             with no surrounding NavigationMenu.Menu) navigates immediately
             instead of opening a dropdown. `as={A}` keeps navigation
             client-side, like the rest of the app. */}
-        <NavigationMenu.Trigger as={A} href="/stats" class={itemClass}>
-          Stats
+        <NavigationMenu.Trigger as={A} href="/collections" class={itemClass}>
+          Collections
         </NavigationMenu.Trigger>
+        <NavigationMenu.Trigger as={A} href="/libraries" class={itemClass}>
+          Libraries
+        </NavigationMenu.Trigger>
+
 
         {/* Settings-related entries (the Settings page, the sidebar
             toggle, and logout) grouped into one dropdown instead of each
@@ -57,15 +61,19 @@ export default function NavBar() {
               <NavigationMenu.Item
                 as={A}
                 href="/settings"
-                class="rounded px-3 py-1.5 text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
+            class="btn-link"
               >
                 Settings
               </NavigationMenu.Item>
+    
+        <NavigationMenu.Item as={A} href="/stats" class={itemClass}>
+          Stats
+        </NavigationMenu.Item>
               <NavigationMenu.Item
                 as="button"
                 type="button"
                 onSelect={handleLogout}
-                class="rounded px-3 py-1.5 text-left text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
+        
               >
                 Log out
               </NavigationMenu.Item>
