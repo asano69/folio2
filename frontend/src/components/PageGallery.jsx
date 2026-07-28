@@ -115,11 +115,27 @@ export default function PageGallery(props) {
   // Store the saved description back onto the in-memory images array so
   // reopening the note button later reflects what was just saved, without
   // needing to refetch the whole manifest.
+  //
+  // The dynamic caption plugin renders each slide's caption once, when the
+  // slide is created (see captionContent in openViewer), so an edit made
+  // afterward has to be applied by hand: to the slide's own data (so a
+  // future re-render, e.g. on resize, doesn't revert to the old text) and
+  // to the already-rendered DOM element (so the currently open lightbox
+  // reflects the change immediately, without closing/reopening it).
   const handleNoteSaved = (description) => {
     const panel = notePanel();
     if (!panel) return;
     const item = props.images.find((i) => i.pageId === panel.pageId);
     if (item) item.description = description;
+
+    const slide = pswp?.currSlide;
+    if (slide) {
+      slide.data.description = description;
+      if (slide.dynamicCaption?.element) {
+        slide.dynamicCaption.element.innerHTML = description;
+      }
+    }
+
     setNotePanel(null);
   };
 
