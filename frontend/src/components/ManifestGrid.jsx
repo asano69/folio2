@@ -29,11 +29,14 @@ export default function ManifestGrid(props) {
             id: `manifest-${manifest.id}`,
             data: { type: DRAG_TYPE_MANIFEST_ID, manifestId: manifest.id },
           });
+          // touch-none prevents the browser from treating a drag
+          // gesture as a scroll on touch devices, which otherwise
+          // fights with dnd-kit's own drag handling.
           return (
           <A
             ref={draggable.ref}
             href={`/manifests/${manifest.id}`}
-            class="flex flex-col gap-2"
+            class="flex flex-col gap-2 touch-none"
             style={{
               width: `${THUMB_WIDTH}px`,
               opacity: draggable.isDragging() ? 0.5 : 1,

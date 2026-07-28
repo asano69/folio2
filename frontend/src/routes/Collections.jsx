@@ -35,11 +35,14 @@ export default function Collections() {
                 id: `collection-${collection.id}`,
                 data: { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
               });
+              // touch-none prevents the browser from treating a drag
+              // gesture as a scroll on touch devices, which otherwise
+              // fights with dnd-kit's own drag handling.
               return (
               <A
                 ref={draggable.ref}
                 href={`/collections/${collection.id}`}
-                class="flex flex-col gap-2"
+                class="flex flex-col gap-2 touch-none"
                 style={{
                   width: `${THUMB_WIDTH}px`,
                   opacity: draggable.isDragging() ? 0.5 : 1,

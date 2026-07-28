@@ -1,5 +1,6 @@
 import { onMount, Show } from "solid-js";
 import { DragDropProvider } from "@dnd-kit/solid";
+import { AutoScroller } from "@dnd-kit/dom";
 import NavBar from "../NavBar";
 import SideBar from "./SideBar";
 import CollectionSidebar from "./CollectionSidebar";
@@ -32,8 +33,16 @@ export default function AppShell(props) {
   // regardless of which sidebar view is active. See
   // lib/classification.js for what happens on drop, and
   // lib/dragTypes.js for the payload vocabulary.
+  //
+  // AutoScroller is excluded: dnd-kit's default behavior auto-scrolls
+  // the page when the pointer nears the top/bottom edge while dragging,
+  // which made the Viewer scroll unexpectedly while carrying a card
+  // toward the sidebar. Classification drags here never need that.
   return (
-    <DragDropProvider onDragEnd={handleClassificationDrop}>
+    <DragDropProvider
+      onDragEnd={handleClassificationDrop}
+      plugins={(defaults) => defaults.filter((plugin) => plugin !== AutoScroller)}
+    >
       <div class="flex min-h-screen w-full">
         <SideBar title={<SidebarViewSelect />}>
           <Show when={sidebarView() === "collections"}>
