@@ -1,8 +1,8 @@
 // frontend/src/routes/ManifestViewer.jsx
-import { createResource, Show } from "solid-js";
+import { createResource } from "solid-js";
 import { useParams, useSearchParams } from "@solidjs/router";
 import PageGallery from "../components/PageGallery";
-import Loading from "../components/Loading";
+import ViewerPage from "../components/ViewerPage";
 import pb from "../lib/pb";
 
 // Loads a manifest's pages, ordered by position, expanded down to their
@@ -38,14 +38,12 @@ export default function ManifestViewer() {
   const [images] = createResource(() => params.id, fetchImages);
 
   return (
-    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
-      <Show when={images()} fallback={<Loading />}>
-        <PageGallery
-          images={images()}
-          position={searchParams.i}
-          onPositionChange={(i) => setSearchParams({ i }, { replace: true })}
-        />
-      </Show>
-    </div>
+    <ViewerPage resource={images}>
+      <PageGallery
+        images={images()}
+        position={searchParams.i}
+        onPositionChange={(i) => setSearchParams({ i }, { replace: true })}
+      />
+    </ViewerPage>
   );
 }
