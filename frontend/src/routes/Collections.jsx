@@ -5,6 +5,7 @@ import LibraryIcon from "lucide-solid/icons/library";
 import pb from "../lib/pb";
 import { fetchCollections } from "../lib/collections";
 import Loading from "../components/Loading";
+import CreateEntityButton from "../components/CreateEntityButton";
 
 // Fixed thumbnail size for every collection card.
 const THUMB_WIDTH = 250;
@@ -15,6 +16,13 @@ export default function Collections() {
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
+      <div class="flex w-full justify-end">
+        <CreateEntityButton
+          collection="collections"
+          basePath="/collections"
+          triggerLabel="New Collection"
+        />
+      </div>
       <Show when={collections()} fallback={<Loading />}>
         <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
           <For each={collections()}>
