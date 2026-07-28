@@ -29,6 +29,24 @@
     --color-active-border: #777777;
     --color-shadow: #111111;
   }
+
+  /* Scanned book pages are white with black text, which is painfully
+   * bright against a dark UI. Invert both PhotoSwipe's own rendered
+   * image element (its .pswp__img class comes from PhotoSwipe itself,
+   * not our JSX, so it has to be targeted globally like this rather
+   * than via a component prop) and the page thumbnail grid in
+   * PageGallery (.page-image), so pages read as light text on a dark
+   * page in both places. Cover images and other thumbnails elsewhere
+   * in the app are left untouched.
+   * hue-rotate(180deg) after invert keeps any tinted/sepia scans from
+   * shifting to an odd color cast. contrast() below 1 and a slight
+   * brightness reduction soften the resulting black/white extremes
+   * into grays, since a fully inverted page is still glaringly harsh
+   * on the eyes even in dark mode. */
+  .pswp__img,
+  .page-image {
+    filter: invert(1) hue-rotate(180deg) contrast(0.85) brightness(0.9);
+  }
 }
 
 @layer base {
