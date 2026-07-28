@@ -22,7 +22,7 @@ export default function SidebarList(props) {
   //   or library row to add it there -- see lib/dragTypes.js)
   return (
     <Show when={props.items} fallback={<Loading />}>
-      <ul class="flex flex-col gap-1">
+      <ul class="flex flex-col my-2">
         <For each={props.items}>
           {(item) => (
             <li>

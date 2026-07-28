@@ -5,7 +5,7 @@ import { Image } from "@kobalte/core/image";
 // Thumbnail + fallback icon, shared by both branches below.
 function Thumb(props) {
   return (
-    <Image class="h-12 w-12 shrink-0 overflow-hidden rounded border">
+    <Image class="h-12 w-12  shrink-0 overflow-hidden rounded border">
       <Image.Img
         class="h-full w-full object-cover"
         src={props.imageUrl || undefined}
