@@ -2,6 +2,7 @@ import { createResource } from "solid-js";
 import { useParams } from "@solidjs/router";
 import ManifestGrid from "../components/ManifestGrid";
 import ViewerPage from "../components/ViewerPage";
+import CollectionEditButton from "../components/CollectionEditButton";
 import pb from "../lib/pb";
 import { attachCovers } from "../lib/manifests";
 
@@ -28,11 +29,23 @@ async function fetchCollectionManifests(collectionId) {
 
 export default function CollectionViewer() {
   const params = useParams();
-  const [data] = createResource(() => params.id, fetchCollectionManifests);
+  const [data, { refetch }] = createResource(
+    () => params.id,
+    fetchCollectionManifests,
+  );
 
   return (
     <ViewerPage resource={data}>
-      <h1 class="text-4xl">{data().label}</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-4xl">{data().label}</h1>
+        {/* Refetches this page's data once the edit dialog closes, so a
+            renamed label or new cover shows up immediately. */}
+        <CollectionEditButton
+          collectionId={params.id}
+          label={data().label}
+          onClose={refetch}
+        />
+      </div>
       <ManifestGrid manifests={data().manifests} />
     </ViewerPage>
   );
