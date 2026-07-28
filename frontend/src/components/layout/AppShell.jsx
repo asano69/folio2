@@ -6,6 +6,7 @@ import CollectionSidebar from "./CollectionSidebar";
 import LibrarySidebar from "./LibrarySidebar";
 import SidebarViewSelect from "./SidebarViewSelect";
 import { sidebarView, loadSidebarView } from "./sidebarView";
+import { loadSidebarOpen } from "./uiState";
 import { handleClassificationDrop } from "../../lib/classification";
 
 // Wraps every route so NavBar renders once regardless of page (it's
@@ -17,7 +18,14 @@ import { handleClassificationDrop } from "../../lib/classification";
 // sidebarView (see lib/sidebarView.js and SidebarViewSelect.jsx); the
 // panel itself (SideBar) doesn't know or care what's inside it.
 export default function AppShell(props) {
-  onMount(loadSidebarView);
+  // Both preferences are loaded once, on mount: which sidebar view is
+  // shown (see sidebarView.js) and whether the panel starts open or
+  // collapsed (see uiState.js). Both fall back to their signal's default
+  // if no settings record exists yet or the request fails.
+  onMount(() => {
+    loadSidebarView();
+    loadSidebarOpen();
+  });
 
   // A single provider wraps both the sidebar (drop targets) and the
   // routed content (drag sources), so classification drags work
