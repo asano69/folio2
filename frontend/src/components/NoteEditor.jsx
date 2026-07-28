@@ -1,54 +1,32 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal } from "solid-js";
 import { Dialog } from "@kobalte/core/dialog";
 import { Button } from "@kobalte/core/button";
+import { TextField } from "@kobalte/core/text-field";
 import pb from "../lib/pb";
 import { showError } from "../lib/toast";
 
-// Overlay panel for editing the note attached to a single manifest_pages
-// record. Mounted via Portal so it lives outside PhotoSwipe's DOM and can
-// be shown on top of it while the image stays visible underneath.
-//
-// Only one note per manifest_pages record: if props.note is null, saving
-// creates a new notes record and links it back from manifest_pages.note;
-// otherwise saving updates the existing note in place. There is no
-// autosave, only the explicit Save button, so accidentally opening the
-// panel never creates an empty note.
+// Overlay panel for editing a page's note, stored directly in
+// pages.description (also used as the PhotoSwipe caption -- see
+// PageGallery.jsx). Mounted via Portal so it lives outside PhotoSwipe's
+// DOM and can be shown on top of it while the image stays visible
+// underneath. There is no autosave, only the explicit Save button, so
+// accidentally opening the panel never overwrites anything.
 export default function NoteEditor(props) {
-  // props.manifestPageId: id of the manifest_pages record being annotated
-  // props.note: existing notes record ({id, content}) or null
+  // props.pageId: id of the pages record being annotated
+  // props.description: current description text (may be empty)
   // props.onClose(): dismiss the panel without saving
-  // props.onSaved(note): called with the created/updated notes record
+  // props.onSaved(description): called with the saved description text
 
-  let editorRef;
-  let quill;
+  const [text, setText] = createSignal(props.description || "");
   const [saving, setSaving] = createSignal(false);
-
-  // Quill is loaded on demand (like PhotoSwipe in PageGallery) so it isn't
-  // part of the main bundle for people who never open a note.
-  onMount(async () => {
-    const { default: Quill } = await import("quill");
-    await import("quill/dist/quill.snow.css");
-    quill = new Quill(editorRef, { theme: "snow" });
-    if (props.note?.content) {
-      quill.setContents(props.note.content);
-    }
-  });
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Quill Delta is stored as-is in notes.content (json field).
-      const content = quill.getContents();
-      let note;
-      if (props.note) {
-        note = await pb.collection("notes").update(props.note.id, { content });
-      } else {
-        note = await pb.collection("notes").create({ content });
-        await pb
-          .collection("manifest_pages")
-          .update(props.manifestPageId, { note: note.id });
-      }
-      props.onSaved(note);
+      await pb
+        .collection("pages")
+        .update(props.pageId, { description: text() });
+      props.onSaved(text());
     } catch (err) {
       showError(err?.message || "Failed to save note.");
     } finally {
@@ -62,21 +40,13 @@ export default function NoteEditor(props) {
         <Dialog.Overlay class="fixed inset-0 z-[100001] bg-black/50" />
         <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
           <Dialog.Content class="flex w-full max-w-xl flex-col gap-4 rounded-md border border-[#999999] bg-white p-6 text-black shadow-lg dark:bg-neutral-900 dark:text-white">
-            {/* Quill's snow theme is overridden here to follow light/dark
-                mode instead of staying forced-light, and the editor area
-                is height-capped with overflow so it scrolls instead of
-                growing the dialog without bound. */}
-            <div
-              ref={editorRef}
-              class="min-h-[200px] rounded border bg-white text-black
-                     dark:bg-neutral-800 dark:text-white
-                     [&_.ql-editor]:max-h-[50vh] [&_.ql-editor]:overflow-y-auto
-                     [&_.ql-toolbar]:dark:border-neutral-700 [&_.ql-toolbar]:dark:bg-neutral-900
-                     [&_.ql-stroke]:dark:stroke-white [&_.ql-fill]:dark:fill-white
-                     [&_.ql-picker-label]:dark:text-white [&_.ql-picker-options]:dark:bg-neutral-800"
-            />
+            <TextField value={text()} onChange={setText}>
+              <TextField.TextArea
+                class="min-h-[200px] max-h-[50vh] w-full resize-y rounded border bg-white p-2 text-black dark:bg-neutral-800 dark:text-white"
+              />
+            </TextField>
             <div class="flex justify-end gap-2">
-              <Button onClick={props.onClose}>Close</Button>
+              <Button onClick={props.onClose}>Cancel</Button>
               <Button onClick={handleSave} disabled={saving()}>
                 {saving() ? "Saving…" : "Save"}
               </Button>

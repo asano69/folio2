@@ -16,7 +16,6 @@
     "photoswipe": "^5.4.4",
     "photoswipe-dynamic-caption-plugin": "^1.2.7",
     "pocketbase": "^0.27.0",
-    "quill": "^2.0.3",
     "solid-js": "^1.9.12"
   },
   "devDependencies": {

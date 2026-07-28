@@ -10,15 +10,15 @@ import NoteEditor from "./NoteEditor";
 // array instead of using the DOM-scanning Lightbox helper, since Solid
 // renders declaratively rather than leaving static <a> tags to scan.
 export default function PageGallery(props) {
-  // props.images: [{ manifestPageId, image, note, position }], already
-  // sorted by manifest_pages.position. `note` is the linked notes record or
-  // null.
+  // props.images: [{ manifestPageId, pageId, image, description, position }],
+  // already sorted by manifest_pages.position. `description` is the
+  // note/caption text stored on the pages record.
   // props.position: manifest_pages.position from the `i` search param, used
   // to deep-link directly into a page when the component mounts.
   // props.onPositionChange(position): called with the current page's
   // position while browsing, and with undefined when the lightbox is closed.
 
-  // Holds { manifestPageId, note } while the note editor overlay is open,
+  // Holds { pageId, description } while the note editor overlay is open,
   // null otherwise. The overlay is portalled out of PhotoSwipe's DOM (see
   // NoteEditor), so it can stay open on top of the lightbox.
   const [notePanel, setNotePanel] = createSignal(null);
@@ -77,8 +77,8 @@ export default function PageGallery(props) {
         onClick: () => {
           const item = props.images[pswp.currIndex];
           setNotePanel({
-            manifestPageId: item.manifestPageId,
-            note: item.note,
+            pageId: item.pageId,
+            description: item.description,
           });
         },
       });
@@ -112,16 +112,14 @@ export default function PageGallery(props) {
     }
   });
 
-  // Store the saved note back onto the in-memory images array so reopening
-  // the note button later reflects what was just saved, without needing to
-  // refetch the whole manifest.
-  const handleNoteSaved = (note) => {
+  // Store the saved description back onto the in-memory images array so
+  // reopening the note button later reflects what was just saved, without
+  // needing to refetch the whole manifest.
+  const handleNoteSaved = (description) => {
     const panel = notePanel();
     if (!panel) return;
-    const item = props.images.find(
-      (i) => i.manifestPageId === panel.manifestPageId,
-    );
-    if (item) item.note = note;
+    const item = props.images.find((i) => i.pageId === panel.pageId);
+    if (item) item.description = description;
     setNotePanel(null);
   };
 
@@ -150,8 +148,8 @@ export default function PageGallery(props) {
       </div>
       <Show when={notePanel()}>
         <NoteEditor
-          manifestPageId={notePanel().manifestPageId}
-          note={notePanel().note}
+          pageId={notePanel().pageId}
+          description={notePanel().description}
           onClose={() => setNotePanel(null)}
           onSaved={handleNoteSaved}
         />
