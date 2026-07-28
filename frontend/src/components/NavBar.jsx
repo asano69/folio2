@@ -1,9 +1,12 @@
+import { Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { NavigationMenu } from "@kobalte/core/navigation-menu";
 import ChevronDown from "lucide-solid/icons/chevron-down";
+import Menu from "lucide-solid/icons/menu";
 import pb from "../lib/pb";
 import Logo from "./Logo";
 import { setSidebarOpen } from "./layout/uiState";
+import { isDesktop } from "../lib/viewport";
 
 // Shared look for every top-level entry, matching the previous <A>/<Button>
 // style (see style.css's .btn-link rule).
@@ -14,7 +17,22 @@ export default function NavBar() {
 
   return (
     <div class="mb-10 flex w-full flex-wrap items-center justify-between gap-y-3">
-      <Logo linkable />
+      <div class="flex items-center gap-2">
+        {/* Mobile-only: opens the sidebar overlay. On desktop the
+            sidebar is always visible as a rail/panel, so this toggle
+            is unnecessary there (see SideBar.jsx). */}
+        <Show when={!isDesktop()}>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+            class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+          >
+            <Menu size={20} />
+          </button>
+        </Show>
+        <Logo linkable />
+      </div>
       <NavigationMenu class="flex flex-wrap items-center gap-3">
         {/* Plain page links: Kobalte's "link trigger" pattern (a Trigger
             with no surrounding NavigationMenu.Menu) navigates immediately
@@ -42,16 +60,6 @@ export default function NavBar() {
                 class="rounded px-3 py-1.5 text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
               >
                 Settings
-              </NavigationMenu.Item>
-              {/* Not a link, so it's rendered as a button rather than
-                  NavigationMenu.Item's default <a> element. */}
-              <NavigationMenu.Item
-                as="button"
-                type="button"
-                onSelect={() => setSidebarOpen(true)}
-                class="rounded px-3 py-1.5 text-left text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
-              >
-                Sidebar
               </NavigationMenu.Item>
               <NavigationMenu.Item
                 as="button"
