@@ -78,6 +78,9 @@ export default function NavBar() {
             with no surrounding NavigationMenu.Menu) navigates immediately
             instead of opening a dropdown. `as={A}` keeps navigation
             client-side, like the rest of the app. */}
+        <NavigationMenu.Trigger as={A} href="/manifests" class={itemClass}>
+          Manifests
+        </NavigationMenu.Trigger>
         <NavigationMenu.Trigger as={A} href="/collections" class={itemClass}>
           Collections
         </NavigationMenu.Trigger>

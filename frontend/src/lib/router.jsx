@@ -1,6 +1,7 @@
 import { Router, Route } from "@solidjs/router";
 
 import Home from "../routes/Home";
+import Manifests from "../routes/Manifests";
 import ManifestViewer from "../routes/ManifestViewer";
 import Collections from "../routes/Collections";
 import CollectionViewer from "../routes/CollectionViewer";
@@ -21,6 +22,7 @@ export default function AppRouter() {
   return (
     <Router root={AppShell}>
       <Route path="/" component={Home} />
+      <Route path="/manifests" component={Manifests} />
       <Route path="/manifests/:id" component={ManifestViewer} />
       <Route path="/collections" component={Collections} />
       <Route path="/collections/:id" component={CollectionViewer} />
