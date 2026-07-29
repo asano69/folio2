@@ -1,4 +1,4 @@
-import { Show, createResource } from "solid-js";
+import { Show, createResource, createMemo } from "solid-js";
 import pb from "../lib/pb";
 import Loading from "./Loading";
 import ManifestGrid from "./ManifestGrid";
@@ -23,22 +23,24 @@ async function fetchManifests() {
 export default function Catalog() {
   const [manifests] = createResource(fetchManifests);
 
-  // Excludes manifests just dropped onto a collection (see
-  // lib/classification.js), so the list updates the instant a drop
-  // happens instead of waiting for a request/refetch to land.
-  const visibleManifests = () =>
-    manifests()?.filter((m) => !hiddenManifestIds().has(m.id));
+  // Covers are fetched once for the full, unfiltered manifest list (not
+  // re-run every time a manifest is hidden -- see below). Solid re-runs
+  // this fetcher automatically whenever `manifests` itself changes.
+  const [withCovers] = createResource(manifests, attachCovers);
 
-  // Covers are fetched as a second resource, sourced from
-  // `visibleManifests`, so the grid can render immediately once the
-  // manifest list itself is ready (with fallback icons), instead of
-  // waiting for covers too. Solid re-runs this fetcher automatically
-  // whenever `visibleManifests` changes.
-  const [withCovers] = createResource(visibleManifests, attachCovers);
+  // Excludes manifests just dropped onto a collection (see
+  // lib/classification.js). This is a plain synchronous filter over
+  // whatever's already loaded, so a drop hides the item instantly
+  // instead of waiting on another cover-fetch round-trip.
+  const visible = createMemo(() =>
+    (withCovers() ?? manifests())?.filter(
+      (m) => !hiddenManifestIds().has(m.id),
+    ),
+  );
 
   return (
     <Show when={manifests()} fallback={<Loading />}>
-      <ManifestGrid manifests={withCovers() ?? visibleManifests()} />
+      <ManifestGrid manifests={visible()} />
     </Show>
   );
 }
