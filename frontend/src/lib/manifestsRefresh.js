@@ -1,12 +1,24 @@
 import { createSignal } from "solid-js";
 
-// Bumped whenever a manifest's collection membership changes (see
-// lib/classification.js), so Catalog's createResource can depend on it
-// and refetch the "unclassified" list without a full page reload.
-const [refreshKey, setRefreshKey] = createSignal(0);
+// Manifest ids hidden from Home's "unclassified" list the instant they
+// are dropped onto a collection (see lib/classification.js). Hiding
+// happens locally, before the classification request even starts, so
+// the list updates immediately and a second drag can begin right away
+// instead of waiting for a request/refetch round-trip to land.
+const [hiddenManifestIds, setHiddenManifestIds] = createSignal(new Set());
 
-export function triggerManifestsRefresh() {
-  setRefreshKey((k) => k + 1);
+export function hideManifest(id) {
+  setHiddenManifestIds((prev) => new Set(prev).add(id));
 }
 
-export { refreshKey };
+// Reverses hideManifest, used when the classification request fails so
+// the manifest reappears instead of staying hidden incorrectly.
+export function unhideManifest(id) {
+  setHiddenManifestIds((prev) => {
+    const next = new Set(prev);
+    next.delete(id);
+    return next;
+  });
+}
+
+export { hiddenManifestIds };

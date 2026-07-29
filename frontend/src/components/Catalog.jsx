@@ -2,7 +2,7 @@ import { Show, createResource } from "solid-js";
 import pb from "../lib/pb";
 import Loading from "./Loading";
 import ManifestGrid from "./ManifestGrid";
-import { refreshKey } from "../lib/manifestsRefresh";
+import { hiddenManifestIds } from "../lib/manifestsRefresh";
 import { attachCovers } from "../lib/manifests";
 
 // Fetches every manifest that isn't linked to any collection yet, so Home
@@ -21,20 +21,24 @@ async function fetchManifests() {
 }
 
 export default function Catalog() {
-  // refreshKey is only used as a createResource dependency: bumping it
-  // re-runs fetchManifests, which is how a just-classified manifest
-  // disappears from this list without a page reload.
-  const [manifests] = createResource(refreshKey, fetchManifests);
+  const [manifests] = createResource(fetchManifests);
 
-  // Covers are fetched as a second resource, sourced from `manifests`, so
-  // the grid can render immediately once the manifest list itself is
-  // ready (with fallback icons), instead of waiting for covers too.
-  // Solid re-runs this fetcher automatically whenever `manifests` changes.
-  const [withCovers] = createResource(manifests, attachCovers);
+  // Excludes manifests just dropped onto a collection (see
+  // lib/classification.js), so the list updates the instant a drop
+  // happens instead of waiting for a request/refetch to land.
+  const visibleManifests = () =>
+    manifests()?.filter((m) => !hiddenManifestIds().has(m.id));
+
+  // Covers are fetched as a second resource, sourced from
+  // `visibleManifests`, so the grid can render immediately once the
+  // manifest list itself is ready (with fallback icons), instead of
+  // waiting for covers too. Solid re-runs this fetcher automatically
+  // whenever `visibleManifests` changes.
+  const [withCovers] = createResource(visibleManifests, attachCovers);
 
   return (
     <Show when={manifests()} fallback={<Loading />}>
-      <ManifestGrid manifests={withCovers() ?? manifests()} />
+      <ManifestGrid manifests={withCovers() ?? visibleManifests()} />
     </Show>
   );
 }

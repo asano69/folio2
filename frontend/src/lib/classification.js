@@ -4,7 +4,7 @@
 // drives this lives, and lib/dragTypes.js for the payload vocabulary.
 import pb from "./pb";
 import { showError, showSuccess } from "./toast";
-import { triggerManifestsRefresh } from "./manifestsRefresh";
+import { hideManifest, unhideManifest } from "./manifestsRefresh";
 import {
   DRAG_TYPE_MANIFEST_ID,
   DRAG_TYPE_COLLECTION_ID,
@@ -73,16 +73,16 @@ export async function handleClassificationDrop(event) {
       source.type === DRAG_TYPE_MANIFEST_ID &&
       dest.type === DROP_TARGET_COLLECTION
     ) {
+      // Hide immediately, before the request even starts, so Home's
+      // list updates the instant the drop happens and a second drag can
+      // begin right away -- waiting for this request to finish and
+      // Home to refetch was interrupting a drag started right after.
+      hideManifest(source.manifestId);
       const added = await addManifestToCollection(
         source.manifestId,
         dest.collectionId,
       );
-      if (added) {
-        showSuccess(`Added to "${dest.label}".`);
-        // The manifest is now classified, so Home's unclassified list
-        // needs to drop it.
-        triggerManifestsRefresh();
-      }
+      if (added) showSuccess(`Added to "${dest.label}".`);
     } else if (
       source.type === DRAG_TYPE_COLLECTION_ID &&
       dest.type === DROP_TARGET_LIBRARY
@@ -94,6 +94,11 @@ export async function handleClassificationDrop(event) {
       if (added) showSuccess(`Added to "${dest.label}".`);
     }
   } catch (err) {
+    // The request failed, so the manifest wasn't actually classified;
+    // undo the optimistic hide so it reappears in Home's list.
+    if (source.type === DRAG_TYPE_MANIFEST_ID) {
+      unhideManifest(source.manifestId);
+    }
     showError(err?.message || "Failed to classify item.");
   }
 }
