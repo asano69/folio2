@@ -12,6 +12,11 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
+// dataDirEnvVar lets the data directory be set via environment variable
+// instead of always requiring the "--dir" flag. If unset, PocketBase
+// falls back to its own default (a "pb_data" folder next to the binary).
+const dataDirEnvVar = "FOLIO_DATA_DIR"
+
 // dbConnect mirrors PocketBase's core.DefaultDBConnect, but raises
 // busy_timeout well above the 10s default. "folio serve" and "folio
 // import" can run as separate OS processes against the same SQLite
@@ -41,6 +46,9 @@ func main() {
 	app := pocketbase.NewWithConfig(pocketbase.Config{
 		HideStartBanner: true,
 		DBConnect:       dbConnect,
+		// Sets the "--dir" flag's default value. An explicit "--dir"
+		// still overrides this, so the flag keeps working as before.
+		DefaultDataDir: os.Getenv(dataDirEnvVar),
 	})
 
 	// Registers "folio migrate up/down/create/collections/history-sync"
