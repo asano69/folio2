@@ -5,6 +5,7 @@ import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../lib/pb";
 import { fetchLibraries } from "../lib/libraries";
 import Loading from "../components/Loading";
+import CreateEntityButton from "../components/CreateEntityButton";
 
 // Fixed thumbnail size for every library card, matching Collections.jsx.
 const THUMB_WIDTH = 250;
@@ -15,6 +16,13 @@ export default function Libraries() {
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
+      <div class="flex w-full justify-end">
+        <CreateEntityButton
+          collection="libraries"
+          basePath="/libraries"
+          triggerLabel="New Library"
+        />
+      </div>
       <Show when={libraries()} fallback={<Loading />}>
         <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
           <For each={libraries()}>

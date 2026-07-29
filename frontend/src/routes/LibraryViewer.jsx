@@ -4,6 +4,7 @@ import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
 import { useDraggable } from "@dnd-kit/solid";
 import ViewerPage from "../components/ViewerPage";
+import LibraryEditButton from "../components/LibraryEditButton";
 import pb from "../lib/pb";
 import { DRAG_TYPE_COLLECTION_ID } from "../lib/dragTypes";
 
@@ -31,11 +32,23 @@ async function fetchLibraryCollections(libraryId) {
 
 export default function LibraryViewer() {
   const params = useParams();
-  const [data] = createResource(() => params.id, fetchLibraryCollections);
+  const [data, { refetch }] = createResource(
+    () => params.id,
+    fetchLibraryCollections,
+  );
 
   return (
     <ViewerPage resource={data}>
-      <h1 class="text-4xl">{data().label}</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-4xl">{data().label}</h1>
+        {/* Refetches this page's data once the edit dialog closes, so a
+            renamed label or new cover shows up immediately. */}
+        <LibraryEditButton
+          libraryId={params.id}
+          label={data().label}
+          onClose={refetch}
+        />
+      </div>
       <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
         <For each={data().collections}>
           {(collection) => {
