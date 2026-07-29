@@ -45,7 +45,7 @@ export default function CreateEntityButton(props) {
       const record = await pb
         .collection(props.collection)
         .create({ label: value });
-      setOpen(false);
+      handleOpenChange(false);
       props.onCreated?.(record);
     } catch (err) {
       showError(err?.message || `Failed to create ${props.triggerLabel}.`);
