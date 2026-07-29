@@ -13,6 +13,7 @@ import (
 	_ "image/jpeg" // registers the JPEG format with image.DecodeConfig
 	_ "image/png"  // registers the PNG format with image.DecodeConfig
 	"io"
+	"log/slog"
 	"path/filepath"
 
 	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
@@ -143,6 +144,22 @@ func hashBytes(data []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
+// compressForStorage resizes/recompresses data if it is a JPEG or PNG
+// that exceeds the thresholds in image.go. Anything else -- a WebP page,
+// or a JPEG/PNG that fails to decode/encode -- is stored as-is; a
+// compression failure should never abort an otherwise-valid import.
+func compressForStorage(data []byte, name string) ([]byte, string) {
+	if !isCompressibleImage(name) {
+		return data, name
+	}
+	processed, newName, _, err := processImage(data, name)
+	if err != nil {
+		slog.Warn("image compression failed, storing original", "file", name, "error", err)
+		return data, name
+	}
+	return processed, newName
+}
+
 // decodeImageSize returns the pixel width and height of image data, used
 // to populate images.width/height so viewers (e.g. PhotoSwipe) can lay
 // out pages without loading the full image first.
@@ -167,6 +184,13 @@ func findOrCreateImage(app core.App, name string, data []byte, hash string) (rec
 	if err != nil {
 		return nil, false, errs.Newf("find images collection: %v", err)
 	}
+
+	// Compression is applied only when actually writing a new file, not
+	// during hashing/dedup above: hash identifies the source image
+	// regardless of compression settings, so re-importing the same page
+	// after a compression tweak still reuses the existing record instead
+	// of creating a duplicate.
+	data, name = compressForStorage(data, name)
 
 	file, err := filesystem.NewFileFromBytes(data, name)
 	if err != nil {
