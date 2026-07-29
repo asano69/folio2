@@ -209,6 +209,10 @@ func findOrCreateImage(app core.App, name string, data []byte, hash string) (rec
 	imageRecord.Set("image", file)
 	imageRecord.Set("width", width)
 	imageRecord.Set("height", height)
+	// Stored file size in bytes. data here is already the post-compression
+	// bytes (see compressForStorage above), so this reflects what actually
+	// ends up in storage rather than the original upload size.
+	imageRecord.Set("size", len(data))
 
 	if err := app.Save(imageRecord); err != nil {
 		return nil, false, errs.Newf("save image record: %v", err)
