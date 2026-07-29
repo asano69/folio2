@@ -1,7 +1,7 @@
-import { createResource } from "solid-js";
+import { onMount } from "solid-js";
 import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../../lib/pb";
-import { fetchLibraries } from "../../lib/libraries";
+import { libraries, loadLibraries } from "../../lib/libraries";
 import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
 import { setSidebarOpen } from "./uiState";
@@ -21,7 +21,7 @@ const THUMB_SIZE = 48;
 // would attach onDragOver/onDrop (see lib/dragTypes.js for the shared
 // drag data format).
 export default function LibrarySidebar() {
-  const [libraries] = createResource(fetchLibraries);
+  onMount(loadLibraries);
 
   return (
     <SidebarList

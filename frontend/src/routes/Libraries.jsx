@@ -1,9 +1,9 @@
-import { For, Show, createResource } from "solid-js";
+import { For, Show, onMount } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/landmark";
 import pb from "../lib/pb";
-import { fetchLibraries } from "../lib/libraries";
+import { libraries, loadLibraries, addLibrary } from "../lib/libraries";
 import Loading from "../components/Loading";
 import CreateEntityButton from "../components/CreateEntityButton";
 
@@ -12,15 +12,15 @@ const THUMB_WIDTH = 250;
 const THUMB_HEIGHT = 200;
 
 export default function Libraries() {
-  const [libraries] = createResource(fetchLibraries);
+  onMount(loadLibraries);
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
       <div class="flex w-full justify-end">
         <CreateEntityButton
           collection="libraries"
-          basePath="/libraries"
           triggerLabel="New Library"
+          onCreated={addLibrary}
         />
       </div>
       <Show when={libraries()} fallback={<Loading />}>

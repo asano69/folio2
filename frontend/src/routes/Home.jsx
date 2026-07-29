@@ -1,5 +1,6 @@
 import Catalog from "../components/Catalog";
 import CreateEntityButton from "../components/CreateEntityButton";
+import { addCollection } from "../lib/collections";
 
 export default function Home() {
   return (
@@ -7,8 +8,8 @@ export default function Home() {
       <div class="flex w-full justify-end">
         <CreateEntityButton
           collection="collections"
-          basePath="/collections"
           triggerLabel="New Collection"
+          onCreated={addCollection}
         />
       </div>
       <Catalog />

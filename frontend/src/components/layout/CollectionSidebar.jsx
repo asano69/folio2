@@ -1,7 +1,7 @@
-import { createResource } from "solid-js";
+import { onMount } from "solid-js";
 import Library from "lucide-solid/icons/library";
 import pb from "../../lib/pb";
-import { fetchCollections } from "../../lib/collections";
+import { collections, loadCollections } from "../../lib/collections";
 import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
 import { setSidebarOpen } from "./uiState";
@@ -12,15 +12,17 @@ const THUMB_SIZE = 48;
 // Desktop-only sidebar list of collections, shown as a left-side overlay
 // panel by AppShell (see uiState.js / AppShell.jsx). Row rendering itself
 // lives in SidebarList/SidebarRow (shared with LibrarySidebar); this
-// file only supplies what's specific to collections: the fetch, the link
-// target, and closing the sidebar on navigation.
+// file only supplies what's specific to collections: the link target,
+// and closing the sidebar on navigation. The list itself is the shared
+// signal from lib/collections.js, so a collection created elsewhere
+// (see CreateEntityButton) shows up here immediately.
 //
 // itemProps is also where a future drop target -- e.g. dragging a
 // manifest card onto a collection row to add it to that collection --
 // would attach onDragOver/onDrop (see lib/dragTypes.js for the shared
 // drag data format).
 export default function CollectionSidebar() {
-  const [collections] = createResource(fetchCollections);
+  onMount(loadCollections);
 
   return (
     <SidebarList

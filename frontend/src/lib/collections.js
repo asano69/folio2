@@ -1,8 +1,25 @@
+import { createSignal } from "solid-js";
 import pb from "./pb";
 
-// Fetches all collections, shared by Collections (the mobile /collections
-// page) and CollectionSidebar (the desktop overlay panel) so both stay in
-// sync without duplicating the PocketBase query itself.
-export async function fetchCollections() {
-  return pb.collection("collections").getFullList({ sort: "-created" });
+// Shared reactive list of collections, so every consumer (the
+// /collections page and CollectionSidebar) reads the same data and stays
+// in sync -- e.g. a newly created collection shows up in both places
+// immediately, without a page reload or refetch.
+const [collections, setCollections] = createSignal(null);
+
+// Loads the full collection list into the shared signal. Safe to call
+// from every consumer's onMount; whichever call resolves last just wins.
+export async function loadCollections() {
+  setCollections(
+    await pb.collection("collections").getFullList({ sort: "-created" }),
+  );
 }
+
+// Prepends a newly created collection to the list (see
+// CreateEntityButton's onCreated), matching the "-created" sort order
+// used by loadCollections.
+export function addCollection(record) {
+  setCollections((prev) => [record, ...(prev ?? [])]);
+}
+
+export { collections };

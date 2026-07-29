@@ -1,24 +1,24 @@
 import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
 import { Dialog } from "@kobalte/core/dialog";
 import { Button } from "@kobalte/core/button";
 import { TextField } from "@kobalte/core/text-field";
 import pb from "../lib/pb";
 import { showError } from "../lib/toast";
 
-// Generic "create a record with just a label, then jump to its detail
-// page" flow. Shared by any top-level list page that only needs a single
-// text field to create an entity -- Collections today, Libraries later
-// (see Collections.jsx for how it's wired up).
+// Generic "create a record with just a label" flow. Shared by any
+// top-level list page that only needs a single text field to create an
+// entity -- Collections and Libraries. Stays on the current page after
+// creation; the caller is responsible for reflecting the new record
+// wherever it's shown (see props.onCreated).
 export default function CreateEntityButton(props) {
   // props.collection: PocketBase collection name to create the record in
   //   (e.g. "collections")
-  // props.basePath: detail route prefix the new record is navigated to
-  //   after creation (e.g. "/collections" -> "/collections/<id>")
   // props.triggerLabel: text shown on the button that opens the dialog,
   //   reused as the dialog title (e.g. "New Collection")
+  // props.onCreated(record): called with the newly created record, so
+  //   the caller can add it to whatever list is currently shown (e.g.
+  //   the sidebar) without waiting for a refetch.
 
-  const navigate = useNavigate();
   const [open, setOpen] = createSignal(false);
   const [label, setLabel] = createSignal("");
   const [creating, setCreating] = createSignal(false);
@@ -40,7 +40,7 @@ export default function CreateEntityButton(props) {
         .collection(props.collection)
         .create({ label: value });
       setOpen(false);
-      navigate(`${props.basePath}/${record.id}`);
+      props.onCreated?.(record);
     } catch (err) {
       showError(err?.message || `Failed to create ${props.triggerLabel}.`);
     } finally {

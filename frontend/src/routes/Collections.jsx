@@ -1,10 +1,10 @@
-import { For, Show, createResource } from "solid-js";
+import { For, Show, onMount } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
 import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
-import { fetchCollections } from "../lib/collections";
+import { collections, loadCollections, addCollection } from "../lib/collections";
 import Loading from "../components/Loading";
 import CreateEntityButton from "../components/CreateEntityButton";
 import { DRAG_TYPE_COLLECTION_ID } from "../lib/dragTypes";
@@ -14,15 +14,15 @@ const THUMB_WIDTH = 250;
 const THUMB_HEIGHT = 200;
 
 export default function Collections() {
-  const [collections] = createResource(fetchCollections);
+  onMount(loadCollections);
 
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
       <div class="flex w-full justify-end">
         <CreateEntityButton
           collection="collections"
-          basePath="/collections"
           triggerLabel="New Collection"
+          onCreated={addCollection}
         />
       </div>
       <Show when={collections()} fallback={<Loading />}>
