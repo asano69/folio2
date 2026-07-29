@@ -56,7 +56,7 @@ func compressUploadedImage(record *core.Record) error {
 	if err != nil {
 		return err
 	}
-	record.Set("image", []*filesystem.File{newFile})
+	record.Set("image", newFile)
 
 	width, height, err := imageproc.DecodeSize(compressed)
 	if err != nil {
