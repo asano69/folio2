@@ -15,6 +15,8 @@ import (
 	"io"
 	"log/slog"
 	"path/filepath"
+	"runtime"
+	"sync"
 
 	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
 	"time"
@@ -78,6 +80,13 @@ func importSource(app core.App, src source, result *Result, dupIndex *manifestIn
 		return false, nil
 	}
 
+	// Compression (resize/re-encode) is pure CPU work with no DB
+	// dependency, so it runs concurrently across cores here, ahead of
+	// the transaction below. This keeps the transaction itself a plain
+	// sequential run of DB writes, avoiding any concurrency concerns
+	// with SQLite.
+	precompressed := compressNewImages(app, pages, contents, hashes)
+
 	err = app.RunInTransaction(func(txApp core.App) error {
 		manifest, err := createManifest(txApp, label)
 		if err != nil {
@@ -92,7 +101,7 @@ func importSource(app core.App, src source, result *Result, dupIndex *manifestIn
 
 		// position is 0-based, so the first page gets position=0.
 		for index, p := range pages {
-			image, reused, err := findOrCreateImage(txApp, p.Name, contents[index], hashes[index])
+			image, reused, err := findOrCreateImage(txApp, hashes[index], precompressed)
 			if err != nil {
 				return err
 			}
@@ -171,11 +180,61 @@ func decodeImageSize(data []byte) (width, height int, err error) {
 	return cfg.Width, cfg.Height, nil
 }
 
+// compressedImage holds the compressForStorage output (bytes and,
+// possibly renamed, filename) computed ahead of time for one unique page
+// hash -- see compressNewImages.
+type compressedImage struct {
+	data []byte
+	name string
+}
+
+// compressNewImages runs compressForStorage concurrently across up to
+// runtime.NumCPU() workers, ahead of the import transaction. Only pages
+// whose hash isn't already backed by a stored image are compressed, and
+// each hash is compressed once even if it occurs on multiple pages
+// within this same source (matching findOrCreateImage's own hash-based
+// dedup). Compression has no DB dependency, so doing it here keeps the
+// transaction that follows a plain sequential run of DB writes.
+func compressNewImages(app core.App, pages []sourcePage, contents [][]byte, hashes []string) map[string]compressedImage {
+	pending := make(map[string]compressedImage)
+	for i, hash := range hashes {
+		if _, seen := pending[hash]; seen {
+			continue
+		}
+		if existing, err := app.FindFirstRecordByFilter("images", "hash = {:hash}", map[string]any{"hash": hash}); err == nil && existing != nil {
+			continue
+		}
+		pending[hash] = compressedImage{data: contents[i], name: pages[i].Name}
+	}
+
+	results := make(map[string]compressedImage, len(pending))
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, runtime.NumCPU())
+
+	for hash, in := range pending {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(hash string, in compressedImage) {
+			defer wg.Done()
+			defer func() { <-sem }()
+			data, name := compressForStorage(in.data, in.name)
+			mu.Lock()
+			results[hash] = compressedImage{data: data, name: name}
+			mu.Unlock()
+		}(hash, in)
+	}
+	wg.Wait()
+
+	return results
+}
+
 // findOrCreateImage returns the images record for a page, reusing an
 // existing record with the same content hash instead of storing the same
-// bytes twice. hash is the page's already-computed SHA-256 digest (see
-// importSource), so the content is never read twice.
-func findOrCreateImage(app core.App, name string, data []byte, hash string) (record *core.Record, reused bool, err error) {
+// bytes twice. hash is the page's already-computed SHA-256 digest, and
+// precompressed holds the already-compressed bytes for hashes that
+// needed a new image (see compressNewImages).
+func findOrCreateImage(app core.App, hash string, precompressed map[string]compressedImage) (record *core.Record, reused bool, err error) {
 	if existing, findErr := app.FindFirstRecordByFilter("images", "hash = {:hash}", map[string]any{"hash": hash}); findErr == nil && existing != nil {
 		return existing, true, nil
 	}
@@ -185,12 +244,11 @@ func findOrCreateImage(app core.App, name string, data []byte, hash string) (rec
 		return nil, false, errs.Newf("find images collection: %v", err)
 	}
 
-	// Compression is applied only when actually writing a new file, not
-	// during hashing/dedup above: hash identifies the source image
-	// regardless of compression settings, so re-importing the same page
-	// after a compression tweak still reuses the existing record instead
-	// of creating a duplicate.
-	data, name = compressForStorage(data, name)
+	compressed, ok := precompressed[hash]
+	if !ok {
+		return nil, false, errs.Newf("missing precompressed image for hash %q", hash)
+	}
+	data, name := compressed.data, compressed.name
 
 	file, err := filesystem.NewFileFromBytes(data, name)
 	if err != nil {
@@ -210,7 +268,7 @@ func findOrCreateImage(app core.App, name string, data []byte, hash string) (rec
 	imageRecord.Set("width", width)
 	imageRecord.Set("height", height)
 	// Stored file size in bytes. data here is already the post-compression
-	// bytes (see compressForStorage above), so this reflects what actually
+	// bytes (see compressNewImages above), so this reflects what actually
 	// ends up in storage rather than the original upload size.
 	imageRecord.Set("size", len(data))
 
