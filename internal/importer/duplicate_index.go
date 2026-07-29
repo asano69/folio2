@@ -13,6 +13,14 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
+// manifestPageHash is one row of the manifest/position/hash join query
+// used by newManifestIndex below.
+type manifestPageHash struct {
+	Manifest string `db:"manifest"`
+	Position int    `db:"position"`
+	Hash     string `db:"hash"`
+}
+
 // manifestIndex caches the content signature (see signatureOf) of every
 // existing manifest, so a duplicate check is a single map lookup instead
 // of a linear scan that re-fetches each manifest's pages and images.
@@ -27,64 +35,36 @@ func signatureOf(hashes []string) string {
 	return strings.Join(hashes, "\x00")
 }
 
-// newManifestIndex loads every manifest's page image hashes in only three
-// queries total, regardless of how many manifests or pages exist: one for
-// every manifest_pages record, one batch fetch of the referenced pages,
-// and one batch fetch of the referenced images. The previous
-// implementation issued two additional queries (FindRecordById for the
-// page, then for the image) per manifest_pages row, for every existing
-// manifest, for every single item being imported.
+// newManifestIndex loads every manifest's page image hashes with a single
+// SQL join across manifest_pages -> pages -> images, ordered so each
+// manifest's hashes arrive already in page order. A single join avoids
+// building an "id IN (...)" query over every page/image id, which would
+// otherwise hit SQLite's bound-variable limit once a library has enough
+// pages.
 func newManifestIndex(app core.App) (*manifestIndex, error) {
-	manifestPages, err := app.FindRecordsByFilter("manifest_pages", "", "manifest,position", 0, 0)
+	var rows []manifestPageHash
+	err := app.DB().NewQuery(`
+		SELECT {{manifest_pages}}.manifest AS manifest,
+		       {{manifest_pages}}.position AS position,
+		       {{images}}.hash AS hash
+		FROM {{manifest_pages}}
+		INNER JOIN {{pages}} ON {{pages}}.id = {{manifest_pages}}.page
+		INNER JOIN {{images}} ON {{images}}.id = {{pages}}.image
+		ORDER BY {{manifest_pages}}.manifest, {{manifest_pages}}.position
+	`).All(&rows)
 	if err != nil {
-		return nil, errs.Newf("list manifest pages: %v", err)
-	}
-	if len(manifestPages) == 0 {
-		return &manifestIndex{signatures: map[string]bool{}}, nil
+		return nil, errs.Newf("list manifest page hashes: %v", err)
 	}
 
-	pageIDs := make([]string, 0, len(manifestPages))
-	for _, mp := range manifestPages {
-		pageIDs = append(pageIDs, mp.GetString("page"))
-	}
-	pages, err := app.FindRecordsByIds("pages", pageIDs)
-	if err != nil {
-		return nil, errs.Newf("find pages: %v", err)
-	}
-	pageByID := make(map[string]*core.Record, len(pages))
-	imageIDs := make([]string, 0, len(pages))
-	for _, page := range pages {
-		pageByID[page.Id] = page
-		imageIDs = append(imageIDs, page.GetString("image"))
-	}
-
-	images, err := app.FindRecordsByIds("images", imageIDs)
-	if err != nil {
-		return nil, errs.Newf("find images: %v", err)
-	}
-	hashByImageID := make(map[string]string, len(images))
-	for _, image := range images {
-		hashByImageID[image.Id] = image.GetString("hash")
-	}
-
-	// manifestPages is sorted by manifest, then position, so hashes for
+	// rows is already ordered by manifest, then position, so hashes for
 	// each manifest are appended below in the correct page order.
 	hashesByManifest := make(map[string][]string)
 	var order []string
-	for _, mp := range manifestPages {
-		page := pageByID[mp.GetString("page")]
-		if page == nil {
-			continue
+	for _, row := range rows {
+		if _, seen := hashesByManifest[row.Manifest]; !seen {
+			order = append(order, row.Manifest)
 		}
-		hash, ok := hashByImageID[page.GetString("image")]
-		if !ok {
-			continue
-		}
-		manifestID := mp.GetString("manifest")
-		if _, seen := hashesByManifest[manifestID]; !seen {
-			order = append(order, manifestID)
-		}
-		hashesByManifest[manifestID] = append(hashesByManifest[manifestID], hash)
+		hashesByManifest[row.Manifest] = append(hashesByManifest[row.Manifest], row.Hash)
 	}
 
 	signatures := make(map[string]bool, len(order))
