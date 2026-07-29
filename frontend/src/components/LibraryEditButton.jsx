@@ -5,6 +5,7 @@ import { TextField } from "@kobalte/core/text-field";
 import Ellipsis from "lucide-solid/icons/ellipsis";
 import pb from "../lib/pb";
 import { showError } from "../lib/toast";
+import { updateLibrary } from "../lib/libraries";
 
 // Icon-only edit button shown next to a library's label in
 // LibraryViewer. Opens a dialog to rename the library and/or upload a
@@ -46,8 +47,18 @@ export default function LibraryEditButton(props) {
       // PocketBase SDK switches to multipart/form-data automatically
       // whenever a File/Blob value is present.
       if (cover()) data.cover = cover();
-      await pb.collection("libraries").update(props.libraryId, data);
-      setOpen(false);
+      const updated = await pb
+        .collection("libraries")
+        .update(props.libraryId, data);
+      // Patch the sidebar's shared libraries list immediately -- it's
+      // loaded once on mount and otherwise never learns about edits made
+      // from this dialog.
+      updateLibrary(props.libraryId, updated);
+      // Go through handleOpenChange (not setOpen directly) so
+      // props.onClose() actually fires: Kobalte only calls onOpenChange
+      // in response to its own close triggers, not when the `open`
+      // signal is set imperatively from outside.
+      handleOpenChange(false);
     } catch (err) {
       showError(err?.message || "Failed to update library.");
     } finally {

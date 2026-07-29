@@ -24,4 +24,14 @@ export function addLibrary(record) {
   setLibraries((prev) => [...(prev ?? []), record]);
 }
 
+// Patches a single library's fields in the shared signal (e.g. after
+// renaming it or replacing its cover via LibraryEditButton), so
+// LibrarySidebar reflects the change immediately without a refetch or a
+// full page reload.
+export function updateLibrary(id, patch) {
+  setLibraries((prev) =>
+    (prev ?? []).map((l) => (l.id === id ? { ...l, ...patch } : l)),
+  );
+}
+
 export { libraries };

@@ -51,7 +51,11 @@ export default function EditManifestButton(props) {
       if (cover()) {
         await setManifestCover(props.manifestId, cover());
       }
-      setOpen(false);
+      // Go through handleOpenChange (not setOpen directly) so
+      // props.onClose() actually fires: Kobalte only calls onOpenChange
+      // in response to its own close triggers, not when the `open`
+      // signal is set imperatively from outside.
+      handleOpenChange(false);
     } catch (err) {
       showError(err?.message || "Failed to update manifest.");
     } finally {

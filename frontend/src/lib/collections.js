@@ -22,4 +22,14 @@ export function addCollection(record) {
   setCollections((prev) => [record, ...(prev ?? [])]);
 }
 
+// Patches a single collection's fields in the shared signal (e.g. after
+// renaming it or replacing its cover via CollectionEditButton), so
+// CollectionSidebar reflects the change immediately without a refetch
+// or a full page reload.
+export function updateCollection(id, patch) {
+  setCollections((prev) =>
+    (prev ?? []).map((c) => (c.id === id ? { ...c, ...patch } : c)),
+  );
+}
+
 export { collections };

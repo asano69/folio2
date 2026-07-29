@@ -5,6 +5,7 @@ import { TextField } from "@kobalte/core/text-field";
 import Ellipsis from "lucide-solid/icons/ellipsis";
 import pb from "../lib/pb";
 import { showError } from "../lib/toast";
+import { updateCollection } from "../lib/collections";
 
 // Icon-only edit button shown next to a collection's label in
 // CollectionViewer. Opens a dialog to rename the collection and/or
@@ -46,8 +47,18 @@ export default function CollectionEditButton(props) {
       // PocketBase SDK switches to multipart/form-data automatically
       // whenever a File/Blob value is present.
       if (cover()) data.cover = cover();
-      await pb.collection("collections").update(props.collectionId, data);
-      setOpen(false);
+      const updated = await pb
+        .collection("collections")
+        .update(props.collectionId, data);
+      // Patch the sidebar's shared collections list immediately -- it's
+      // loaded once on mount and otherwise never learns about edits made
+      // from this dialog.
+      updateCollection(props.collectionId, updated);
+      // Go through handleOpenChange (not setOpen directly) so
+      // props.onClose() actually fires: Kobalte only calls onOpenChange
+      // in response to its own close triggers, not when the `open`
+      // signal is set imperatively from outside.
+      handleOpenChange(false);
     } catch (err) {
       showError(err?.message || "Failed to update collection.");
     } finally {
