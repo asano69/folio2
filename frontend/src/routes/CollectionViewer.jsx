@@ -19,11 +19,9 @@ async function fetchCollectionManifests(collectionId) {
     expand: "manifest",
   });
 
-  const manifests = links.map((link) => link.expand.manifest);
-
   return {
     label: collection.label,
-    manifests: await attachCovers(manifests),
+    manifests: links.map((link) => link.expand.manifest),
   };
 }
 
@@ -32,6 +30,15 @@ export default function CollectionViewer() {
   const [data, { refetch }] = createResource(
     () => params.id,
     fetchCollectionManifests,
+  );
+
+  // Covers are fetched as a second resource, sourced from `data`, so the
+  // grid can render (with fallback icons) as soon as the manifest list
+  // itself arrives, instead of waiting for every cover too. Solid
+  // re-runs this fetcher automatically whenever `data` changes.
+  const [manifestsWithCovers] = createResource(
+    () => data()?.manifests,
+    attachCovers,
   );
 
   return (
@@ -46,7 +53,7 @@ export default function CollectionViewer() {
           onClose={refetch}
         />
       </div>
-      <ManifestGrid manifests={data().manifests} />
+      <ManifestGrid manifests={manifestsWithCovers() ?? data().manifests} />
     </ViewerPage>
   );
 }

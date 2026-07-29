@@ -17,9 +17,7 @@ async function fetchManifests() {
   ]);
 
   const classifiedIds = new Set(links.map((link) => link.manifest));
-  const unclassified = manifests.filter((m) => !classifiedIds.has(m.id));
-
-  return attachCovers(unclassified);
+  return manifests.filter((m) => !classifiedIds.has(m.id));
 }
 
 export default function Catalog() {
@@ -28,9 +26,15 @@ export default function Catalog() {
   // disappears from this list without a page reload.
   const [manifests] = createResource(refreshKey, fetchManifests);
 
+  // Covers are fetched as a second resource, sourced from `manifests`, so
+  // the grid can render immediately once the manifest list itself is
+  // ready (with fallback icons), instead of waiting for covers too.
+  // Solid re-runs this fetcher automatically whenever `manifests` changes.
+  const [withCovers] = createResource(manifests, attachCovers);
+
   return (
     <Show when={manifests()} fallback={<Loading />}>
-      <ManifestGrid manifests={manifests()} />
+      <ManifestGrid manifests={withCovers() ?? manifests()} />
     </Show>
   );
 }
