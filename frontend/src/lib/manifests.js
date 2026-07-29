@@ -7,21 +7,24 @@ import pb from "./pb";
 // module's own fetchAllManifests, since all three need the same cover
 // lookup.
 export async function attachCovers(manifests) {
-  const covers = await Promise.all(
-    manifests.map((manifest) =>
-      pb
-        .collection("manifest_pages")
-        .getFirstListItem(
-          pb.filter("manifest = {:id} && position = 0", { id: manifest.id }),
-          { expand: "page.image" },
-        )
-        .catch(() => null),
-    ),
+  if (manifests.length === 0) return manifests;
+
+  // Single request for every manifest's cover (position 0 page), instead
+  // of one request per manifest. The old per-manifest approach turned a
+  // Home load into hundreds of individual round-trips once the manifest
+  // count grew, overwhelming the server.
+  const covers = await pb.collection("manifest_pages").getFullList({
+    filter: "position = 0",
+    expand: "manifest,page.image",
+  });
+
+  const coverByManifestId = new Map(
+    covers.map((c) => [c.manifest, c.expand?.page?.expand?.image ?? null]),
   );
 
-  return manifests.map((manifest, i) => ({
+  return manifests.map((manifest) => ({
     ...manifest,
-    coverImage: covers[i]?.expand?.page?.expand?.image ?? null,
+    coverImage: coverByManifestId.get(manifest.id) ?? null,
   }));
 }
 

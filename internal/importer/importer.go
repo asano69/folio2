@@ -55,6 +55,11 @@ func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
 	}
 	sort.Strings(names)
 
+	dupIndex, err := newManifestIndex(app)
+	if err != nil {
+		return nil, err
+	}
+
 	result := &Result{}
 	total := len(names)
 
@@ -67,7 +72,7 @@ func Run(app core.App, dir string, onProgress func(Progress)) (*Result, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, err := importSource(app, src, result); err != nil {
+		if _, err := importSource(app, src, result, dupIndex); err != nil {
 			return nil, errs.Newf("import %q: %v", name, err)
 		}
 	}
@@ -100,6 +105,11 @@ func ImportPaths(app core.App, paths []string, onProgress func(Progress)) (*Resu
 		return nil, err
 	}
 
+	dupIndex, err := newManifestIndex(app)
+	if err != nil {
+		return nil, err
+	}
+
 	result := &Result{}
 	total := len(items)
 
@@ -113,7 +123,7 @@ func ImportPaths(app core.App, paths []string, onProgress func(Progress)) (*Resu
 		if err != nil {
 			return nil, err
 		}
-		if _, err := importSource(app, src, result); err != nil {
+		if _, err := importSource(app, src, result, dupIndex); err != nil {
 			return nil, errs.Newf("import %q: %v", path, err)
 		}
 	}

@@ -14,7 +14,6 @@ import (
 	_ "image/png"  // registers the PNG format with image.DecodeConfig
 	"io"
 	"path/filepath"
-	"slices"
 
 	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
 	"time"
@@ -37,10 +36,10 @@ func resolveLabel(sourceLabel string, meta *folioMeta) string {
 
 // importSource registers src as one manifest, inside a single transaction
 // so a partially-imported book is never left behind. It returns false
-// (with no error) if src has no pages, or if an existing manifest already
-// has the exact same ordered sequence of images, in which case nothing is
-// created.
-func importSource(app core.App, src source, result *Result) (bool, error) {
+// (with no error) if src has no pages, or if dupIndex reports an existing
+// manifest with the exact same ordered sequence of images, in which case
+// nothing is created.
+func importSource(app core.App, src source, result *Result, dupIndex *manifestIndex) (bool, error) {
 	pages, err := src.Pages()
 	if err != nil {
 		return false, err
@@ -73,11 +72,7 @@ func importSource(app core.App, src source, result *Result) (bool, error) {
 		hashes[i] = hashBytes(data)
 	}
 
-	duplicate, err := findDuplicateManifest(app, hashes)
-	if err != nil {
-		return false, err
-	}
-	if duplicate != nil {
+	if dupIndex.Has(hashes) {
 		result.ManifestsSkipped++
 		return false, nil
 	}
@@ -123,6 +118,7 @@ func importSource(app core.App, src source, result *Result) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	dupIndex.Add(hashes)
 	return true, nil
 }
 
@@ -156,57 +152,6 @@ func decodeImageSize(data []byte) (width, height int, err error) {
 		return 0, 0, errs.Newf("decode image config: %v", err)
 	}
 	return cfg.Width, cfg.Height, nil
-}
-
-// findDuplicateManifest returns an existing manifest whose pages carry the
-// exact same ordered sequence of image hashes as hashes, or nil if no such
-// manifest exists. This lets re-importing an unchanged folder/archive
-// reuse the existing manifest instead of creating a duplicate.
-func findDuplicateManifest(app core.App, hashes []string) (*core.Record, error) {
-	manifests, err := app.FindRecordsByFilter("manifests", "", "-created", 0, 0)
-	if err != nil {
-		return nil, errs.Newf("list manifests: %v", err)
-	}
-
-	for _, manifest := range manifests {
-		existing, err := manifestImageHashes(app, manifest.Id)
-		if err != nil {
-			return nil, err
-		}
-		if slices.Equal(existing, hashes) {
-			return manifest, nil
-		}
-	}
-	return nil, nil
-}
-
-// manifestImageHashes returns the ordered list of image hashes for a
-// manifest's pages, following manifest_pages -> pages -> images.
-func manifestImageHashes(app core.App, manifestID string) ([]string, error) {
-	manifestPages, err := app.FindRecordsByFilter(
-		"manifest_pages",
-		"manifest = {:id}",
-		"position",
-		0, 0,
-		map[string]any{"id": manifestID},
-	)
-	if err != nil {
-		return nil, errs.Newf("list manifest pages: %v", err)
-	}
-
-	hashes := make([]string, 0, len(manifestPages))
-	for _, mp := range manifestPages {
-		page, err := app.FindRecordById("pages", mp.GetString("page"))
-		if err != nil {
-			return nil, errs.Newf("find page: %v", err)
-		}
-		image, err := app.FindRecordById("images", page.GetString("image"))
-		if err != nil {
-			return nil, errs.Newf("find image: %v", err)
-		}
-		hashes = append(hashes, image.GetString("hash"))
-	}
-	return hashes, nil
 }
 
 // findOrCreateImage returns the images record for a page, reusing an
