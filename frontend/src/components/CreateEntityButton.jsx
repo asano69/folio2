@@ -30,7 +30,13 @@ export default function CreateEntityButton(props) {
     if (!value) setLabel("");
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (e) => {
+    // e is undefined when called directly from the Create button's
+    // onClick, and a submit event when called via the form's onSubmit
+    // (Enter key inside the text field). preventDefault only applies in
+    // the latter case, so the page never actually navigates/reloads.
+    e?.preventDefault();
+
     const value = label().trim();
     if (!value) return;
 
@@ -57,19 +63,25 @@ export default function CreateEntityButton(props) {
           <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
             <Dialog.Content class="flex w-full max-w-sm flex-col gap-4 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-6 text-[var(--color-text)] shadow-lg">
               <Dialog.Title class="text-xl">{props.triggerLabel}</Dialog.Title>
-              <TextField value={label()} onChange={setLabel}>
-                <TextField.Input
-                  placeholder="Title"
-                  autofocus
-                  class="w-full rounded-md border px-3 py-2"
-                />
-              </TextField>
-              <div class="flex justify-end gap-2">
-                <Dialog.CloseButton as={Button}>Cancel</Dialog.CloseButton>
-                <Button onClick={handleCreate} disabled={creating()}>
-                  {creating() ? "Creating…" : "Create"}
-                </Button>
-              </div>
+              {/* Wrapped in a form so pressing Enter inside the text
+                  field submits (== Create), matching the Escape-to-cancel
+                  behavior Kobalte's Dialog already provides out of the
+                  box. */}
+              <form onSubmit={handleCreate} class="flex flex-col gap-4">
+                <TextField value={label()} onChange={setLabel}>
+                  <TextField.Input
+                    placeholder="Title"
+                    autofocus
+                    class="w-full rounded-md border px-3 py-2"
+                  />
+                </TextField>
+                <div class="flex justify-end gap-2">
+                  <Dialog.CloseButton as={Button}>Cancel</Dialog.CloseButton>
+                  <Button type="submit" disabled={creating()}>
+                    {creating() ? "Creating…" : "Create"}
+                  </Button>
+                </div>
+              </form>
             </Dialog.Content>
           </div>
         </Dialog.Portal>
