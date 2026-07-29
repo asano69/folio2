@@ -30,10 +30,13 @@ export async function attachCovers(manifests) {
 
 // Fetches every manifest, regardless of collection membership. Unlike
 // Catalog's fetchManifests (Home's "unclassified inbox"), this is the
-// complete list, used by the /manifests page.
-export async function fetchAllManifests() {
+// complete list, used by the /manifests page. When query is given, only
+// manifests whose label contains it are returned (substring match via
+// PocketBase's "~" operator; no fuzzy matching).
+export async function fetchAllManifests(query) {
+  const filter = query ? pb.filter("label ~ {:query}", { query }) : "";
   const manifests = await pb
     .collection("manifests")
-    .getFullList({ sort: "-created" });
+    .getFullList({ sort: "-created", filter });
   return attachCovers(manifests);
 }
