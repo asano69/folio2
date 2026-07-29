@@ -22,7 +22,18 @@ import (
 // (e.g. the CLI import command) whenever the other process held the
 // write lock for longer than that.
 func dbConnect(dbPath string) (*dbx.DB, error) {
-	pragmas := "?_pragma=busy_timeout(60000)&_pragma=journal_mode(WAL)&_pragma=journal_size_limit(200000000)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)&_pragma=temp_store(MEMORY)&_pragma=cache_size(-32000)"
+	// _txlock=immediate forces every transaction to grab the SQLite
+	// write lock immediately (BEGIN IMMEDIATE) instead of starting as a
+	// reader and trying to upgrade to a writer later (plain BEGIN).
+	// Without this, a transaction that reads before it writes (e.g.
+	// importSource's duplicate-image lookup before saving a new image
+	// record) can fail with SQLITE_BUSY_SNAPSHOT (error 517) the moment
+	// another process commits a write in between -- and busy_timeout
+	// does NOT help there, since it isn't "the lock is currently held,
+	// wait for it" but "your read snapshot is already stale". BEGIN
+	// IMMEDIATE turns that failure mode into an ordinary lock wait,
+	// which busy_timeout above can then actually retry.
+	pragmas := "?_pragma=busy_timeout(60000)&_pragma=journal_mode(WAL)&_pragma=journal_size_limit(200000000)&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)&_pragma=temp_store(MEMORY)&_pragma=cache_size(-32000)&_txlock=immediate"
 	return dbx.Open("sqlite", "file:"+dbPath+pragmas)
 }
 
