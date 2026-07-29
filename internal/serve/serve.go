@@ -25,6 +25,8 @@ import (
 func Run(app *pocketbase.PocketBase, cfg *config.Config) error {
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
+	registerImageHooks(app)
+
 	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
 		// Serves the whole Vite build output (index.html, hashed JS/CSS
 		// under assets/, and public/ files like favicon.svg copied to the

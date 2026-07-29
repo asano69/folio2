@@ -1,18 +1,27 @@
-// Package importer (image.go): resizes/recompresses JPEG and PNG page
-// images before they're stored. This file has no dependency on the
-// folder/zip source implementations, so it can be reused as-is for a
-// future input source (e.g. PDF).
-package importer
+// Package imageproc resizes/recompresses JPEG and PNG images before they
+// are stored, and provides the small set of helpers (size decoding,
+// content hashing) around that step. It has no dependency on where an
+// image comes from -- a folder import, a ZIP archive, or a direct API
+// upload (see internal/importer and internal/serve's images upload
+// hook) -- so all three share the exact same compression behavior.
+package imageproc
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
 	"image/png"
+	"log/slog"
 	"path/filepath"
 	"strings"
+
+	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
+
+	"github.com/asano69/folio/internal/errs"
 )
 
 const (
@@ -22,11 +31,45 @@ const (
 )
 
 // isCompressibleImage returns true for JPEG and PNG files, the only
-// formats this file knows how to re-encode. WebP pages are left
+// formats this file knows how to re-encode. WebP images are left
 // untouched (the standard library has no WebP encoder).
 func isCompressibleImage(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
 	return ext == ".jpg" || ext == ".jpeg" || ext == ".png"
+}
+
+// CompressForStorage resizes/recompresses data if it is a JPEG or PNG
+// that exceeds the thresholds below. Anything else -- a WebP image, or a
+// JPEG/PNG that fails to decode/encode -- is returned unchanged; a
+// compression failure should never abort an otherwise-valid save.
+func CompressForStorage(data []byte, name string) ([]byte, string) {
+	if !isCompressibleImage(name) {
+		return data, name
+	}
+	processed, newName, _, err := processImage(data, name)
+	if err != nil {
+		slog.Warn("image compression failed, storing original", "file", name, "error", err)
+		return data, name
+	}
+	return processed, newName
+}
+
+// DecodeSize returns the pixel width and height of image data.
+func DecodeSize(data []byte) (width, height int, err error) {
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return 0, 0, errs.Newf("decode image config: %v", err)
+	}
+	return cfg.Width, cfg.Height, nil
+}
+
+// HashBytes returns the hex-encoded SHA-256 digest of data, used as the
+// images.hash value so identical image content is recognised regardless
+// of which path it came in through (folder import, ZIP archive, or a
+// direct API upload).
+func HashBytes(data []byte) string {
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
 }
 
 // processImage resizes and/or compresses an image in memory.

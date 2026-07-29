@@ -6,22 +6,14 @@
 package importer
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
-	"image"
-	_ "image/jpeg" // registers the JPEG format with image.DecodeConfig
-	_ "image/png"  // registers the PNG format with image.DecodeConfig
 	"io"
-	"log/slog"
 	"path/filepath"
 	"runtime"
 	"sync"
-
-	_ "golang.org/x/image/webp" // registers the WebP format with image.DecodeConfig
 	"time"
 
 	"github.com/asano69/folio/internal/errs"
+	"github.com/asano69/folio/internal/imageproc"
 
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
@@ -72,7 +64,7 @@ func importSource(app core.App, src source, result *Result, dupIndex *manifestIn
 			return false, err
 		}
 		contents[i] = data
-		hashes[i] = hashBytes(data)
+		hashes[i] = imageproc.HashBytes(data)
 	}
 
 	if dupIndex.Has(hashes) {
@@ -147,39 +139,6 @@ func readPage(p sourcePage) ([]byte, error) {
 	return data, nil
 }
 
-// hashBytes returns the hex-encoded SHA-256 digest of data.
-func hashBytes(data []byte) string {
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
-}
-
-// compressForStorage resizes/recompresses data if it is a JPEG or PNG
-// that exceeds the thresholds in image.go. Anything else -- a WebP page,
-// or a JPEG/PNG that fails to decode/encode -- is stored as-is; a
-// compression failure should never abort an otherwise-valid import.
-func compressForStorage(data []byte, name string) ([]byte, string) {
-	if !isCompressibleImage(name) {
-		return data, name
-	}
-	processed, newName, _, err := processImage(data, name)
-	if err != nil {
-		slog.Warn("image compression failed, storing original", "file", name, "error", err)
-		return data, name
-	}
-	return processed, newName
-}
-
-// decodeImageSize returns the pixel width and height of image data, used
-// to populate images.width/height so viewers (e.g. PhotoSwipe) can lay
-// out pages without loading the full image first.
-func decodeImageSize(data []byte) (width, height int, err error) {
-	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
-	if err != nil {
-		return 0, 0, errs.Newf("decode image config: %v", err)
-	}
-	return cfg.Width, cfg.Height, nil
-}
-
 // compressedImage holds the compressForStorage output (bytes and,
 // possibly renamed, filename) computed ahead of time for one unique page
 // hash -- see compressNewImages.
@@ -218,7 +177,7 @@ func compressNewImages(app core.App, pages []sourcePage, contents [][]byte, hash
 		go func(hash string, in compressedImage) {
 			defer wg.Done()
 			defer func() { <-sem }()
-			data, name := compressForStorage(in.data, in.name)
+			data, name := imageproc.CompressForStorage(in.data, in.name)
 			mu.Lock()
 			results[hash] = compressedImage{data: data, name: name}
 			mu.Unlock()
@@ -255,7 +214,7 @@ func findOrCreateImage(app core.App, hash string, precompressed map[string]compr
 		return nil, false, errs.Newf("create image file: %v", err)
 	}
 
-	width, height, err := decodeImageSize(data)
+	width, height, err := imageproc.DecodeSize(data)
 	if err != nil {
 		return nil, false, err
 	}
