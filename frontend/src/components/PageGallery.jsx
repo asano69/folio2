@@ -33,9 +33,29 @@ export default function PageGallery(props) {
   // like a mistap while the chunk loads.
   const [isOpening, setIsOpening] = createSignal(false);
 
+  // Tracks whether the "close" handler below was reached because of a
+  // back-button press (via handlePopState) rather than the user closing
+  // the viewer some other way (X button, swipe-down, Escape).
+  let closedByBackButton = false;
+
+  // On mobile (PWA), the back button would otherwise navigate the
+  // underlying page while PhotoSwipe stays open on top of it. Closing
+  // the viewer here instead makes the back button do what the user
+  // expects: just close the viewer, without leaving the app.
+  const handlePopState = () => {
+    closedByBackButton = true;
+    pswp?.close();
+  };
+
   const openViewer = async (index) => {
     if (isOpening()) return;
     setIsOpening(true);
+
+    // Push a history entry so the back button triggers handlePopState
+    // above instead of navigating away underneath the open viewer.
+    closedByBackButton = false;
+    window.history.pushState({ photoswipe: true }, "");
+    window.addEventListener("popstate", handlePopState);
 
     const { default: PhotoSwipe } = await import("photoswipe");
     await import("photoswipe/style.css");
@@ -109,6 +129,14 @@ export default function PageGallery(props) {
     pswp.on("close", () => {
       props.onPositionChange?.(undefined);
       setIsOpening(false);
+      window.removeEventListener("popstate", handlePopState);
+      // If the viewer was closed some other way than the back button,
+      // pop the history entry pushed above ourselves, so it doesn't sit
+      // there as an extra step the next real back-button press has to
+      // get through first.
+      if (!closedByBackButton) {
+        window.history.back();
+      }
     });
 
     pswp.init();
