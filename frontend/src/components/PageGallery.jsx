@@ -156,6 +156,25 @@ export default function PageGallery(props) {
       }),
     });
 
+    // On mobile, vFill can crop the left/right edges of a page whenever
+    // its aspect ratio is wider than the viewport's. By default
+    // PhotoSwipe centers that crop, but a book page should instead stay
+    // anchored to its spine edge: the right edge while reading
+    // right-to-left (manga-style), the left edge while reading
+    // left-to-right. "calcBounds" fires every time pan bounds are
+    // (re)computed, including the one zoomAndPanToInitial() uses for the
+    // initial view, so overriding bounds.center.x here is enough --
+    // min/max (the actual pannable range) are left untouched, so the
+    // user can still pan the rest of the way by hand.
+    if (!isDesktop()) {
+      pswp.on("calcBounds", (e) => {
+        const { bounds } = e.slide;
+        if (bounds.max.x !== bounds.min.x) {
+          bounds.center.x = dir === "rl" ? bounds.max.x : bounds.min.x;
+        }
+      });
+    }
+
     // photoswipe-dynamic-caption-plugin expects a PhotoSwipeLightbox
     // instance, whose real PhotoSwipe instance lives at `lightbox.pswp`.
     // We use PhotoSwipe's core class directly instead of the Lightbox
