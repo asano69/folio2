@@ -121,6 +121,14 @@ All configuration is via environment variables.
 | `FOLIO_IMPORT_DIR` | `./import` | import dir |
 
 
+## Plan
+- [ ] バックエンドのOCR機能
+- [ ] メタデータによる高度な条件検索
+- [ ] 目次によるナビゲーション機能
+- [ ] エクスポート機能
+- [ ] ISBNからの書誌情報インポートプラグイン
+- [ ] 
+
 
 ## Tech Stack
 
