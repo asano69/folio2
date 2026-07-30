@@ -137,6 +137,12 @@ export default function PageGallery(props) {
       dataSource,
       index: mirrorIndex(index, dir, props.images.length),
       trapFocus: false,
+      // The built-in counter always counts up from 1 in PhotoSwipe's own
+      // (already direction-mirrored) dataSource order, so it still shows
+      // 1/200 -> 200/200 while reading "rl". Replaced with a custom
+      // element below so it counts down (200/200 -> 1/200) to match the
+      // manifest's original page order instead.
+      counter: false,
     });
 
     // photoswipe-dynamic-caption-plugin expects a PhotoSwipeLightbox
@@ -207,6 +213,30 @@ export default function PageGallery(props) {
             pageId: item.pageId,
             description: item.description,
           });
+        },
+      });
+
+      // Replaces the disabled built-in counter (see the "counter: false"
+      // option above). While reading "rl", currIndex still counts up
+      // through PhotoSwipe's mirrored dataSource, so the numerator is
+      // flipped here to count down instead, matching the manifest's
+      // original page order.
+      pswp.ui.registerElement({
+        name: "counter-indicator",
+        order: 5,
+        // Reuses PhotoSwipe's own "pswp__counter" class instead of
+        // writing custom CSS, so this custom element inherits the same
+        // white-on-dark styling as the built-in counter it replaces.
+        className: "pswp__counter",
+        onInit: (el, pswpInstance) => {
+          const updateCounter = () => {
+            const total = pswpInstance.getNumItems();
+            const current =
+              dir === "rl" ? total - pswpInstance.currIndex : pswpInstance.currIndex + 1;
+            el.innerText = current + pswpInstance.options.indexIndicatorSep + total;
+          };
+          pswpInstance.on("change", updateCounter);
+          updateCounter();
         },
       });
     });
