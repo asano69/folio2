@@ -3,6 +3,7 @@ import { TextField } from "@kobalte/core/text-field";
 import { Button } from "@kobalte/core/button";
 import Loading from "./Loading";
 import ManifestGrid from "./ManifestGrid";
+import SearchBox from "./SearchBox";
 import { hiddenManifestIds } from "../lib/manifestsRefresh";
 import { fetchManifestsPage } from "../lib/manifests";
 import { useInfiniteList } from "../lib/useInfiniteList";
@@ -16,22 +17,14 @@ import { useInfiniteList } from "../lib/useInfiniteList";
 // is added to a collection (see lib/classification.js), it disappears
 // from here.
 export default function Catalog() {
-  // The search box only searches on submit (Enter or the button), not on
-  // every keystroke, so `query` (what was actually searched for) is kept
-  // separate from `input` (the field's current text) -- same split as
-  // routes/Manifests.jsx.
-  const [input, setInput] = createSignal("");
+  // `query` is a signal fed by SearchBox's onSearch -- see
+  // components/SearchBox.jsx.
   const [query, setQuery] = createSignal("");
 
   const { items, loading, sentinelRef } = useInfiniteList(
     (q, page) => fetchManifestsPage(q, page, { unclassifiedOnly: true }),
     query,
   );
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setQuery(input());
-  };
 
   // Excludes manifests just dropped onto a collection (see
   // lib/classification.js). This is a plain synchronous filter over
@@ -44,16 +37,7 @@ export default function Catalog() {
 
   return (
     <>
-      <form onSubmit={handleSearch} class="flex w-full gap-2">
-        <TextField value={input()} onChange={setInput} class="flex-1">
-          <TextField.Input
-            type="search"
-            placeholder="Search by label"
-            class="w-full rounded-md border px-3 py-2"
-          />
-        </TextField>
-        <Button type="submit">Search</Button>
-      </form>
+      <SearchBox placeholder="Search by label" onSearch={setQuery} />
       <ManifestGrid manifests={visible()} />
       {/* Invisible marker the IntersectionObserver watches; when it
           scrolls into view, the hook fetches the next page. */}

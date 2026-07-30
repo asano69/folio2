@@ -1,8 +1,7 @@
 import { Show, createSignal } from "solid-js";
-import { TextField } from "@kobalte/core/text-field";
-import { Button } from "@kobalte/core/button";
 import ManifestGrid from "../components/ManifestGrid";
 import Loading from "../components/Loading";
+import SearchBox from "../components/SearchBox";
 import { fetchManifestsPage } from "../lib/manifests";
 import { useInfiniteList } from "../lib/useInfiniteList";
 
@@ -19,11 +18,10 @@ import { useInfiniteList } from "../lib/useInfiniteList";
 // bottom, via an IntersectionObserver watching a sentinel element placed
 // after the grid.
 //
-// The search box only searches on submit (Enter or the button), not on
-// every keystroke, so `query` (what was actually searched for) is kept
-// separate from `input` (the field's current text).
+// `query` (what was actually searched for) is a signal fed by SearchBox's
+// onSearch, kept separate from the box's own internal input text -- see
+// components/SearchBox.jsx.
 export default function Manifests() {
-  const [input, setInput] = createSignal("");
   const [query, setQuery] = createSignal("");
 
   const { items, loading, sentinelRef } = useInfiniteList(
@@ -31,23 +29,9 @@ export default function Manifests() {
     query,
   );
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setQuery(input());
-  };
-
   return (
     <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
-      <form onSubmit={handleSearch} class="flex w-full gap-2">
-        <TextField value={input()} onChange={setInput} class="flex-1">
-          <TextField.Input
-            type="search"
-            placeholder="Search by label"
-            class="w-full rounded-md border px-3 py-2"
-          />
-        </TextField>
-        <Button type="submit">Search</Button>
-      </form>
+      <SearchBox placeholder="Search by label" onSearch={setQuery} />
       <ManifestGrid manifests={items()} />
       {/* Invisible marker the IntersectionObserver watches; when it
           scrolls into view, the hook fetches the next page. */}
