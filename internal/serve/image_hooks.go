@@ -36,8 +36,15 @@ func registerImageHooks(app *pocketbase.PocketBase) {
 
 	for _, name := range []string{"collections", "libraries"} {
 		compressCover := func(e *core.RecordRequestEvent) error {
-			if _, err := compressUploadedFile(e.Record, "cover"); err != nil {
+			compressed, err := compressUploadedFile(e.Record, "cover")
+			if err != nil {
 				return err
+			}
+			// Fills in width/height/size for the cover, the same way
+			// compressUploadedImage does for the "images" collection --
+			// see setImageSizeFields.
+			if compressed != nil {
+				setImageSizeFields(e.Record, compressed)
 			}
 			return e.Next()
 		}
@@ -79,6 +86,20 @@ func compressUploadedFile(record *core.Record, fieldName string) ([]byte, error)
 	return compressed, nil
 }
 
+// setImageSizeFields fills in width/height/size on record from already-
+// compressed image bytes. Shared by compressUploadedImage (the "images"
+// collection) and the collections/libraries cover hooks above, so a
+// cover gets the exact same size metadata an images record does.
+func setImageSizeFields(record *core.Record, compressed []byte) {
+	width, height, err := imageproc.DecodeSize(compressed)
+	if err != nil {
+		slog.Warn("decode uploaded image size", "error", err)
+	}
+	record.Set("width", width)
+	record.Set("height", height)
+	record.Set("size", len(compressed))
+}
+
 // compressUploadedImage compresses the "images" record's "image" field
 // and fills in the record's width/height/size/hash/status fields with the
 // result. A record with no uploaded file is left untouched.
@@ -91,13 +112,7 @@ func compressUploadedImage(record *core.Record) error {
 		return nil
 	}
 
-	width, height, err := imageproc.DecodeSize(compressed)
-	if err != nil {
-		slog.Warn("decode uploaded image size", "error", err)
-	}
-	record.Set("width", width)
-	record.Set("height", height)
-	record.Set("size", len(compressed))
+	setImageSizeFields(record, compressed)
 
 	// The frontend upload doesn't send these (see lib/manifestCover.js);
 	// fill them in here so the "images" collection's required "hash"
