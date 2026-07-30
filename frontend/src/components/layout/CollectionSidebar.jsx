@@ -1,9 +1,17 @@
-import { onMount } from "solid-js";
+import { createMemo, onMount } from "solid-js";
 import Library from "lucide-solid/icons/library";
 import pb from "../../lib/pb";
 import { collections, loadCollections } from "../../lib/collections";
+import { loadLibraries } from "../../lib/libraries";
 import { isDesktop } from "../../lib/viewport";
 import SidebarList from "./SidebarList";
+import CollectionLibraryFilter from "./CollectionLibraryFilter";
+import {
+  collectionLibraryFilter,
+  loadCollectionLibraryFilter,
+  FILTER_ALL,
+  FILTER_UNCLASSIFIED,
+} from "./collectionLibraryFilter";
 import { setSidebarOpen } from "./uiState";
 import { DROP_TARGET_COLLECTION } from "../../lib/dragTypes";
 
@@ -22,11 +30,30 @@ const THUMB_SIZE = 48;
 // would attach onDragOver/onDrop (see lib/dragTypes.js for the shared
 // drag data format).
 export default function CollectionSidebar() {
-  onMount(loadCollections);
+  onMount(() => {
+    loadCollections();
+    loadLibraries();
+    loadCollectionLibraryFilter();
+  });
+
+  // Narrows the shared collections list down to the currently selected
+  // library (see CollectionLibraryFilter.jsx), leaving it untouched
+  // (including null while still loading) when no filter is active.
+  const filteredCollections = createMemo(() => {
+    const filter = collectionLibraryFilter();
+    const items = collections();
+    if (!items || filter === FILTER_ALL) return items;
+    if (filter === FILTER_UNCLASSIFIED) {
+      return items.filter((c) => !c.library?.length);
+    }
+    return items.filter((c) => c.library?.includes(filter));
+  });
 
   return (
-    <SidebarList
-      items={collections()}
+    <>
+      <CollectionLibraryFilter />
+      <SidebarList
+      items={filteredCollections()}
       icon={Library}
       getHref={(collection) => `/collections/${collection.id}`}
       getImageUrl={(collection) =>
@@ -50,6 +77,7 @@ export default function CollectionSidebar() {
           if (!isDesktop()) setSidebarOpen(false);
         },
       })}
-    />
+      />
+    </>
   );
 }
