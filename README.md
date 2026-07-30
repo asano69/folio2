@@ -130,6 +130,7 @@ All configuration is via environment variables.
 - [ ] Homeに未整理のコレクションを表示する
 - [ ] ページタグ機能
 - [ ] 孤立ページの削除機能
+- [ ] しおり機能（しおりを挟んだ位置から、再開することができる）
 
 
 ## Tech Stack
