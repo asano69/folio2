@@ -4,6 +4,7 @@ import { Image } from "@kobalte/core/image";
 import ImageIcon from "lucide-solid/icons/image";
 import pb from "../lib/pb";
 import NoteEditor from "./NoteEditor";
+import { isDesktop } from "../lib/viewport";
 
 // Renders a thumbnail grid and opens a PhotoSwipe lightbox on click.
 // PhotoSwipe's core class is instantiated directly against a dataSource
@@ -27,12 +28,14 @@ export default function PageGallery(props) {
   // already open or still loading. Opening is async (photoswipe is a
   // dynamically imported chunk), so on mobile a slow first tap leaves a
   // window where extra taps on a thumbnail would otherwise each start
-  // their own PhotoSwipe instance.
-  let opening = false;
+  // their own PhotoSwipe instance. Also drives the edge loader below, so
+  // on mobile a tap gets an immediate visual response instead of looking
+  // like a mistap while the chunk loads.
+  const [isOpening, setIsOpening] = createSignal(false);
 
   const openViewer = async (index) => {
-    if (opening) return;
-    opening = true;
+    if (isOpening()) return;
+    setIsOpening(true);
 
     const { default: PhotoSwipe } = await import("photoswipe");
     await import("photoswipe/style.css");
@@ -105,10 +108,13 @@ export default function PageGallery(props) {
     // eslint-disable-next-line solid/reactivity
     pswp.on("close", () => {
       props.onPositionChange?.(undefined);
-      opening = false;
+      setIsOpening(false);
     });
 
     pswp.init();
+    // The lightbox shell is mounted synchronously by init(), so the
+    // loader is no longer needed once this returns.
+    setIsOpening(false);
   };
 
   // Deep-link support: if the URL already has ?i=N when this gallery
@@ -151,6 +157,12 @@ export default function PageGallery(props) {
 
   return (
     <>
+      {/* Mobile-only: PhotoSwipe's dynamic import + init takes a
+          noticeable moment on a slow connection, so without this a tap
+          looks identical to a mistap until the viewer actually appears. */}
+      <Show when={!isDesktop() && isOpening()}>
+        <div class="fixed top-4 right-4 z-[100000] h-6 w-6 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-500 dark:border-neutral-700 dark:border-t-neutral-300" />
+      </Show>
       <div class="flex flex-wrap gap-2">
         <For each={props.images}>
           {(item, i) => (
