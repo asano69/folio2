@@ -66,9 +66,15 @@ export default function InlineCreateButton(props) {
           cancels too so this never gets stuck open. */}
       <form onSubmit={handleSubmit}>
         <TextField value={value()} onChange={setValue}>
+          {/* autofocus doesn't reliably fire on elements inserted after
+              the initial render, so focus is set imperatively via ref
+              instead. The ref callback runs before the element is
+              attached to the DOM, so focus() has to be deferred to a
+              microtask -- calling it immediately would target a
+              detached node and silently do nothing. */}
           <TextField.Input
+            ref={(el) => queueMicrotask(() => el.focus())}
             placeholder={props.label}
-            autofocus
             onKeyDown={(e) => e.key === "Escape" && stopEditing()}
             onBlur={stopEditing}
             class="w-full rounded-md border px-3 py-1.5 text-sm"
