@@ -6,9 +6,12 @@ import SideBar from "./SideBar";
 import CollectionSidebar from "./CollectionSidebar";
 import LibrarySidebar from "./LibrarySidebar";
 import SidebarViewSelect from "./SidebarViewSelect";
+import InlineCreateButton from "./InlineCreateButton";
 import { sidebarView, loadSidebarView } from "./sidebarView";
 import { loadSidebarOpen } from "./uiState";
 import { handleClassificationDrop } from "../../lib/classification";
+import { addCollection } from "../../lib/collections";
+import { addLibrary } from "../../lib/libraries";
 
 // Wraps every route so NavBar renders once regardless of page (it's
 // global chrome, not something that should vary per route). SideBar is
@@ -46,7 +49,27 @@ export default function AppShell(props) {
       }
     >
       <div class="flex min-h-screen w-full">
-        <SideBar title={<SidebarViewSelect />}>
+        <SideBar
+          title={<SidebarViewSelect />}
+          footer={
+            <Show
+              when={sidebarView() === "collections"}
+              fallback={
+                <InlineCreateButton
+                  collection="libraries"
+                  label="New Library"
+                  onCreated={addLibrary}
+                />
+              }
+            >
+              <InlineCreateButton
+                collection="collections"
+                label="New Collection"
+                onCreated={addCollection}
+              />
+            </Show>
+          }
+        >
           <Show when={sidebarView() === "collections"}>
             <CollectionSidebar />
           </Show>

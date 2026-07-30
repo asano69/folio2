@@ -105,6 +105,14 @@ export default function SideBar(props) {
             <div class="min-h-0 flex-1 overflow-y-auto">
               <Show when={sidebarOpen()}>{props.children}</Show>
             </div>
+            {/* Fixed footer (e.g. InlineCreateButton, see AppShell.jsx):
+                sits outside the scrollable div above, so it stays
+                visible at the bottom instead of scrolling away. */}
+            <Show when={sidebarOpen() && props.footer}>
+              <div class="shrink-0 border-t border-[var(--color-border-soft)] pt-3">
+                {props.footer}
+              </div>
+            </Show>
           </div>
         </>
       }
@@ -151,9 +159,15 @@ export default function SideBar(props) {
           </div>
         </Show>
         <Show when={sidebarOpen()}>
-          <div class="flex w-80 flex-1 flex-col gap-4 overflow-y-auto px-6 pb-6">
+          <div class="flex min-h-0 w-80 flex-1 flex-col gap-4 overflow-y-auto px-6">
             {props.children}
           </div>
+          {/* Same fixed-footer behavior as the mobile overlay above. */}
+          <Show when={props.footer}>
+            <div class="w-80 shrink-0 border-t border-[var(--color-border-soft)] px-6 py-3">
+              {props.footer}
+            </div>
+          </Show>
         </Show>
       </aside>
     </Show>
