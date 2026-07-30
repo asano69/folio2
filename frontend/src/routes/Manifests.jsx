@@ -2,6 +2,8 @@ import {
   Show,
   createSignal,
   createEffect,
+  on,
+  untrack,
   onMount,
   onCleanup,
 } from "solid-js";
@@ -59,13 +61,22 @@ export default function Manifests() {
 
   // Restarts the list from page 1 whenever the search query changes
   // (including the initial load, since this also runs once on mount).
-  createEffect(() => {
-    query();
-    setManifests([]);
-    setPage(1);
-    setHasMore(true);
-    loadMore();
-  });
+  // Wrapped in on(query, ...) so only `query` is tracked as a
+  // dependency -- loadMore() also reads page()/hasMore()/loading() (before
+  // its first await), and without on()/untrack() those reads would make
+  // this effect a dependent of them too. Since loadMore() itself calls
+  // setPage()/setHasMore() once its fetch resolves, that would re-trigger
+  // this same effect, wiping the list and restarting from page 1 in an
+  // infinite loop -- which is exactly the runaway request storm and
+  // permanently-spinning loader observed.
+  createEffect(
+    on(query, () => {
+      setManifests([]);
+      setPage(1);
+      setHasMore(true);
+      untrack(loadMore);
+    }),
+  );
 
   onMount(() => {
     const observer = new IntersectionObserver((entries) => {
