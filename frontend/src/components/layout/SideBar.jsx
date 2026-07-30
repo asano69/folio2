@@ -102,7 +102,7 @@ export default function SideBar(props) {
                 view along with the list. Content itself stays Show-gated
                 so it isn't fetched/rendered until the panel is actually
                 opened, even though the panel wrapper is always mounted. */}
-            <div class="min-h-0 flex-1 overflow-y-auto">
+            <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
               <Show when={sidebarOpen()}>{props.children}</Show>
             </div>
             {/* Fixed footer (e.g. InlineCreateButton, see AppShell.jsx):

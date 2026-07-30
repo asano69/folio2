@@ -49,7 +49,7 @@ export default function SidebarList(props) {
         <TextField.Input
           type="search"
           placeholder="Search…"
-          class="my-3 w-full rounded-md border px-3 py-1.5 text-sm"
+          class="w-full rounded-md border px-3 py-1.5 text-sm"
         />
       </TextField>
       <ul class="flex flex-col">

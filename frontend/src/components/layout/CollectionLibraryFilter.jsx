@@ -31,40 +31,35 @@ export default function CollectionLibraryFilter() {
     options().find((o) => o.id === collectionLibraryFilter()) ?? ALL_OPTION;
 
   return (
-    // mt-2: breathing room from the header row above (the sidebar's
-    // outer flex container has no gap before its first child).
-    // -mb-3: cancels out the search box's own top margin (my-3, see
-    // SidebarList.jsx) so it doesn't stack on top of the outer
-    // container's gap-4, which otherwise doubled the visible space
-    // between this filter and the search box below it.
-    <div class="mt-2 -mb-3">
-      <Select
-        options={options()}
-        optionValue="id"
-        optionTextValue="label"
-        value={selectedOption()}
-        onChange={(option) => option && setCollectionLibraryFilter(option.id)}
-        itemComponent={(props) => (
-          <Select.Item
-            item={props.item}
-            class="cursor-pointer rounded px-3 py-1.5 data-[highlighted]:bg-[var(--color-hover-bg)]"
-          >
-            <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
-          </Select.Item>
-        )}
-      >
-        <Select.Trigger
-          aria-label="Filter by library"
-          class="w-full justify-between rounded-md border border-[var(--color-border-soft)] bg-transparent px-3 py-1.5 text-sm font-normal shadow-none hover:border-[var(--color-border-soft)] hover:bg-transparent active:border-[var(--color-border-soft)] active:bg-transparent active:shadow-none"
+    // Spacing between this filter and the search box/list below it is
+    // handled entirely by the parent's flex gap (see SideBar.jsx), not
+    // by margins here.
+    <Select
+      options={options()}
+      optionValue="id"
+      optionTextValue="label"
+      value={selectedOption()}
+      onChange={(option) => option && setCollectionLibraryFilter(option.id)}
+      itemComponent={(props) => (
+        <Select.Item
+          item={props.item}
+          class="cursor-pointer rounded px-3 py-1.5 data-[highlighted]:bg-[var(--color-hover-bg)]"
         >
-          <Select.Value>{(state) => state.selectedOption()?.label}</Select.Value>
-        </Select.Trigger>
-        <Select.Portal>
-          <Select.Content class="z-60 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] p-1 shadow-md">
-            <Select.Listbox />
-          </Select.Content>
-        </Select.Portal>
-      </Select>
-    </div>
+          <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+        </Select.Item>
+      )}
+    >
+      <Select.Trigger
+        aria-label="Filter by library"
+        class="w-full justify-between rounded-md border border-[var(--color-border-soft)] bg-transparent px-3 py-1.5 text-sm font-normal shadow-none hover:border-[var(--color-border-soft)] hover:bg-transparent active:border-[var(--color-border-soft)] active:bg-transparent active:shadow-none"
+      >
+        <Select.Value>{(state) => state.selectedOption()?.label}</Select.Value>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Content class="z-60 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg)] p-1 shadow-md">
+          <Select.Listbox />
+        </Select.Content>
+      </Select.Portal>
+    </Select>
   );
 }
