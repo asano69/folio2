@@ -32,7 +32,7 @@ export default function SidebarViewSelect() {
     >
       <Select.Trigger
         aria-label="Sidebar view"
-        class="w-32 my-1  justify-between font-medium border-none bg-transparent px-0 py-0 shadow-none text-xl hover:border-transparent hover:bg-transparent active:border-transparent active:bg-transparent active:shadow-none"
+        class="w-32 justify-between font-medium border-none bg-transparent px-0 py-0 shadow-none text-xl hover:border-transparent hover:bg-transparent active:border-transparent active:bg-transparent active:shadow-none"
       >
         <Select.Value>{(state) => state.selectedOption()?.label}</Select.Value>
       </Select.Trigger>
