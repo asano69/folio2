@@ -68,6 +68,7 @@ func main() {
 	root.AddCommand(
 		serveCmd(app),
 		importCmd(app),
+		gcCmd(app),
 		backfillImageSizesCmd(app), // one-off, remove after running
 		pbcmd.NewSuperuserCommand(app),
 	)
