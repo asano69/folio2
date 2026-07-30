@@ -1,46 +1,41 @@
-import { Show, createResource, createMemo } from "solid-js";
-import pb from "../lib/pb";
+import { Show, createMemo } from "solid-js";
 import Loading from "./Loading";
 import ManifestGrid from "./ManifestGrid";
 import { hiddenManifestIds } from "../lib/manifestsRefresh";
-import { attachCovers } from "../lib/manifests";
+import { fetchManifestsPage } from "../lib/manifests";
+import { useInfiniteList } from "../lib/useInfiniteList";
 
-// Fetches every manifest that isn't linked to any collection yet, so Home
-// acts as an "inbox" of unclassified manifests. Once a manifest is added
-// to a collection (see lib/classification.js), it disappears from here.
-// For the complete list regardless of collection membership, see the
-// /manifests page (lib/manifests.js's fetchAllManifests).
-async function fetchManifests() {
-  const [manifests, links] = await Promise.all([
-    pb.collection("manifests").getFullList({ sort: "-created" }),
-    pb.collection("collection_manifests").getFullList({ fields: "manifest" }),
-  ]);
-
-  const classifiedIds = new Set(links.map((link) => link.manifest));
-  return manifests.filter((m) => !classifiedIds.has(m.id));
-}
-
+// Home's "inbox" of manifests not yet linked to any collection. Loaded
+// page by page via the same infinite-scroll hook the /manifests page
+// uses (see lib/useInfiniteList.js and routes/Manifests.jsx), asking the
+// server to only return unclassified manifests (fetchManifestsPage's
+// unclassifiedOnly option) instead of fetching every manifest and every
+// collection_manifests link and filtering client-side. Once a manifest
+// is added to a collection (see lib/classification.js), it disappears
+// from here.
 export default function Catalog() {
-  const [manifests] = createResource(fetchManifests);
-
-  // Covers are fetched once for the full, unfiltered manifest list (not
-  // re-run every time a manifest is hidden -- see below). Solid re-runs
-  // this fetcher automatically whenever `manifests` itself changes.
-  const [withCovers] = createResource(manifests, attachCovers);
+  const { items, loading, sentinelRef } = useInfiniteList((_query, page) =>
+    fetchManifestsPage(undefined, page, { unclassifiedOnly: true }),
+  );
 
   // Excludes manifests just dropped onto a collection (see
   // lib/classification.js). This is a plain synchronous filter over
   // whatever's already loaded, so a drop hides the item instantly
-  // instead of waiting on another cover-fetch round-trip.
+  // instead of waiting on the next scroll-triggered page fetch to
+  // reflect it.
   const visible = createMemo(() =>
-    (withCovers() ?? manifests())?.filter(
-      (m) => !hiddenManifestIds().has(m.id),
-    ),
+    items().filter((m) => !hiddenManifestIds().has(m.id)),
   );
 
   return (
-    <Show when={manifests()} fallback={<Loading />}>
+    <>
       <ManifestGrid manifests={visible()} />
-    </Show>
+      {/* Invisible marker the IntersectionObserver watches; when it
+          scrolls into view, the hook fetches the next page. */}
+      <div ref={sentinelRef} />
+      <Show when={loading()}>
+        <Loading />
+      </Show>
+    </>
   );
 }

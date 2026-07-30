@@ -35,24 +35,37 @@ export async function attachCovers(manifests) {
   }));
 }
 
-// Number of manifests fetched per page on the /manifests route (see
-// fetchManifestsPage / routes/Manifests.jsx's infinite scroll).
+// Number of manifests fetched per page, shared by the /manifests route
+// and Home's Catalog (see lib/useInfiniteList.js's infinite scroll).
 const MANIFESTS_PAGE_SIZE = 40;
 
-// Fetches one page of manifests, regardless of collection membership.
-// Unlike Catalog's fetchManifests (Home's "unclassified inbox"), this
-// covers the complete list, used by the /manifests page. When query is
-// given, only manifests whose label contains it are returned (substring
-// match via PocketBase's "~" operator; no fuzzy matching).
-//
-// `page` is 1-based, matching PocketBase's getList. Returns `hasMore` so
-// the caller (an IntersectionObserver-driven infinite scroll) knows
+// Fetches one page of manifests, sorted newest first. `page` is 1-based,
+// matching PocketBase's getList. Returns `hasMore` so the caller (an
+// IntersectionObserver-driven infinite scroll, see useInfiniteList) knows
 // whether to keep requesting further pages.
-export async function fetchManifestsPage(query, page) {
-  const filter = query ? pb.filter("label ~ {:query}", { query }) : "";
+//
+// `query`, if given, restricts results to manifests whose label contains
+// it (substring match via PocketBase's "~" operator; no fuzzy matching).
+//
+// `options.unclassifiedOnly` restricts results to manifests with no
+// collection_manifests link at all -- Home's "unclassified inbox" (see
+// components/Catalog.jsx). This is computed via a PocketBase
+// back-relation filter (collection_manifests_via_manifest), so it can be
+// paginated server-side instead of fetching every manifest plus every
+// collection_manifests link and filtering client-side.
+export async function fetchManifestsPage(query, page, options = {}) {
+  const filters = [];
+  if (query) filters.push(pb.filter("label ~ {:query}", { query }));
+  if (options.unclassifiedOnly) {
+    filters.push("collection_manifests_via_manifest.id = ''");
+  }
+
   const result = await pb
     .collection("manifests")
-    .getList(page, MANIFESTS_PAGE_SIZE, { sort: "-created", filter });
+    .getList(page, MANIFESTS_PAGE_SIZE, {
+      sort: "-created",
+      filter: filters.join(" && "),
+    });
   return {
     items: await attachCovers(result.items),
     hasMore: page < result.totalPages,
