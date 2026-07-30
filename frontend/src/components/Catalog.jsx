@@ -1,4 +1,6 @@
-import { Show, createMemo } from "solid-js";
+import { Show, createMemo, createSignal } from "solid-js";
+import { TextField } from "@kobalte/core/text-field";
+import { Button } from "@kobalte/core/button";
 import Loading from "./Loading";
 import ManifestGrid from "./ManifestGrid";
 import { hiddenManifestIds } from "../lib/manifestsRefresh";
@@ -14,9 +16,22 @@ import { useInfiniteList } from "../lib/useInfiniteList";
 // is added to a collection (see lib/classification.js), it disappears
 // from here.
 export default function Catalog() {
-  const { items, loading, sentinelRef } = useInfiniteList((_query, page) =>
-    fetchManifestsPage(undefined, page, { unclassifiedOnly: true }),
+  // The search box only searches on submit (Enter or the button), not on
+  // every keystroke, so `query` (what was actually searched for) is kept
+  // separate from `input` (the field's current text) -- same split as
+  // routes/Manifests.jsx.
+  const [input, setInput] = createSignal("");
+  const [query, setQuery] = createSignal("");
+
+  const { items, loading, sentinelRef } = useInfiniteList(
+    (q, page) => fetchManifestsPage(q, page, { unclassifiedOnly: true }),
+    query,
   );
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setQuery(input());
+  };
 
   // Excludes manifests just dropped onto a collection (see
   // lib/classification.js). This is a plain synchronous filter over
@@ -29,6 +44,16 @@ export default function Catalog() {
 
   return (
     <>
+      <form onSubmit={handleSearch} class="flex w-full gap-2">
+        <TextField value={input()} onChange={setInput} class="flex-1">
+          <TextField.Input
+            type="search"
+            placeholder="Search by label"
+            class="w-full rounded-md border px-3 py-2"
+          />
+        </TextField>
+        <Button type="submit">Search</Button>
+      </form>
       <ManifestGrid manifests={visible()} />
       {/* Invisible marker the IntersectionObserver watches; when it
           scrolls into view, the hook fetches the next page. */}
