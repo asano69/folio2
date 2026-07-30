@@ -6,7 +6,7 @@ import { useDraggable } from "@dnd-kit/solid";
 import ViewerPage from "../components/ViewerPage";
 import LibraryEditButton from "../components/LibraryEditButton";
 import pb from "../lib/pb";
-import { isDesktop } from "../lib/viewport";
+import { useClassificationDraggable } from "../lib/useClassificationDraggable";
 import { DRAG_TYPE_COLLECTION_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size for every collection card, matching Collections.jsx.
@@ -53,21 +53,15 @@ export default function LibraryViewer() {
       <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
         <For each={data().collections}>
           {(collection) => {
-            // Desktop-only drag (see ManifestGrid.jsx for why touch-none
-            // is skipped on mobile).
-            const draggable = useDraggable({
-              id: `collection-${collection.id}`,
-              data: {
-                type: DRAG_TYPE_COLLECTION_ID,
-                collectionId: collection.id,
-              },
-            });
-            const desktop = isDesktop();
+            const draggable = useClassificationDraggable(
+              `collection-${collection.id}`,
+              { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
+            );
             return (
               <A
-                ref={desktop ? draggable.ref : undefined}
+                ref={draggable.ref}
                 href={`/collections/${collection.id}`}
-                class={`flex flex-col gap-2${desktop ? " touch-none" : ""}`}
+                class={`flex flex-col gap-2${draggable.touchClass}`}
                 style={{
                   width: `${THUMB_WIDTH}px`,
                   opacity: draggable.isDragging() ? 0.5 : 1,

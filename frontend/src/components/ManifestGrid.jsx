@@ -2,9 +2,8 @@ import { For } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import BookOpen from "lucide-solid/icons/book-open";
-import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
-import { isDesktop } from "../lib/viewport";
+import { useClassificationDraggable } from "../lib/useClassificationDraggable";
 import { DRAG_TYPE_MANIFEST_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size so every cover lines up in a neat grid regardless
@@ -26,25 +25,15 @@ export default function ManifestGrid(props) {
           // to add this manifest to that collection. dnd-kit's default
           // activation distance keeps a plain tap/click still working as
           // navigation.
-          const draggable = useDraggable({
-            id: `manifest-${manifest.id}`,
-            data: { type: DRAG_TYPE_MANIFEST_ID, manifestId: manifest.id },
-          });
-          // Drag-to-classify is desktop-only: touch-none (needed so
-          // dnd-kit's drag gesture doesn't fight the browser's own touch
-          // scrolling) also blocks ordinary flick-scrolling whenever a
-          // finger starts on a card, which made scrolling the grid on
-          // mobile unreliable. The sidebar drop target isn't visible on
-          // mobile anyway (it's an overlay opened from NavBar, not a
-          // persistent rail), so dragging is skipped there: no ref (so
-          // dnd-kit never grabs the pointer) and no touch-none (so
-          // native scrolling stays in control).
-          const desktop = isDesktop();
+          const draggable = useClassificationDraggable(
+            `manifest-${manifest.id}`,
+            { type: DRAG_TYPE_MANIFEST_ID, manifestId: manifest.id },
+          );
           return (
             <A
-              ref={desktop ? draggable.ref : undefined}
+              ref={draggable.ref}
               href={`/manifests/${manifest.id}`}
-              class={`flex flex-col gap-2${desktop ? " touch-none" : ""}`}
+              class={`flex flex-col gap-2${draggable.touchClass}`}
               style={{
                 width: `${THUMB_WIDTH}px`,
                 opacity: draggable.isDragging() ? 0.5 : 1,

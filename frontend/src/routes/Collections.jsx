@@ -2,9 +2,8 @@ import { For, Show, onMount } from "solid-js";
 import { A } from "@solidjs/router";
 import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
-import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
-import { isDesktop } from "../lib/viewport";
+import { useClassificationDraggable } from "../lib/useClassificationDraggable";
 import {
   collections,
   loadCollections,
@@ -35,22 +34,16 @@ export default function Collections() {
           <For each={collections()}>
             {(collection) => {
               // Draggable onto a LibrarySidebar row to add this collection
-              // to that library (see lib/classification.js). Desktop-only
-              // (see ManifestGrid.jsx for why touch-none is skipped on
-              // mobile).
-              const draggable = useDraggable({
-                id: `collection-${collection.id}`,
-                data: {
-                  type: DRAG_TYPE_COLLECTION_ID,
-                  collectionId: collection.id,
-                },
-              });
-              const desktop = isDesktop();
+              // to that library (see lib/classification.js).
+              const draggable = useClassificationDraggable(
+                `collection-${collection.id}`,
+                { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
+              );
               return (
                 <A
-                  ref={desktop ? draggable.ref : undefined}
+                  ref={draggable.ref}
                   href={`/collections/${collection.id}`}
-                  class={`flex flex-col gap-2${desktop ? " touch-none" : ""}`}
+                  class={`flex flex-col gap-2${draggable.touchClass}`}
                   style={{
                     width: `${THUMB_WIDTH}px`,
                     opacity: draggable.isDragging() ? 0.5 : 1,
