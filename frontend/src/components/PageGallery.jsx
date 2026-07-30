@@ -23,8 +23,17 @@ export default function PageGallery(props) {
   // NoteEditor), so it can stay open on top of the lightbox.
   const [notePanel, setNotePanel] = createSignal(null);
   let pswp;
+  // Guards against a second PhotoSwipe instance being created while one is
+  // already open or still loading. Opening is async (photoswipe is a
+  // dynamically imported chunk), so on mobile a slow first tap leaves a
+  // window where extra taps on a thumbnail would otherwise each start
+  // their own PhotoSwipe instance.
+  let opening = false;
 
   const openViewer = async (index) => {
+    if (opening) return;
+    opening = true;
+
     const { default: PhotoSwipe } = await import("photoswipe");
     await import("photoswipe/style.css");
     const { default: PhotoSwipeDynamicCaption } =
@@ -96,6 +105,7 @@ export default function PageGallery(props) {
     // eslint-disable-next-line solid/reactivity
     pswp.on("close", () => {
       props.onPositionChange?.(undefined);
+      opening = false;
     });
 
     pswp.init();
