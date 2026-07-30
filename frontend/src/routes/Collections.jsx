@@ -4,6 +4,7 @@ import { Image } from "@kobalte/core/image";
 import LibraryIcon from "lucide-solid/icons/library";
 import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
+import { isDesktop } from "../lib/viewport";
 import {
   collections,
   loadCollections,
@@ -34,7 +35,9 @@ export default function Collections() {
           <For each={collections()}>
             {(collection) => {
               // Draggable onto a LibrarySidebar row to add this collection
-              // to that library (see lib/classification.js).
+              // to that library (see lib/classification.js). Desktop-only
+              // (see ManifestGrid.jsx for why touch-none is skipped on
+              // mobile).
               const draggable = useDraggable({
                 id: `collection-${collection.id}`,
                 data: {
@@ -42,14 +45,12 @@ export default function Collections() {
                   collectionId: collection.id,
                 },
               });
-              // touch-none prevents the browser from treating a drag
-              // gesture as a scroll on touch devices, which otherwise
-              // fights with dnd-kit's own drag handling.
+              const desktop = isDesktop();
               return (
                 <A
-                  ref={draggable.ref}
+                  ref={desktop ? draggable.ref : undefined}
                   href={`/collections/${collection.id}`}
-                  class="flex flex-col gap-2 touch-none"
+                  class={`flex flex-col gap-2${desktop ? " touch-none" : ""}`}
                   style={{
                     width: `${THUMB_WIDTH}px`,
                     opacity: draggable.isDragging() ? 0.5 : 1,

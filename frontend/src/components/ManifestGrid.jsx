@@ -4,6 +4,7 @@ import { Image } from "@kobalte/core/image";
 import BookOpen from "lucide-solid/icons/book-open";
 import { useDraggable } from "@dnd-kit/solid";
 import pb from "../lib/pb";
+import { isDesktop } from "../lib/viewport";
 import { DRAG_TYPE_MANIFEST_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size so every cover lines up in a neat grid regardless
@@ -29,14 +30,21 @@ export default function ManifestGrid(props) {
             id: `manifest-${manifest.id}`,
             data: { type: DRAG_TYPE_MANIFEST_ID, manifestId: manifest.id },
           });
-          // touch-none prevents the browser from treating a drag
-          // gesture as a scroll on touch devices, which otherwise
-          // fights with dnd-kit's own drag handling.
+          // Drag-to-classify is desktop-only: touch-none (needed so
+          // dnd-kit's drag gesture doesn't fight the browser's own touch
+          // scrolling) also blocks ordinary flick-scrolling whenever a
+          // finger starts on a card, which made scrolling the grid on
+          // mobile unreliable. The sidebar drop target isn't visible on
+          // mobile anyway (it's an overlay opened from NavBar, not a
+          // persistent rail), so dragging is skipped there: no ref (so
+          // dnd-kit never grabs the pointer) and no touch-none (so
+          // native scrolling stays in control).
+          const desktop = isDesktop();
           return (
             <A
-              ref={draggable.ref}
+              ref={desktop ? draggable.ref : undefined}
               href={`/manifests/${manifest.id}`}
-              class="flex flex-col gap-2 touch-none"
+              class={`flex flex-col gap-2${desktop ? " touch-none" : ""}`}
               style={{
                 width: `${THUMB_WIDTH}px`,
                 opacity: draggable.isDragging() ? 0.5 : 1,
