@@ -131,6 +131,7 @@ All configuration is via environment variables.
 - [ ] ページタグ機能
 - [ ] 孤立ページの削除機能
 - [ ] しおり機能（しおりを挟んだ位置から、再開することができる）
+- [ ] ページ番号表示バグの修正
 
 
 ## Tech Stack
