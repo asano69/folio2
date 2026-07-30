@@ -63,6 +63,21 @@
 }
 
 @layer base {
+  /* Tailwind v4 changed the default border color from a fixed gray to
+   * `currentColor`, so any `border` utility without an explicit color
+   * inherits the current text color -- painfully bright/white in dark
+   * mode, since --color-text is a light gray there. Reset the default
+   * back to the border token (matching v3's old behavior), so every
+   * plain `border` utility across the app stays legible in both themes
+   * without needing to touch each component individually. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border-soft);
+  }
+
   body {
     @apply h-screen w-screen;
     background: var(--color-bg);
