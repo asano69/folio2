@@ -149,6 +149,8 @@ export default function PageGallery(props) {
               onClick={() => openViewer(i())}
             >
               <Image.Img
+                loading="lazy"
+                decoding="async"
                 class="h-full w-full object-cover page-image"
                 src={pb.files.getURL(item.image, item.image.image, {
                   thumb: "200x150",

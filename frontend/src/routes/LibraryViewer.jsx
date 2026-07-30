@@ -54,45 +54,48 @@ export default function LibraryViewer() {
           {(collection) => {
             const draggable = useDraggable({
               id: `collection-${collection.id}`,
-              data: { type: DRAG_TYPE_COLLECTION_ID, collectionId: collection.id },
+              data: {
+                type: DRAG_TYPE_COLLECTION_ID,
+                collectionId: collection.id,
+              },
             });
             // touch-none prevents the browser from treating a drag
             // gesture as a scroll on touch devices, which otherwise
             // fights with dnd-kit's own drag handling.
             return (
-            <A
-              ref={draggable.ref}
-              href={`/collections/${collection.id}`}
-              class="flex flex-col gap-2 touch-none"
-              style={{
-                width: `${THUMB_WIDTH}px`,
-                opacity: draggable.isDragging() ? 0.5 : 1,
-              }}
-            >
-              <Image
-                class="overflow-hidden rounded border"
+              <A
+                ref={draggable.ref}
+                href={`/collections/${collection.id}`}
+                class="flex flex-col gap-2 touch-none"
                 style={{
                   width: `${THUMB_WIDTH}px`,
-                  height: `${THUMB_HEIGHT}px`,
+                  opacity: draggable.isDragging() ? 0.5 : 1,
                 }}
               >
-                <Image.Img
-                  class="h-full w-full object-cover"
-                  src={
-                    collection.cover
-                      ? pb.files.getURL(collection, collection.cover, {
-                          thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
-                        })
-                      : undefined
-                  }
-                  alt=""
-                />
-                <Image.Fallback class="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
-                  <LibraryIcon size={48} strokeWidth={1.5} />
-                </Image.Fallback>
-              </Image>
-              <span class="truncate text-sm">{collection.label}</span>
-            </A>
+                <Image
+                  class="overflow-hidden rounded border"
+                  style={{
+                    width: `${THUMB_WIDTH}px`,
+                    height: `${THUMB_HEIGHT}px`,
+                  }}
+                >
+                  <Image.Img
+                    class="h-full w-full object-cover"
+                    src={
+                      collection.cover
+                        ? pb.files.getURL(collection, collection.cover, {
+                            thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
+                          })
+                        : undefined
+                    }
+                    alt=""
+                  />
+                  <Image.Fallback class="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
+                    <LibraryIcon size={48} strokeWidth={1.5} />
+                  </Image.Fallback>
+                </Image>
+                <span class="truncate text-sm">{collection.label}</span>
+              </A>
             );
           }}
         </For>

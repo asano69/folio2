@@ -41,9 +41,7 @@ export default function NoteEditor(props) {
         <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
           <Dialog.Content class="flex w-full max-w-xl flex-col gap-4 rounded-md border border-[#999999] bg-white p-6 text-black shadow-lg dark:bg-neutral-900 dark:text-white">
             <TextField value={text()} onChange={setText}>
-              <TextField.TextArea
-                class="min-h-[200px] max-h-[50vh] w-full resize-y rounded border bg-white p-2 text-black dark:bg-neutral-800 dark:text-white"
-              />
+              <TextField.TextArea class="min-h-[200px] max-h-[50vh] w-full resize-y rounded border bg-white p-2 text-black dark:bg-neutral-800 dark:text-white" />
             </TextField>
             <div class="flex justify-end gap-2">
               <Button onClick={props.onClose}>Cancel</Button>

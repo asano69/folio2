@@ -41,7 +41,10 @@ export default function ManifestViewer() {
   // `i` tracks the manifest_pages.position of the page PhotoSwipe currently
   // shows, so each page gets its own shareable URI (e.g. .../manifests/abc?i=2).
   const [searchParams, setSearchParams] = useSearchParams();
-  const [data, { refetch }] = createResource(() => params.id, fetchManifestData);
+  const [data, { refetch }] = createResource(
+    () => params.id,
+    fetchManifestData,
+  );
 
   return (
     <ViewerPage resource={data}>

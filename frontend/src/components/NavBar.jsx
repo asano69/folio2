@@ -88,7 +88,6 @@ export default function NavBar() {
           Libraries
         </NavigationMenu.Trigger>
 
-
         {/* Settings dropdown: the admin actions previously on their own
             /settings page (PocketBase link, folder import), plus
             logout, grouped into one dropdown instead of a separate
@@ -150,7 +149,6 @@ export default function NavBar() {
             </NavigationMenu.Content>
           </NavigationMenu.Portal>
         </NavigationMenu.Menu>
-   
 
         <NavigationMenu.Viewport class="relative" />
       </NavigationMenu>

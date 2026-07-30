@@ -33,40 +33,43 @@ export default function ManifestGrid(props) {
           // gesture as a scroll on touch devices, which otherwise
           // fights with dnd-kit's own drag handling.
           return (
-          <A
-            ref={draggable.ref}
-            href={`/manifests/${manifest.id}`}
-            class="flex flex-col gap-2 touch-none"
-            style={{
-              width: `${THUMB_WIDTH}px`,
-              opacity: draggable.isDragging() ? 0.5 : 1,
-            }}
-          >
-            <Image
-              class="overflow-hidden rounded border"
-              style={{ width: `${THUMB_WIDTH}px`, height: `${THUMB_HEIGHT}px` }}
+            <A
+              ref={draggable.ref}
+              href={`/manifests/${manifest.id}`}
+              class="flex flex-col gap-2 touch-none"
+              style={{
+                width: `${THUMB_WIDTH}px`,
+                opacity: draggable.isDragging() ? 0.5 : 1,
+              }}
             >
-              <Image.Img
-                class="h-full w-full object-cover"
-                src={
-                  manifest.coverImage
-                    ? pb.files.getURL(
-                        manifest.coverImage,
-                        manifest.coverImage.image,
-                        {
-                          thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
-                        },
-                      )
-                    : undefined
-                }
-                alt=""
-              />
-              <Image.Fallback class="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
-                <BookOpen size={48} strokeWidth={1.5} />
-              </Image.Fallback>
-            </Image>
-            <span class="truncate text-sm">{manifest.label}</span>
-          </A>
+              <Image
+                class="overflow-hidden rounded border"
+                style={{
+                  width: `${THUMB_WIDTH}px`,
+                  height: `${THUMB_HEIGHT}px`,
+                }}
+              >
+                <Image.Img
+                  class="h-full w-full object-cover"
+                  src={
+                    manifest.coverImage
+                      ? pb.files.getURL(
+                          manifest.coverImage,
+                          manifest.coverImage.image,
+                          {
+                            thumb: `${THUMB_WIDTH}x${THUMB_HEIGHT}`,
+                          },
+                        )
+                      : undefined
+                  }
+                  alt=""
+                />
+                <Image.Fallback class="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
+                  <BookOpen size={48} strokeWidth={1.5} />
+                </Image.Fallback>
+              </Image>
+              <span class="truncate text-sm">{manifest.label}</span>
+            </A>
           );
         }}
       </For>

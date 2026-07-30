@@ -138,8 +138,16 @@ export default function SideBar(props) {
             itself is collapsed to a narrow rail. */}
         <Show when={!sidebarOpen()}>
           <div class="flex flex-col items-center gap-1">
-            <NavIconLink href="/collections" label="Collections" icon={LibraryIcon} />
-            <NavIconLink href="/libraries" label="Libraries" icon={LandmarkIcon} />
+            <NavIconLink
+              href="/collections"
+              label="Collections"
+              icon={LibraryIcon}
+            />
+            <NavIconLink
+              href="/libraries"
+              label="Libraries"
+              icon={LandmarkIcon}
+            />
           </div>
         </Show>
         <Show when={sidebarOpen()}>

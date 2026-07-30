@@ -41,7 +41,9 @@ export default function AppShell(props) {
   return (
     <DragDropProvider
       onDragEnd={handleClassificationDrop}
-      plugins={(defaults) => defaults.filter((plugin) => plugin !== AutoScroller)}
+      plugins={(defaults) =>
+        defaults.filter((plugin) => plugin !== AutoScroller)
+      }
     >
       <div class="flex min-h-screen w-full">
         <SideBar title={<SidebarViewSelect />}>

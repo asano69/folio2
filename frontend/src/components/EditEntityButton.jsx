@@ -81,7 +81,9 @@ export default function EditEntityButton(props) {
       // signal is set imperatively from outside.
       handleOpenChange(false);
     } catch (err) {
-      showError(err?.message || `Failed to update ${props.entityLabel.toLowerCase()}.`);
+      showError(
+        err?.message || `Failed to update ${props.entityLabel.toLowerCase()}.`,
+      );
     } finally {
       setSaving(false);
     }
@@ -102,7 +104,9 @@ export default function EditEntityButton(props) {
           <Dialog.Overlay class="fixed inset-0 z-[100001] bg-black/50" />
           <div class="fixed inset-0 z-[100001] flex items-center justify-center p-6">
             <Dialog.Content class="flex w-full max-w-sm flex-col gap-4 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-6 text-[var(--color-text)] shadow-lg">
-              <Dialog.Title class="text-xl">Edit {props.entityLabel}</Dialog.Title>
+              <Dialog.Title class="text-xl">
+                Edit {props.entityLabel}
+              </Dialog.Title>
               {/* Wrapped in a form so pressing Enter inside the text
                   field submits (== Save), matching CreateEntityButton's
                   behavior. */}

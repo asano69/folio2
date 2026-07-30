@@ -5,7 +5,8 @@ import { Toast, toaster } from "@kobalte/core/toast";
 // toast stays compact. No close button: toasts auto-dismiss on their own
 // (duration below), so a manual close control is unnecessary.
 function showToast(message, variant) {
-  const accent = variant === "success" ? "border-l-green-500" : "border-l-red-500";
+  const accent =
+    variant === "success" ? "border-l-green-500" : "border-l-red-500";
 
   toaster.show(
     (props) => (
