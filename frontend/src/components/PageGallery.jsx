@@ -137,6 +137,12 @@ export default function PageGallery(props) {
       dataSource,
       index: mirrorIndex(index, dir, props.images.length),
       trapFocus: false,
+      // Pinch-out to zoom out beyond the minimum zoom level was being
+      // interpreted as the "pinch to close" gesture, closing the viewer
+      // instead of just rubber-banding at the zoom limit. Disabled since
+      // the back-button handler (see handlePopState) already provides an
+      // explicit close action on mobile.
+      pinchToClose: false,
       // The built-in counter always counts up from 1 in PhotoSwipe's own
       // (already direction-mirrored) dataSource order, so it still shows
       // 1/200 -> 200/200 while reading "rl". Replaced with a custom
