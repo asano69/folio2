@@ -143,6 +143,17 @@ export default function PageGallery(props) {
       // element below so it counts down (200/200 -> 1/200) to match the
       // manifest's original page order instead.
       counter: false,
+      // On mobile the viewport is narrower than it is tall, so the default
+      // "fit" zoom (contain) leaves empty space above/below a page whenever
+      // its aspect ratio doesn't exactly match the screen, forcing a manual
+      // pinch-zoom on every page turn. vFill instead scales the page to
+      // fill the viewport's height, cropping the sides (pannable) if
+      // needed, so a page always opens already zoomed to the top/bottom
+      // edges. Desktop keeps the default "fit" behavior, since width isn't
+      // the constraint there.
+      ...(!isDesktop() && {
+        initialZoomLevel: (zoomLevel) => zoomLevel.vFill,
+      }),
     });
 
     // photoswipe-dynamic-caption-plugin expects a PhotoSwipeLightbox
