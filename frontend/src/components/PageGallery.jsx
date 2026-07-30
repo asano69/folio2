@@ -5,6 +5,25 @@ import ImageIcon from "lucide-solid/icons/image";
 import pb from "../lib/pb";
 import NoteEditor from "./NoteEditor";
 import { isDesktop } from "../lib/viewport";
+import { showError } from "../lib/toast";
+
+// Inlined lucide "arrow-big-left"/"arrow-big-right" icons, used by the
+// reading-direction toggle button below. PhotoSwipe's registerElement
+// expects a raw HTML string (see the note button further down), so the
+// icon markup is inlined the same way instead of importing the
+// lucide-solid component.
+const ARROW_BIG_LEFT_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15h-6v4l-7-7 7-7v4h6v6z"/></svg>';
+const ARROW_BIG_RIGHT_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h6V5l7 7-7 7v-4H6V9z"/></svg>';
+
+// Maps an index between "reading order" (props.images, always sorted by
+// manifest_pages.position) and PhotoSwipe's own display order, which is
+// reversed while direction is "rl" (right-to-left reading, e.g. manga).
+// The mapping is its own inverse, so the same helper works both ways.
+function mirrorIndex(index, dir, length) {
+  return dir === "rl" ? length - 1 - index : index;
+}
 
 // Renders a thumbnail grid and opens a PhotoSwipe lightbox on click.
 // PhotoSwipe's core class is instantiated directly against a dataSource
@@ -18,11 +37,19 @@ export default function PageGallery(props) {
   // to deep-link directly into a page when the component mounts.
   // props.onPositionChange(position): called with the current page's
   // position while browsing, and with undefined when the lightbox is closed.
+  // props.manifestId: id of the manifests record, used to persist the
+  // reading direction toggled from within the viewer.
+  // props.direction: the manifest's current reading direction ("lr" or
+  // "rl"), used as this signal's initial value.
 
   // Holds { pageId, description } while the note editor overlay is open,
   // null otherwise. The overlay is portalled out of PhotoSwipe's DOM (see
   // NoteEditor), so it can stay open on top of the lightbox.
   const [notePanel, setNotePanel] = createSignal(null);
+  // Which way swiping/arrow keys move to the next page. Toggled from a
+  // button inside the PhotoSwipe UI (see the "direction-button" element
+  // below) and persisted on the manifest.
+  const [direction, setDirection] = createSignal(props.direction || "lr");
   let pswp;
   // Guards against a second PhotoSwipe instance being created while one is
   // already open or still loading. Opening is async (photoswipe is a
@@ -38,6 +65,12 @@ export default function PageGallery(props) {
   // the viewer some other way (X button, swipe-down, Escape).
   let closedByBackButton = false;
 
+  // Set just before pswp.close() when the close is only a side effect of
+  // toggling the reading direction (see the "direction-button" element
+  // below), so the "close" handler can reopen at the same page instead of
+  // treating it like the user actually leaving the viewer.
+  let pendingReopenIndex = null;
+
   // On mobile (PWA), the back button would otherwise navigate the
   // underlying page while PhotoSwipe stays open on top of it. Closing
   // the viewer here instead makes the back button do what the user
@@ -47,14 +80,34 @@ export default function PageGallery(props) {
     pswp?.close();
   };
 
-  const openViewer = async (index) => {
+  // Persists a toggled reading direction on the manifest. Best-effort: the
+  // in-memory `direction` signal already reflects the change, so a failed
+  // save only means it won't survive a reload.
+  const saveDirection = async (next) => {
+    try {
+      await pb.collection("manifests").update(props.manifestId, {
+        direction: next,
+      });
+    } catch (err) {
+      showError(err?.message || "Failed to save reading direction.");
+    }
+  };
+
+  const openViewer = async (index, options = {}) => {
     if (isOpening()) return;
     setIsOpening(true);
 
     // Push a history entry so the back button triggers handlePopState
     // above instead of navigating away underneath the open viewer.
+    // Reopening after a reading-direction toggle (options.replaceHistory)
+    // replaces that entry instead of adding a new one, since it isn't
+    // really a new "page".
     closedByBackButton = false;
-    window.history.pushState({ photoswipe: true }, "");
+    if (options.replaceHistory) {
+      window.history.replaceState({ photoswipe: true }, "");
+    } else {
+      window.history.pushState({ photoswipe: true }, "");
+    }
     window.addEventListener("popstate", handlePopState);
 
     const { default: PhotoSwipe } = await import("photoswipe");
@@ -63,7 +116,13 @@ export default function PageGallery(props) {
       await import("photoswipe-dynamic-caption-plugin");
     await import("photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css");
 
-    const dataSource = props.images.map((item) => ({
+    // Captured once per PhotoSwipe instance: toggling direction closes and
+    // reopens a fresh instance (see the direction button below), so this
+    // never changes while `pswp` itself is alive.
+    const dir = direction();
+    const orderedImages =
+      dir === "rl" ? [...props.images].reverse() : props.images;
+    const dataSource = orderedImages.map((item) => ({
       src: pb.files.getURL(item.image, item.image.image),
       width: item.image.width,
       height: item.image.height,
@@ -74,7 +133,11 @@ export default function PageGallery(props) {
     // own container whenever focus moves elsewhere (e.g. into the
     // portalled NoteEditor), which silently swallows every keystroke
     // typed into the note editor.
-    pswp = new PhotoSwipe({ dataSource, index, trapFocus: false });
+    pswp = new PhotoSwipe({
+      dataSource,
+      index: mirrorIndex(index, dir, props.images.length),
+      trapFocus: false,
+    });
 
     // photoswipe-dynamic-caption-plugin expects a PhotoSwipeLightbox
     // instance, whose real PhotoSwipe instance lives at `lightbox.pswp`.
@@ -95,8 +158,35 @@ export default function PageGallery(props) {
     });
 
     // Adds a note button just left of the built-in zoom button (order: 10)
-    // that opens the note editor for whichever page is currently shown.
+    // that opens the note editor for whichever page is currently shown,
+    // plus a reading-direction toggle just left of that (order: 8).
     pswp.on("uiRegister", () => {
+      // Toggles which way swiping/arrow keys move to the next page and
+      // persists the choice on the manifest. Shows the *current*
+      // direction: a left-pointing arrow while reading right-to-left
+      // (manga-style), a right-pointing arrow for the default
+      // left-to-right order. Toggling closes and reopens the viewer at
+      // the same page, since PhotoSwipe's own dataSource order needs to
+      // change along with it (see openViewer above).
+      pswp.ui.registerElement({
+        name: "direction-button",
+        ariaLabel: "Toggle reading direction",
+        order: 8,
+        isButton: true,
+        html: dir === "rl" ? ARROW_BIG_LEFT_SVG : ARROW_BIG_RIGHT_SVG,
+        onClick: () => {
+          const nextDir = dir === "rl" ? "lr" : "rl";
+          pendingReopenIndex = mirrorIndex(
+            pswp.currIndex,
+            dir,
+            props.images.length,
+          );
+          setDirection(nextDir);
+          saveDirection(nextDir);
+          pswp.close();
+        },
+      });
+
       pswp.ui.registerElement({
         name: "note-button",
         ariaLabel: "Note",
@@ -107,7 +197,12 @@ export default function PageGallery(props) {
         // inlined directly instead of importing the component.
         html: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11l5-5V5a2 2 0 0 0-2-2z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg>',
         onClick: () => {
-          const item = props.images[pswp.currIndex];
+          const originalIndex = mirrorIndex(
+            pswp.currIndex,
+            dir,
+            props.images.length,
+          );
+          const item = props.images[originalIndex];
           setNotePanel({
             pageId: item.pageId,
             description: item.description,
@@ -123,18 +218,30 @@ export default function PageGallery(props) {
     // apply here (same as a plain DOM event handler).
     // eslint-disable-next-line solid/reactivity
     pswp.on("change", () => {
-      props.onPositionChange?.(String(props.images[pswp.currIndex].position));
+      const originalIndex = mirrorIndex(
+        pswp.currIndex,
+        dir,
+        props.images.length,
+      );
+      props.onPositionChange?.(String(props.images[originalIndex].position));
     });
     // eslint-disable-next-line solid/reactivity
     pswp.on("close", () => {
       props.onPositionChange?.(undefined);
       setIsOpening(false);
       window.removeEventListener("popstate", handlePopState);
-      // If the viewer was closed some other way than the back button,
-      // pop the history entry pushed above ourselves, so it doesn't sit
-      // there as an extra step the next real back-button press has to
-      // get through first.
-      if (!closedByBackButton) {
+      if (pendingReopenIndex !== null) {
+        // Closed only to rebuild PhotoSwipe with the new direction's
+        // dataSource order; reopen at the same page instead of treating
+        // this like the user leaving the viewer.
+        const reopenIndex = pendingReopenIndex;
+        pendingReopenIndex = null;
+        openViewer(reopenIndex, { replaceHistory: true });
+      } else if (!closedByBackButton) {
+        // If the viewer was closed some other way than the back button,
+        // pop the history entry pushed above ourselves, so it doesn't sit
+        // there as an extra step the next real back-button press has to
+        // get through first.
         window.history.back();
       }
     });

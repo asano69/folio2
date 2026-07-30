@@ -33,7 +33,7 @@ async function fetchManifestData(manifestId) {
       position: r.position,
     }));
 
-  return { label: manifest.label, images };
+  return { label: manifest.label, direction: manifest.direction || "lr", images };
 }
 
 export default function ManifestViewer() {
@@ -60,6 +60,8 @@ export default function ManifestViewer() {
       </div>
       <PageGallery
         images={data().images}
+        manifestId={params.id}
+        direction={data().direction}
         position={searchParams.i}
         onPositionChange={(i) => setSearchParams({ i }, { replace: true })}
       />
