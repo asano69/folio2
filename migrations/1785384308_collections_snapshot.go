@@ -879,6 +879,22 @@ func init() {
 						"type": "text"
 					},
 					{
+						"help": "",
+						"hidden": false,
+						"id": "select1045090739",
+						"maxSelect": 0,
+						"name": "direction",
+						"presentable": false,
+						"required": false,
+						"system": false,
+						"type": "select",
+						"values": [
+							"lr",
+							"rl",
+							"tb"
+						]
+					},
+					{
 						"hidden": false,
 						"id": "autodate2990389176",
 						"name": "created",
