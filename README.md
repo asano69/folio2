@@ -128,6 +128,7 @@ All configuration is via environment variables.
 - [ ] エクスポート機能
 - [ ] ISBNからの書誌情報インポートプラグイン
 - [ ] Homeに未整理のコレクションを表示する
+- [ ] ページタグ機能
 
 
 ## Tech Stack
