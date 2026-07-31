@@ -2,7 +2,7 @@ import { createSignal, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { NavigationMenu } from "@kobalte/core/navigation-menu";
 import { Progress } from "@kobalte/core/progress";
-import ChevronDown from "lucide-solid/icons/chevron-down";
+import EllipsisVertical from "lucide-solid/icons/ellipsis-vertical";
 import Menu from "lucide-solid/icons/menu";
 import BookOpen from "lucide-solid/icons/book-open";
 import LibraryIcon from "lucide-solid/icons/library";
@@ -13,10 +13,6 @@ import { bumpManifestsShuffle } from "../lib/manifests";
 import { setSidebarOpen } from "./layout/uiState";
 import { isDesktop } from "../lib/viewport";
 import { showError } from "../lib/toast";
-
-// Shared look for every top-level entry, matching the previous <A>/<Button>
-// style (see style.css's .btn-link rule).
-const itemClass = "btn-link";
 
 // Icon-only style shared by the Manifests/Collections/Libraries buttons,
 // matching SideBar.jsx's collapsed-rail NavIconLink so the same three
@@ -67,64 +63,33 @@ export default function NavBar() {
   };
 
   return (
-    <div class="mb-10 flex w-full flex-wrap items-center justify-between gap-y-3">
-      <div class="flex items-center gap-2">
-        {/* Mobile-only: opens the sidebar overlay. On desktop the
-            sidebar is always visible as a rail/panel, so this toggle
-            is unnecessary there (see SideBar.jsx). */}
-        <Show when={!isDesktop()}>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-            class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
-          >
-            <Menu size={20} />
-          </button>
-        </Show>
-        <Logo linkable size={isDesktop() ? "lg" : "sm"} />
-      </div>
-      <NavigationMenu class="flex flex-wrap items-center gap-3">
-        {/* Plain page links: Kobalte's "link trigger" pattern (a Trigger
-            with no surrounding NavigationMenu.Menu) navigates immediately
-            instead of opening a dropdown. `as={A}` keeps navigation
-            client-side, like the rest of the app. */}
-        <NavigationMenu.Trigger
-          as={A}
-          href="/manifests"
-          aria-label="Manifests"
-          class={iconLinkClass}
-          onClick={bumpManifestsShuffle}
-        >
-          <BookOpen size={35} />
-        </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger
-          as={A}
-          href="/collections"
-          aria-label="Collections"
-          class={iconLinkClass}
-        >
-          <LibraryIcon size={35} />
-        </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger
-          as={A}
-          href="/libraries"
-          aria-label="Libraries"
-          class={iconLinkClass}
-        >
-          <LandmarkIcon size={35} />
-        </NavigationMenu.Trigger>
+    <NavigationMenu class="mb-10 flex w-full flex-col gap-3">
+      <div class="flex w-full items-center justify-between">
+        <div class="flex items-center gap-2">
+          {/* Mobile-only: opens the sidebar overlay. On desktop the
+              sidebar is always visible as a rail/panel, so this toggle
+              is unnecessary there (see SideBar.jsx). */}
+          <Show when={!isDesktop()}>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open sidebar"
+              class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+            >
+              <Menu size={20} />
+            </button>
+          </Show>
+          <Logo linkable size={isDesktop() ? "lg" : "sm"} />
+        </div>
 
         {/* Settings dropdown: the admin actions previously on their own
             /settings page (PocketBase link, folder import), plus
             logout, grouped into one dropdown instead of a separate
-            page/top-level control. */}
+            page/top-level control. Shares the top row with the logo,
+            anchored to the right edge, as an icon-only button. */}
         <NavigationMenu.Menu>
-          <NavigationMenu.Trigger class={`${itemClass} gap-1`}>
-            Settings
-            <NavigationMenu.Icon>
-              <ChevronDown size={14} />
-            </NavigationMenu.Icon>
+          <NavigationMenu.Trigger aria-label="Settings" class={iconLinkClass}>
+            <EllipsisVertical size={24} />
           </NavigationMenu.Trigger>
           <NavigationMenu.Portal>
             <NavigationMenu.Content class="absolute top-0 left-0 z-50 flex min-w-52 flex-col gap-1 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-2 shadow-md">
@@ -176,9 +141,42 @@ export default function NavBar() {
             </NavigationMenu.Content>
           </NavigationMenu.Portal>
         </NavigationMenu.Menu>
+      </div>
 
-        <NavigationMenu.Viewport class="relative" />
-      </NavigationMenu>
-    </div>
+      {/* Second row: Manifests/Collections/Libraries entry points. */}
+      <div class="flex flex-wrap items-center gap-3">
+        {/* Plain page links: Kobalte's "link trigger" pattern (a Trigger
+            with no surrounding NavigationMenu.Menu) navigates immediately
+            instead of opening a dropdown. `as={A}` keeps navigation
+            client-side, like the rest of the app. */}
+        <NavigationMenu.Trigger
+          as={A}
+          href="/manifests"
+          aria-label="Manifests"
+          class={iconLinkClass}
+          onClick={bumpManifestsShuffle}
+        >
+          <BookOpen size={35} />
+        </NavigationMenu.Trigger>
+        <NavigationMenu.Trigger
+          as={A}
+          href="/collections"
+          aria-label="Collections"
+          class={iconLinkClass}
+        >
+          <LibraryIcon size={35} />
+        </NavigationMenu.Trigger>
+        <NavigationMenu.Trigger
+          as={A}
+          href="/libraries"
+          aria-label="Libraries"
+          class={iconLinkClass}
+        >
+          <LandmarkIcon size={35} />
+        </NavigationMenu.Trigger>
+      </div>
+
+      <NavigationMenu.Viewport class="relative" />
+    </NavigationMenu>
   );
 }
