@@ -364,11 +364,17 @@ export default function PageGallery(props) {
       <Show when={!isDesktop() && isOpening()}>
         <div class="fixed top-4 right-4 z-[100000] h-6 w-6 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-500 dark:border-neutral-700 dark:border-t-neutral-300" />
       </Show>
-      <div class="flex flex-wrap gap-2">
+      {/* Below lg: (this app's own mobile/desktop threshold -- see
+          lib/viewport.js and docs/d02_responsive-ui.md), the grid is
+          always exactly 2 columns, matching ManifestGrid's mobile
+          behavior, so a page thumbnail is never squeezed down to 1 per
+          row on a narrow phone. At lg: and up this is unchanged from
+          before: a plain flex-wrap of fixed 200x150 thumbnails. */}
+      <div class="grid grid-cols-2 gap-2 lg:flex lg:flex-wrap">
         <For each={props.images}>
           {(item, i) => (
             <Image
-              class="h-[150px] w-[200px] cursor-pointer overflow-hidden rounded border"
+              class="aspect-[200/150] w-full cursor-pointer overflow-hidden rounded border lg:h-[150px] lg:w-[200px]"
               onClick={() => openViewer(i())}
             >
               <Image.Img
