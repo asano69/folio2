@@ -21,7 +21,7 @@ export default function Collections() {
   onMount(loadCollections);
 
   return (
-    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
+    <div class="mx-auto flex min-h-screen w-full flex-col items-center gap-8 px-6 py-12 lg:px-24">
       <div class="flex w-full justify-end">
         <CreateEntityButton
           collection="collections"
@@ -43,19 +43,15 @@ export default function Collections() {
                 <A
                   ref={draggable.ref}
                   href={`/collections/${collection.id}`}
-                  class={`flex flex-col gap-2${draggable.touchClass}`}
+                  // Two cards per row on mobile (calc-based width), fixed
+                  // THUMB_WIDTH from sm: up, so more columns fit in as the
+                  // screen widens.
+                  class={`flex w-[calc(50%-0.5rem)] flex-col gap-2 sm:w-[250px]${draggable.touchClass}`}
                   style={{
-                    width: `${THUMB_WIDTH}px`,
                     opacity: draggable.isDragging() ? 0.5 : 1,
                   }}
                 >
-                  <Image
-                    class="overflow-hidden rounded border"
-                    style={{
-                      width: `${THUMB_WIDTH}px`,
-                      height: `${THUMB_HEIGHT}px`,
-                    }}
-                  >
+                  <Image class="aspect-[5/4] w-full overflow-hidden rounded border">
                     <Image.Img
                       class="h-full w-full object-cover"
                       src={

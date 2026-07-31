@@ -12,7 +12,7 @@ export default function ViewerPage(props) {
   //   signal-like function) that resolves to the page's data, or
   //   undefined/null while still loading.
   return (
-    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-6 py-12">
+    <div class="mx-auto flex min-h-screen w-full flex-col gap-8 px-6 py-12 lg:px-24">
       <Show when={props.resource()} fallback={<Loading />}>
         {props.children}
       </Show>
