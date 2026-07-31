@@ -1,6 +1,7 @@
 import { createSignal, Show } from "solid-js";
-import { A } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 import { DropdownMenu } from "@kobalte/core/dropdown-menu";
+import { ToggleGroup } from "@kobalte/core/toggle-group";
 import { Progress } from "@kobalte/core/progress";
 import EllipsisVertical from "lucide-solid/icons/ellipsis-vertical";
 import Menu from "lucide-solid/icons/menu";
@@ -14,15 +15,28 @@ import { setSidebarOpen } from "./layout/uiState";
 import { isDesktop } from "../lib/viewport";
 import { showError } from "../lib/toast";
 
-// Icon-only style shared by the Manifests/Collections/Libraries buttons,
-// matching SideBar.jsx's collapsed-rail NavIconLink so the same three
-// entry points look identical whether reached from NavBar or the
-// collapsed sidebar rail.
+// Icon-only style shared by the settings trigger and the
+// Manifests/Collections/Libraries ToggleGroup items, matching
+// SideBar.jsx's collapsed-rail NavIconLink so the same entry points look
+// identical whether reached from NavBar or the collapsed sidebar rail.
 const iconLinkClass =
   "icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]";
 
 export default function NavBar() {
   const handleLogout = () => pb.authStore.clear();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Derives which ToggleGroup item (if any) should show as pressed from
+  // the current route, since the "selected" state lives in the router,
+  // not in the ToggleGroup itself.
+  const activeSection = () => {
+    if (location.pathname.startsWith("/manifests")) return "manifests";
+    if (location.pathname.startsWith("/collections")) return "collections";
+    if (location.pathname.startsWith("/libraries")) return "libraries";
+    return null;
+  };
 
   // Import-folders job state, moved here from the now-removed Settings
   // page (see routes/Settings/Admin.jsx) since both admin actions live
@@ -63,34 +77,72 @@ export default function NavBar() {
   };
 
   return (
-    <nav class="mb-10 flex w-full flex-col gap-3">
-      <div class="flex w-full items-center justify-between">
-        <div class="flex items-center gap-2">
-          {/* Mobile-only: opens the sidebar overlay. On desktop the
-              sidebar is always visible as a rail/panel, so this toggle
-              is unnecessary there (see SideBar.jsx). */}
-          <Show when={!isDesktop()}>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-              class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
-            >
-              <Menu size={28} />
-            </button>
-          </Show>
-          <Logo linkable size={isDesktop() ? "lg" : "md"} />
-        </div>
+    <nav class="mb-10 flex w-full items-center justify-between">
+      <div class="flex items-center gap-2">
+        {/* Mobile-only: opens the sidebar overlay. On desktop the
+            sidebar is always visible as a rail/panel, so this toggle
+            is unnecessary there (see SideBar.jsx). */}
+        <Show when={!isDesktop()}>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+            class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
+          >
+            <Menu size={28} />
+          </button>
+        </Show>
+        <Logo linkable size={isDesktop() ? "lg" : "md"} />
+      </div>
+
+      <div class="flex items-center gap-3">
+        {/* Manifests/Collections/Libraries entry points as a single
+            ToggleGroup instead of three independent links: they're
+            mutually exclusive destinations, so a tab-like control fits
+            the role better than plain nav buttons. Navigation itself
+            still goes through useNavigate rather than ToggleGroup's own
+            state, since the "selected" section is derived from the
+            current route (see activeSection above), not tracked
+            separately. */}
+        <ToggleGroup
+          value={activeSection()}
+          onChange={(value) => {
+            if (!value) return;
+            if (value === "manifests") bumpManifestsShuffle();
+            navigate(`/${value}`);
+          }}
+          class="flex items-center gap-1"
+        >
+          <ToggleGroup.Item
+            value="manifests"
+            aria-label="Manifests"
+            class={iconLinkClass}
+          >
+            <BookOpen size={28} />
+          </ToggleGroup.Item>
+          <ToggleGroup.Item
+            value="collections"
+            aria-label="Collections"
+            class={iconLinkClass}
+          >
+            <LibraryIcon size={28} />
+          </ToggleGroup.Item>
+          <ToggleGroup.Item
+            value="libraries"
+            aria-label="Libraries"
+            class={iconLinkClass}
+          >
+            <LandmarkIcon size={28} />
+          </ToggleGroup.Item>
+        </ToggleGroup>
 
         {/* Settings dropdown: the admin actions previously on their own
             /settings page (PocketBase link, folder import), plus
             logout, grouped into one dropdown instead of a separate
-            page/top-level control. Shares the top row with the logo,
-            anchored to the right edge, as an icon-only button.
-            DropdownMenu (not NavigationMenu) is used here since there's
-            only a single trigger: Content is positioned relative to the
-            trigger automatically via floating-ui, so no manual
-            top/left coordinates are needed. */}
+            page/top-level control. DropdownMenu (not NavigationMenu) is
+            used here since there's only a single trigger: Content is
+            positioned relative to the trigger automatically via
+            floating-ui, so no manual top/left coordinates are needed. */}
         <DropdownMenu placement="bottom-end">
           <DropdownMenu.Trigger aria-label="Settings" class={iconLinkClass}>
             <EllipsisVertical size={28} />
@@ -145,26 +197,6 @@ export default function NavBar() {
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu>
-      </div>
-
-      {/* Second row: Manifests/Collections/Libraries entry points. These
-          are plain navigation links, not menu items, so a plain <A> is
-          used instead of borrowing NavigationMenu's Trigger API. */}
-      <div class="flex flex-wrap items-center gap-3">
-        <A
-          href="/manifests"
-          aria-label="Manifests"
-          class={iconLinkClass}
-          onClick={bumpManifestsShuffle}
-        >
-          <BookOpen size={35} />
-        </A>
-        <A href="/collections" aria-label="Collections" class={iconLinkClass}>
-          <LibraryIcon size={35} />
-        </A>
-        <A href="/libraries" aria-label="Libraries" class={iconLinkClass}>
-          <LandmarkIcon size={35} />
-        </A>
       </div>
     </nav>
   );
