@@ -6,6 +6,7 @@ import ChevronDown from "lucide-solid/icons/chevron-down";
 import Menu from "lucide-solid/icons/menu";
 import pb from "../lib/pb";
 import Logo from "./Logo";
+import { bumpManifestsShuffle } from "../lib/manifests";
 import { setSidebarOpen } from "./layout/uiState";
 import { isDesktop } from "../lib/viewport";
 import { showError } from "../lib/toast";
@@ -78,7 +79,12 @@ export default function NavBar() {
             with no surrounding NavigationMenu.Menu) navigates immediately
             instead of opening a dropdown. `as={A}` keeps navigation
             client-side, like the rest of the app. */}
-        <NavigationMenu.Trigger as={A} href="/manifests" class={itemClass}>
+        <NavigationMenu.Trigger
+          as={A}
+          href="/manifests"
+          class={itemClass}
+          onClick={bumpManifestsShuffle}
+        >
           Manifests
         </NavigationMenu.Trigger>
         <NavigationMenu.Trigger as={A} href="/collections" class={itemClass}>

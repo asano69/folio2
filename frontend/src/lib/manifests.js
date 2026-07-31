@@ -1,4 +1,17 @@
+import { createSignal } from "solid-js";
 import pb from "./pb";
+
+// Bumped every time the NavBar's "Manifests" link is clicked (even while
+// already on /manifests, where Solid Router doesn't remount the route --
+// see NavBar.jsx), so Manifests.jsx's createResource can depend on it to
+// force a fresh shuffle on every click, not just on the first mount.
+const [shuffleToken, setShuffleToken] = createSignal(0);
+
+export function bumpManifestsShuffle() {
+  setShuffleToken((t) => t + 1);
+}
+
+export { shuffleToken };
 
 // Attaches each manifest's cover image, borrowed from its first page
 // (manifest_pages.position === 0). Manifests without a first page get
@@ -69,5 +82,51 @@ export async function fetchManifestsPage(query, page, options = {}) {
   return {
     items: await attachCovers(result.items),
     hasMore: page < result.totalPages,
+  };
+}
+
+// Fetches every manifest id matching `query` (same substring filter as
+// fetchManifestsPage) and returns them shuffled once. Used by the
+// /manifests page to show manifests in a fresh random order every time
+// the page is opened -- see routes/Manifests.jsx.
+export async function fetchShuffledIds(query) {
+  const records = await pb.collection("manifests").getFullList({
+    filter: query ? pb.filter("label ~ {:query}", { query }) : "",
+    fields: "id",
+  });
+  const ids = records.map((r) => r.id);
+
+  // Fisher-Yates shuffle, in place.
+  for (let i = ids.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  return ids;
+}
+
+// Fetches one page of manifests from a pre-shuffled id order (see
+// fetchShuffledIds). `page` is 1-based, matching fetchManifestsPage.
+// PocketBase's getFullList doesn't preserve the requested id order, so
+// results are re-sorted to match orderedIds before returning.
+export async function fetchManifestsPageByIds(orderedIds, page) {
+  if (!orderedIds) return { items: [], hasMore: false };
+
+  const start = (page - 1) * MANIFESTS_PAGE_SIZE;
+  const pageIds = orderedIds.slice(start, start + MANIFESTS_PAGE_SIZE);
+  if (pageIds.length === 0) return { items: [], hasMore: false };
+
+  const idFilter = pageIds
+    .map((id) => pb.filter("id = {:id}", { id }))
+    .join(" || ");
+  const records = await pb
+    .collection("manifests")
+    .getFullList({ filter: idFilter });
+
+  const byId = new Map(records.map((r) => [r.id, r]));
+  const ordered = pageIds.map((id) => byId.get(id)).filter(Boolean);
+
+  return {
+    items: await attachCovers(ordered),
+    hasMore: start + MANIFESTS_PAGE_SIZE < orderedIds.length,
   };
 }
