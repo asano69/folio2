@@ -12,10 +12,13 @@ import { showError } from "../lib/toast";
 // expects a raw HTML string (see the note button further down), so the
 // icon markup is inlined the same way instead of importing the
 // lucide-solid component.
+const NOTE_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11l5-5V5a2 2 0 0 0-2-2z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg>';
+
 const ARROW_BIG_LEFT_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15h-6v4l-7-7 7-7v4h6v6z"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15h-6v4l-7-7 7-7v4h6v6z"/></svg>';
 const ARROW_BIG_RIGHT_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h6V5l7 7-7 7v-4H6V9z"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h6V5l7 7-7 7v-4H6V9z"/></svg>';
 
 // Maps an index between "reading order" (props.images, always sorted by
 // manifest_pages.position) and PhotoSwipe's own display order, which is
@@ -234,10 +237,7 @@ export default function PageGallery(props) {
         ariaLabel: "Note",
         order: 9,
         isButton: true,
-        // PhotoSwipe's registerElement expects a raw HTML string, not a
-        // Solid component, so lucide-solid's "sticky-note" icon markup is
-        // inlined directly instead of importing the component.
-        html: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11l5-5V5a2 2 0 0 0-2-2z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg>',
+        html: NOTE_SVG,
         onClick: () => {
           const originalIndex = mirrorIndex(
             pswp.currIndex,
