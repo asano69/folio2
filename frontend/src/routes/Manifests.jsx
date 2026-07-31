@@ -46,7 +46,7 @@ export default function Manifests() {
   );
 
   return (
-    <div class="mx-auto flex min-h-screen w-full max-w-4xl flex-col items-center gap-8 px-6 py-12">
+    <div class="mx-auto flex min-h-screen w-full flex-col items-center gap-8 px-6 py-12">
       <SearchBox placeholder="Search by label" onSearch={setQuery} />
       <ManifestGrid manifests={items()} />
       {/* Invisible marker the IntersectionObserver watches; when it

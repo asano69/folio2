@@ -7,8 +7,8 @@ import { useClassificationDraggable } from "../lib/useClassificationDraggable";
 import { DRAG_TYPE_MANIFEST_ID } from "../lib/dragTypes";
 
 // Fixed thumbnail size so every cover lines up in a neat grid regardless
-// of each source image's own aspect ratio.
-const THUMB_WIDTH = 200;
+// of each source image's own aspect ratio. Roughly a 3:4 portrait ratio.
+const THUMB_WIDTH = 188;
 const THUMB_HEIGHT = 250;
 
 // Shared grid of manifest covers, each linking into its viewer. Used by
@@ -33,19 +33,14 @@ export default function ManifestGrid(props) {
             <A
               ref={draggable.ref}
               href={`/manifests/${manifest.id}`}
-              class={`flex flex-col gap-2${draggable.touchClass}`}
+              class={`relative block overflow-hidden rounded border${draggable.touchClass}`}
               style={{
                 width: `${THUMB_WIDTH}px`,
+                height: `${THUMB_HEIGHT}px`,
                 opacity: draggable.isDragging() ? 0.5 : 1,
               }}
             >
-              <Image
-                class="overflow-hidden rounded border"
-                style={{
-                  width: `${THUMB_WIDTH}px`,
-                  height: `${THUMB_HEIGHT}px`,
-                }}
-              >
+              <Image class="h-full w-full">
                 <Image.Img
                   class="h-full w-full object-cover"
                   src={
@@ -65,7 +60,13 @@ export default function ManifestGrid(props) {
                   <BookOpen size={48} strokeWidth={1.5} />
                 </Image.Fallback>
               </Image>
-              <span class="truncate text-sm">{manifest.label}</span>
+              {/* Label overlay: min-height reserves 2 lines regardless of
+                  label length, so every card lines up evenly. Sits on top
+                  of the thumbnail (not below it), with a gradient behind
+                  the text to keep it legible over a bright cover. */}
+              <span class="absolute inset-x-0 bottom-0 line-clamp-2 min-h-10 bg-gradient-to-t from-black/70 to-transparent px-2 pt-6 pb-1.5 text-sm text-white">
+                {manifest.label}
+              </span>
             </A>
           );
         }}
