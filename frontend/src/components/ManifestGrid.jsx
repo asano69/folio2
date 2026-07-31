@@ -18,7 +18,7 @@ const THUMB_HEIGHT = 250;
 export default function ManifestGrid(props) {
   // props.manifests: [{ id, label, coverImage }]
   return (
-    <div class="flex w-full flex-wrap justify-center gap-4 sm:justify-start">
+    <div class="flex w-full flex-wrap justify-center gap-4">
       <For each={props.manifests}>
         {(manifest) => {
           // Draggable onto a CollectionSidebar row (see lib/classification.js)

@@ -26,7 +26,7 @@ export default function SearchBox(props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} class="flex w-full gap-2">
+    <form onSubmit={handleSubmit} class="mx-auto flex w-full max-w-md gap-2">
       <TextField value={input()} onChange={setInput} class="flex-1">
         <TextField.Input
           type="search"

@@ -78,7 +78,12 @@ export default function AppShell(props) {
           </Show>
         </SideBar>
         <div class="min-w-0 flex-1">
-          <div class="mx-auto w-full max-w-4xl px-6 pt-12">
+          {/* Full-width (not max-w-4xl) so the Logo lands on the true
+              left edge and the Settings menu on the true right edge of
+              the sidebar-excluded area, matching Home/Manifests's own
+              px-24 side margins instead of sitting in a narrower
+              centered column above them. */}
+          <div class="w-full px-24 pt-12">
             <NavBar />
           </div>
           {props.children}
