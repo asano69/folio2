@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 import { A } from "@solidjs/router";
-import { NavigationMenu } from "@kobalte/core/navigation-menu";
+import { DropdownMenu } from "@kobalte/core/dropdown-menu";
 import { Progress } from "@kobalte/core/progress";
 import EllipsisVertical from "lucide-solid/icons/ellipsis-vertical";
 import Menu from "lucide-solid/icons/menu";
@@ -63,7 +63,7 @@ export default function NavBar() {
   };
 
   return (
-    <NavigationMenu class="mb-10 flex w-full flex-col gap-3">
+    <nav class="mb-10 flex w-full flex-col gap-3">
       <div class="flex w-full items-center justify-between">
         <div class="flex items-center gap-2">
           {/* Mobile-only: opens the sidebar overlay. On desktop the
@@ -76,24 +76,28 @@ export default function NavBar() {
               aria-label="Open sidebar"
               class="icon-btn cursor-pointer rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
             >
-              <Menu size={20} />
+              <Menu size={28} />
             </button>
           </Show>
-          <Logo linkable size={isDesktop() ? "lg" : "sm"} />
+          <Logo linkable size={isDesktop() ? "lg" : "md"} />
         </div>
 
         {/* Settings dropdown: the admin actions previously on their own
             /settings page (PocketBase link, folder import), plus
             logout, grouped into one dropdown instead of a separate
             page/top-level control. Shares the top row with the logo,
-            anchored to the right edge, as an icon-only button. */}
-        <NavigationMenu.Menu>
-          <NavigationMenu.Trigger aria-label="Settings" class={iconLinkClass}>
-            <EllipsisVertical size={24} />
-          </NavigationMenu.Trigger>
-          <NavigationMenu.Portal>
-            <NavigationMenu.Content class="absolute top-0 left-0 z-50 flex min-w-52 flex-col gap-1 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-2 shadow-md">
-              <NavigationMenu.Item
+            anchored to the right edge, as an icon-only button.
+            DropdownMenu (not NavigationMenu) is used here since there's
+            only a single trigger: Content is positioned relative to the
+            trigger automatically via floating-ui, so no manual
+            top/left coordinates are needed. */}
+        <DropdownMenu placement="bottom-end">
+          <DropdownMenu.Trigger aria-label="Settings" class={iconLinkClass}>
+            <EllipsisVertical size={28} />
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content class="z-50 flex min-w-52 flex-col gap-1 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-field)] p-2 shadow-md">
+              <DropdownMenu.Item
                 as="a"
                 href="/_/"
                 target="_blank"
@@ -101,15 +105,15 @@ export default function NavBar() {
                 class="btn-link"
               >
                 PocketBase↗
-              </NavigationMenu.Item>
-              <NavigationMenu.Item
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
                 as="button"
                 type="button"
                 onSelect={startImport}
                 class="rounded px-3 py-1.5 text-left text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
               >
                 Import Folders
-              </NavigationMenu.Item>
+              </DropdownMenu.Item>
               <Show when={job()}>
                 <Progress
                   value={job().processed}
@@ -130,53 +134,38 @@ export default function NavBar() {
                   <p class="text-sm">{job().message}</p>
                 </Progress>
               </Show>
-              <NavigationMenu.Item
+              <DropdownMenu.Item
                 as="button"
                 type="button"
                 onSelect={handleLogout}
                 class="rounded px-3 py-1.5 text-left text-sm data-[highlighted]:bg-[var(--color-hover-bg)]"
               >
                 Log out
-              </NavigationMenu.Item>
-            </NavigationMenu.Content>
-          </NavigationMenu.Portal>
-        </NavigationMenu.Menu>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu>
       </div>
 
-      {/* Second row: Manifests/Collections/Libraries entry points. */}
+      {/* Second row: Manifests/Collections/Libraries entry points. These
+          are plain navigation links, not menu items, so a plain <A> is
+          used instead of borrowing NavigationMenu's Trigger API. */}
       <div class="flex flex-wrap items-center gap-3">
-        {/* Plain page links: Kobalte's "link trigger" pattern (a Trigger
-            with no surrounding NavigationMenu.Menu) navigates immediately
-            instead of opening a dropdown. `as={A}` keeps navigation
-            client-side, like the rest of the app. */}
-        <NavigationMenu.Trigger
-          as={A}
+        <A
           href="/manifests"
           aria-label="Manifests"
           class={iconLinkClass}
           onClick={bumpManifestsShuffle}
         >
           <BookOpen size={35} />
-        </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger
-          as={A}
-          href="/collections"
-          aria-label="Collections"
-          class={iconLinkClass}
-        >
+        </A>
+        <A href="/collections" aria-label="Collections" class={iconLinkClass}>
           <LibraryIcon size={35} />
-        </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger
-          as={A}
-          href="/libraries"
-          aria-label="Libraries"
-          class={iconLinkClass}
-        >
+        </A>
+        <A href="/libraries" aria-label="Libraries" class={iconLinkClass}>
           <LandmarkIcon size={35} />
-        </NavigationMenu.Trigger>
+        </A>
       </div>
-
-      <NavigationMenu.Viewport class="relative" />
-    </NavigationMenu>
+    </nav>
   );
 }
