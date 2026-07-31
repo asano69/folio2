@@ -20,7 +20,7 @@ import { showError } from "../lib/toast";
 // SideBar.jsx's collapsed-rail NavIconLink so the same entry points look
 // identical whether reached from NavBar or the collapsed sidebar rail.
 const iconLinkClass =
-  "icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]";
+  "icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)] data-[pressed]:bg-[var(--color-active-bg)]";
 
 export default function NavBar() {
   const handleLogout = () => pb.authStore.clear();
