@@ -1,10 +1,10 @@
 import { Show } from "solid-js";
-import { A } from "@solidjs/router";
 import PanelLeft from "lucide-solid/icons/panel-left";
 import LibraryIcon from "lucide-solid/icons/library";
 import LandmarkIcon from "lucide-solid/icons/landmark";
 import { isDesktop } from "../../lib/viewport";
 import { sidebarOpen, setSidebarOpen } from "./uiState";
+import { setSidebarView } from "./sidebarView";
 import Logo from "../Logo";
 
 // Icon-only toggle button shared by the desktop rail and the panel
@@ -23,18 +23,20 @@ function ToggleButton(props) {
   );
 }
 
-// Icon-only link shared by the collapsed rail's quick links to
-// Collections and Libraries, styled the same way as ToggleButton so both
-// rows of icons line up.
+// Icon-only button shared by the collapsed rail's quick links to
+// Collections and Libraries. Instead of navigating away, clicking one
+// just switches the sidebar panel to that view (see sidebarView.js) and
+// opens it, leaving whatever page is currently routed untouched.
 function NavIconLink(props) {
   return (
-    <A
-      href={props.href}
+    <button
+      type="button"
+      onClick={props.onClick}
       aria-label={props.label}
       class="icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]"
     >
       <props.icon size={20} />
-    </A>
+    </button>
   );
 }
 
@@ -147,12 +149,18 @@ export default function SideBar(props) {
         <Show when={!sidebarOpen()}>
           <div class="flex flex-col items-center gap-1">
             <NavIconLink
-              href="/collections"
+              onClick={() => {
+                setSidebarView("collections");
+                setSidebarOpen(true);
+              }}
               label="Collections"
               icon={LibraryIcon}
             />
             <NavIconLink
-              href="/libraries"
+              onClick={() => {
+                setSidebarView("libraries");
+                setSidebarOpen(true);
+              }}
               label="Libraries"
               icon={LandmarkIcon}
             />
