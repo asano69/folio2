@@ -81,9 +81,11 @@ export default function AppShell(props) {
           {/* Full-width (not max-w-4xl) so the Logo lands on the true
               left edge and the Settings menu on the true right edge of
               the sidebar-excluded area, matching Home/Manifests's own
-              px-24 side margins instead of sitting in a narrower
-              centered column above them. */}
-          <div class="w-full px-24 pt-12">
+              side margins instead of sitting in a narrower centered
+              column above them. Margin only widens on desktop (lg:) --
+              on mobile there's no room to spare, and NavBar's own
+              flex-wrap already handles narrow widths on its own. */}
+          <div class="w-full px-6 pt-12 lg:px-24">
             <NavBar />
           </div>
           {props.children}
