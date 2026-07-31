@@ -4,6 +4,9 @@ import { NavigationMenu } from "@kobalte/core/navigation-menu";
 import { Progress } from "@kobalte/core/progress";
 import ChevronDown from "lucide-solid/icons/chevron-down";
 import Menu from "lucide-solid/icons/menu";
+import BookOpen from "lucide-solid/icons/book-open";
+import LibraryIcon from "lucide-solid/icons/library";
+import LandmarkIcon from "lucide-solid/icons/landmark";
 import pb from "../lib/pb";
 import Logo from "./Logo";
 import { bumpManifestsShuffle } from "../lib/manifests";
@@ -14,6 +17,13 @@ import { showError } from "../lib/toast";
 // Shared look for every top-level entry, matching the previous <A>/<Button>
 // style (see style.css's .btn-link rule).
 const itemClass = "btn-link";
+
+// Icon-only style shared by the Manifests/Collections/Libraries buttons,
+// matching SideBar.jsx's collapsed-rail NavIconLink so the same three
+// entry points look identical whether reached from NavBar or the
+// collapsed sidebar rail.
+const iconLinkClass =
+  "icon-btn flex items-center justify-center rounded-md p-1.5 text-[var(--color-text)] transition-colors duration-150 hover:bg-[var(--color-hover-bg)]";
 
 export default function NavBar() {
   const handleLogout = () => pb.authStore.clear();
@@ -82,16 +92,27 @@ export default function NavBar() {
         <NavigationMenu.Trigger
           as={A}
           href="/manifests"
-          class={itemClass}
+          aria-label="Manifests"
+          class={iconLinkClass}
           onClick={bumpManifestsShuffle}
         >
-          Manifests
+          <BookOpen size={35} />
         </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger as={A} href="/collections" class={itemClass}>
-          Collections
+        <NavigationMenu.Trigger
+          as={A}
+          href="/collections"
+          aria-label="Collections"
+          class={iconLinkClass}
+        >
+          <LibraryIcon size={35} />
         </NavigationMenu.Trigger>
-        <NavigationMenu.Trigger as={A} href="/libraries" class={itemClass}>
-          Libraries
+        <NavigationMenu.Trigger
+          as={A}
+          href="/libraries"
+          aria-label="Libraries"
+          class={iconLinkClass}
+        >
+          <LandmarkIcon size={35} />
         </NavigationMenu.Trigger>
 
         {/* Settings dropdown: the admin actions previously on their own
