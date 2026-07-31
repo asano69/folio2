@@ -33,10 +33,12 @@ export default function ManifestGrid(props) {
             <A
               ref={draggable.ref}
               href={`/manifests/${manifest.id}`}
-              class={`relative block overflow-hidden rounded border${draggable.touchClass}`}
+              // Two cards per row on mobile (calc-based width), fixed
+              // THUMB_WIDTH from sm: up. aspect-[188/250] keeps the same
+              // portrait ratio at any width, so height never needs its
+              // own breakpoint.
+              class={`relative block aspect-[188/250] w-[calc(50%-0.5rem)] overflow-hidden rounded border sm:w-[188px]${draggable.touchClass}`}
               style={{
-                width: `${THUMB_WIDTH}px`,
-                height: `${THUMB_HEIGHT}px`,
                 opacity: draggable.isDragging() ? 0.5 : 1,
               }}
             >

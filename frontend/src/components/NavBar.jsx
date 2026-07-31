@@ -82,7 +82,7 @@ export default function NavBar() {
             <Menu size={20} />
           </button>
         </Show>
-        <Logo linkable />
+        <Logo linkable size={isDesktop() ? "lg" : "sm"} />
       </div>
       <NavigationMenu class="flex flex-wrap items-center gap-3">
         {/* Plain page links: Kobalte's "link trigger" pattern (a Trigger

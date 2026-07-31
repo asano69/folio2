@@ -12,6 +12,7 @@ import logoUrl from "../assets/logo.svg";
 // header (smaller, via size="sm").
 const SIZES = {
   lg: { icon: "h-12 w-12", text: "text-4xl" },
+  md: { icon: "h-8 w-8", text: "text-2xl" },
   sm: { icon: "h-6 w-6", text: "text-xl" },
 };
 
