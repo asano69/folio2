@@ -7,7 +7,7 @@ function Thumb(props) {
   return (
     <Image class="h-12 w-12  shrink-0 overflow-hidden rounded border">
       <Image.Img
-        class="h-full w-full object-cover"
+        class="h-full w-full object-cover cover-image"
         src={props.imageUrl || undefined}
         alt=""
       />

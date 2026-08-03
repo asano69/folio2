@@ -36,7 +36,7 @@ export default function Libraries() {
               >
                 <Image class="aspect-[5/4] w-full overflow-hidden rounded border">
                   <Image.Img
-                    class="h-full w-full object-cover"
+                    class="h-full w-full object-cover cover-image"
                     src={
                       library.cover
                         ? pb.files.getURL(library, library.cover, {

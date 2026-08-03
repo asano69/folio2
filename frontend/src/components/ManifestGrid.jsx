@@ -51,7 +51,7 @@ export default function ManifestGrid(props) {
             >
               <Image class="h-full w-full">
                 <Image.Img
-                  class="h-full w-full object-cover"
+                  class="h-full w-full object-cover cover-image"
                   src={
                     manifest.coverImage
                       ? pb.files.getURL(
